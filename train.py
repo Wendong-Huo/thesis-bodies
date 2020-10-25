@@ -192,8 +192,13 @@ if __name__ == "__main__":  # noqa: C901
         env_kwargs[i] = {
             "xml": train_files[0],
             "param": train_params[0],
-            "render": i==0,
+            "render": False,
         }
+    eval_env_kwargs = [{
+        "xml": train_files[0],
+        "param": train_params[0],
+        "render": True,
+    }]
 
     # Create schedules
     for key in ["learning_rate", "clip_range", "clip_range_vf"]:
@@ -270,21 +275,26 @@ if __name__ == "__main__":  # noqa: C901
         :return: (Union[gym.Env, VecEnv])
         """
         global hyperparams
-        global env_kwargs
+        global env_kwargs, eval_env_kwargs
+
+        if eval_env:
+            kwargs = eval_env_kwargs
+        else:
+            kwargs = env_kwargs
 
         # Do not log eval env (issue with writing the same file)
         log_dir = None if eval_env or no_log else save_path
 
         if n_envs == 1:
             env = DummyVecEnv(
-                [make_env(env_id, 0, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=env_kwargs[1])] #[0] may has render.
+                [make_env(env_id, 0, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=kwargs[0])]
             )
         else:
             # env = SubprocVecEnv([make_env(env_id, i, args.seed) for i in range(n_envs)])
             # On most env, SubprocVecEnv does not help and is quite memory hungry
             env = DummyVecEnv(
                 [
-                    make_env(env_id, i, args.seed, log_dir=log_dir, env_kwargs=env_kwargs[i], wrapper_class=env_wrapper)
+                    make_env(env_id, i, args.seed, log_dir=log_dir, env_kwargs=kwargs[i], wrapper_class=env_wrapper)
                     for i in range(n_envs)
                 ]
             )
