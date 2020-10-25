@@ -1,0 +1,19 @@
+bodies:
+  files:
+  - ./bodies/0.xml
+  - ./bodies/1.xml
+  - ./bodies/2.xml
+  - ./bodies/3.xml
+  - ./bodies/4.xml
+  params:
+  - ./params/0.yaml
+  - ./params/1.yaml
+  - ./params/2.yaml
+  - ./params/3.yaml
+  - ./params/4.yaml
+  total: 5
+dataset_name: walker2d
+gym_env:
+  class: Walker2DEnv
+  env_id: Walker2Ds-v0
+  filename: env/walker2d_vanilla.py

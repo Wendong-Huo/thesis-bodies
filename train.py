@@ -34,11 +34,14 @@ from utils.utils import StoreDict, get_callback_class
 
 seaborn.set()
 
+import load_dataset
+
 if __name__ == "__main__":  # noqa: C901
     parser = argparse.ArgumentParser()
     parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
     parser.add_argument("--env", type=str, default="CartPole-v1", help="environment ID")
-    parser.add_argument("-tb", "--tensorboard-log", help="Tensorboard log dir", default="", type=str)
+    parser.add_argument("--hyperparameters", type=str, default="Walker2DBulletEnv-v0", help="")
+    parser.add_argument("-tb", "--tensorboard-log", help="Tensorboard log dir", default="tb", type=str)
     parser.add_argument("-i", "--trained-agent", help="Path to a pretrained agent to continue training", default="", type=str)
     parser.add_argument(
         "--truncate-last-trajectory",
@@ -107,19 +110,21 @@ if __name__ == "__main__":  # noqa: C901
     args = parser.parse_args()
 
     # Going through custom gym packages to let them register in the global registory
-    for env_module in args.gym_packages:
-        importlib.import_module(env_module)
+    # for env_module in args.gym_packages:
+    #     importlib.import_module(env_module)
 
-    env_id = args.env
-    registered_envs = set(gym.envs.registry.env_specs.keys())  # pytype: disable=module-attr
+    # env_id = args.env
+    # registered_envs = set(gym.envs.registry.env_specs.keys())  # pytype: disable=module-attr
 
-    # If the environment is not found, suggest the closest match
-    if env_id not in registered_envs:
-        try:
-            closest_match = difflib.get_close_matches(env_id, registered_envs, n=1)[0]
-        except IndexError:
-            closest_match = "'no close match found...'"
-        raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
+    # # If the environment is not found, suggest the closest match
+    # if env_id not in registered_envs:
+    #     try:
+    #         closest_match = difflib.get_close_matches(env_id, registered_envs, n=1)[0]
+    #     except IndexError:
+    #         closest_match = "'no close match found...'"
+    #     raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
+
+    dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(f"dataset/walker_toy_v5", seed=0)
 
     # Unique id to ensure there is no race condition for the folder creation
     uuid_str = f"_{uuid.uuid4()}" if args.uuid else ""
@@ -152,19 +157,19 @@ if __name__ == "__main__":  # noqa: C901
     # Load hyperparameters from yaml file
     with open(f"hyperparams/{args.algo}.yml", "r") as f:
         hyperparams_dict = yaml.safe_load(f)
-        if env_id in list(hyperparams_dict.keys()):
-            hyperparams = hyperparams_dict[env_id]
+        if args.hyperparameters in list(hyperparams_dict.keys()):
+            hyperparams = hyperparams_dict[args.hyperparameters]
         elif is_atari:
             hyperparams = hyperparams_dict["atari"]
         else:
-            raise ValueError(f"Hyperparameters not found for {args.algo}-{env_id}")
+            raise ValueError(f"Hyperparameters not found for {args.algo}-{args.hyperparameters}")
 
     if args.hyperparams is not None:
         # Overwrite hyperparams if needed
         hyperparams.update(args.hyperparams)
     # Sort hyperparams that will be saved
     saved_hyperparams = OrderedDict([(key, hyperparams[key]) for key in sorted(hyperparams.keys())])
-    env_kwargs = {} if args.env_kwargs is None else args.env_kwargs
+    # env_kwargs = {} if args.env_kwargs is None else args.env_kwargs
 
     algo_ = args.algo
     # HER is only a wrapper around an algo
@@ -181,6 +186,14 @@ if __name__ == "__main__":  # noqa: C901
 
     if args.verbose > 0:
         print(f"Using {n_envs} environments")
+
+    env_kwargs = {}
+    for i in range(n_envs):
+        env_kwargs[i] = {
+            "xml": train_files[0],
+            "param": train_params[0],
+            "render": i==0,
+        }
 
     # Create schedules
     for key in ["learning_rate", "clip_range", "clip_range_vf"]:
@@ -264,14 +277,14 @@ if __name__ == "__main__":  # noqa: C901
 
         if n_envs == 1:
             env = DummyVecEnv(
-                [make_env(env_id, 0, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=env_kwargs)]
+                [make_env(env_id, 0, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=env_kwargs[1])] #[0] may has render.
             )
         else:
             # env = SubprocVecEnv([make_env(env_id, i, args.seed) for i in range(n_envs)])
             # On most env, SubprocVecEnv does not help and is quite memory hungry
             env = DummyVecEnv(
                 [
-                    make_env(env_id, i, args.seed, log_dir=log_dir, env_kwargs=env_kwargs, wrapper_class=env_wrapper)
+                    make_env(env_id, i, args.seed, log_dir=log_dir, env_kwargs=env_kwargs[i], wrapper_class=env_wrapper)
                     for i in range(n_envs)
                 ]
             )
