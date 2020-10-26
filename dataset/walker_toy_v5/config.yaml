@@ -16,4 +16,4 @@ dataset_name: walker2d
 gym_env:
   class: Walker2DEnv
   env_id: Walker2Ds-v0
-  filename: env/walker2d_vanilla.py
+  filename: env/walker2d_upgrade.py

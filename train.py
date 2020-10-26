@@ -56,7 +56,7 @@ if __name__ == "__main__":  # noqa: C901
         "--eval-freq", help="Evaluate the agent every n steps (if negative, no evaluation)", default=10000, type=int
     )
     parser.add_argument("--eval-episodes", help="Number of episodes to use for evaluation", default=5, type=int)
-    parser.add_argument("--save-freq", help="Save the model every n steps (if negative, no checkpoint)", default=-1, type=int)
+    parser.add_argument("--save-freq", help="Save the model every n steps (if negative, no checkpoint)", default=10000, type=int)
     parser.add_argument(
         "--save-replay-buffer", help="Save the replay buffer too (when applicable)", action="store_true", default=False
     )
@@ -107,6 +107,8 @@ if __name__ == "__main__":  # noqa: C901
         help="Overwrite hyperparameter (e.g. learning_rate:0.01 train_freq:10)",
     )
     parser.add_argument("-uuid", "--uuid", action="store_true", default=False, help="Ensure that the run has a unique ID")
+    parser.add_argument("--watch-train",action="store_true", default=False)
+    parser.add_argument("--watch-eval",action="store_true", default=False)
     args = parser.parse_args()
 
     # Going through custom gym packages to let them register in the global registory
@@ -187,17 +189,19 @@ if __name__ == "__main__":  # noqa: C901
     if args.verbose > 0:
         print(f"Using {n_envs} environments")
 
+    # args.watch_train = False
+    # args.watch_eval = False
     env_kwargs = {}
     for i in range(n_envs):
         env_kwargs[i] = {
             "xml": train_files[0],
             "param": train_params[0],
-            "render": False,
+            "render": args.watch_train and i==0,
         }
     eval_env_kwargs = [{
         "xml": train_files[0],
         "param": train_params[0],
-        "render": True,
+        "render": args.watch_eval,
     }]
 
     # Create schedules

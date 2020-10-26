@@ -190,6 +190,8 @@ def make_env(env_id, rank=0, seed=0, log_dir=None, wrapper_class=None, env_kwarg
         env_kwargs = {}
 
     def _init():
+        # import load_dataset
+        # load_dataset.load_dataset(f"dataset/walker_toy_v5", seed=0)
         set_random_seed(seed + rank)
         env = gym.make(env_id, **env_kwargs)
 
@@ -245,9 +247,9 @@ def create_test_env(
             [make_env(env_id, i, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs) for i in range(n_envs)]
         )
     # Pybullet envs does not follow gym.render() interface
-    elif "Bullet" in env_id:
+    elif "Bullet" in env_id or "Walker2D" in env_id:
         # HACK: force SubprocVecEnv for Bullet env
-        env = SubprocVecEnv([make_env(env_id, 0, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
+        env = DummyVecEnv([make_env(env_id, 0, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
     else:
         env = DummyVecEnv([make_env(env_id, 0, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
 
