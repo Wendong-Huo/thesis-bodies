@@ -126,7 +126,8 @@ if __name__ == "__main__":  # noqa: C901
     #         closest_match = "'no close match found...'"
     #     raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
 
-    dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(f"dataset/walker_toy_v5", seed=0)
+    dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
+        f"dataset/pybullet_walker2d", seed=0)
 
     # Unique id to ensure there is no race condition for the folder creation
     uuid_str = f"_{uuid.uuid4()}" if args.uuid else ""
