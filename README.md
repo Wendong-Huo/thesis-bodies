@@ -16,6 +16,10 @@
 
     * We can't ignore live bonus and height and pitch, otherwise it will take very long to train.
 
+    * Trying out different possible bodies. seems fly-away only happens when torso is too small and motor[0] is too big. other power_coef seems not causing fly-away. I don't know why.
+
+    * Sweep 216 power coeff, see their learnability. I can sort them from easiest to hardest. and form different dataset.
+
 3. Modify PPO, concatenate body info to observation;
 
     * 

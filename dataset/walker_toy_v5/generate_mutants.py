@@ -57,20 +57,20 @@ for mutant_id in range(5):
     power_coef_list.append(volumes_int)
 
     data = {
-        "z0": limb_length[0] + limb_length[1] + limb_length[2] + fixed_distance_to_ground,
-        "z1": limb_length[1] + limb_length[2] + fixed_distance_to_ground,
-        "z2": limb_length[2] + fixed_distance_to_ground,
-        "z3": fixed_distance_to_ground,
-        "x3": limb_length[3],
-        "w0": limb_weight[0],
-        "w1": limb_weight[1],
-        "w2": limb_weight[2],
-        "w3": limb_weight[3],
-        "v0": volumes[0],
-        "v1": volumes[1],
-        "v2": volumes[2],
-        "v3": volumes[3],
-        "torso_center_height": limb_length[0]/2 + limb_length[1] + limb_length[2] + fixed_distance_to_ground,
+        "z_torso_top": limb_length[0] + limb_length[1] + limb_length[2] + fixed_distance_to_ground,
+        "z_thigh_top": limb_length[1] + limb_length[2] + fixed_distance_to_ground,
+        "z_leg_top": limb_length[2] + fixed_distance_to_ground,
+        "z_foot": fixed_distance_to_ground,
+        "x_foot": limb_length[3],
+        "weight_torso": limb_weight[0],
+        "weight_thigh": limb_weight[1],
+        "weight_leg": limb_weight[2],
+        "weight_foot": limb_weight[3],
+        "volume_torso": volumes[0],
+        "volume_thigh": volumes[1],
+        "volume_leg": volumes[2],
+        "volume_foot": volumes[3],
+        "z_torso_center": limb_length[0]/2 + limb_length[1] + limb_length[2] + fixed_distance_to_ground,
     }
     # Take .04f
     for key in data:

@@ -7,28 +7,28 @@
     <option integrator="RK4" timestep="0.002" />
     <worldbody>
         <body name="torso">
-            <geom fromto="0 0 $z0 0 0 $z1" name="torso_geom" size="$w0" type="capsule" />
+            <geom fromto="0 0 $z_torso_top 0 0 $z_thigh_top" name="torso_geom" size="$weight_torso" type="capsule" />
             <body name="thigh">
-                <joint axis="0 -1 0" name="thigh_joint" pos="0 0 $z1" range="-60 60" type="hinge" />
-                <geom fromto="0 0 $z1 0 0 $z2" name="thigh_geom" size="$w1" type="capsule" />
+                <joint axis="0 -1 0" name="thigh_joint" pos="0 0 $z_thigh_top" range="-60 60" type="hinge" />
+                <geom fromto="0 0 $z_thigh_top 0 0 $z_leg_top" name="thigh_geom" size="$weight_thigh" type="capsule" />
                 <body name="leg">
-                    <joint axis="0 -1 0" name="leg_joint" pos="0 0 $z2" range="-150 0" type="hinge" />
-                    <geom fromto="0 0 $z2 0 0 $z3" name="leg_geom" size="$w2" type="capsule" />
+                    <joint axis="0 -1 0" name="leg_joint" pos="0 0 $z_leg_top" range="-150 0" type="hinge" />
+                    <geom fromto="0 0 $z_leg_top 0 0 $z_foot" name="leg_geom" size="$weight_leg" type="capsule" />
                     <body name="foot">
-                        <joint axis="0 -1 0" name="foot_joint" pos="0 0 $z3" range="-45 45" type="hinge" />
-                        <geom fromto="0 0 $z3 $x3 0 $z3" name="foot_geom" size="$w3" type="capsule" />
+                        <joint axis="0 -1 0" name="foot_joint" pos="0 0 $z_foot" range="-45 45" type="hinge" />
+                        <geom fromto="0 0 $z_foot $x_foot 0 $z_foot" name="foot_geom" size="$weight_foot" type="capsule" />
                     </body>
                 </body>
             </body>
             <body name="thigh_left">
-                <joint axis="0 -1 0" name="thigh_left_joint" pos="0 0 $z1" range="-60 60" type="hinge" />
-                <geom fromto="0 0 $z1 0 0 $z2" name="thigh_left_geom" rgba=".7 .3 .6 1" size="$w1" type="capsule" />
+                <joint axis="0 -1 0" name="thigh_left_joint" pos="0 0 $z_thigh_top" range="-60 60" type="hinge" />
+                <geom fromto="0 0 $z_thigh_top 0 0 $z_leg_top" name="thigh_left_geom" rgba=".7 .3 .6 1" size="$weight_thigh" type="capsule" />
                 <body name="leg_left">
-                    <joint axis="0 -1 0" name="leg_left_joint" pos="0 0 $z2" range="-150 0" type="hinge" />
-                    <geom fromto="0 0 $z2 0 0 $z3" name="leg_left_geom" rgba=".7 .3 .6 1" size="$w2" type="capsule" />
+                    <joint axis="0 -1 0" name="leg_left_joint" pos="0 0 $z_leg_top" range="-150 0" type="hinge" />
+                    <geom fromto="0 0 $z_leg_top 0 0 $z_foot" name="leg_left_geom" rgba=".7 .3 .6 1" size="$weight_leg" type="capsule" />
                     <body name="foot_left">
-                        <joint axis="0 -1 0" name="foot_left_joint" pos="0 0 $z3" range="-45 45" type="hinge" />
-                        <geom fromto="0 0 $z3 $x3 0 $z3" name="foot_left_geom" rgba=".7 .3 .6 1" size="$w3" type="capsule" />
+                        <joint axis="0 -1 0" name="foot_left_joint" pos="0 0 $z_foot" range="-45 45" type="hinge" />
+                        <geom fromto="0 0 $z_foot $x_foot 0 $z_foot" name="foot_left_geom" rgba=".7 .3 .6 1" size="$weight_foot" type="capsule" />
                     </body>
                 </body>
             </body>

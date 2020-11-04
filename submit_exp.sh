@@ -5,10 +5,10 @@
 #SBATCH -c 1
 #SBATCH --output slurm.out/%j
 
-cd ${SLURM_SUBMIT_DIR}
+# cd ${SLURM_SUBMIT_DIR}
 
-source activate baselines3-zoo
+# conda activate thesis-bodies
 
-time python train.py -tb=tb/same_body --save-freq=10000 --seed=$1
+time python train.py -tb tb/$1_$2_$3 -f logs/$1_$2_$3 --powercoeff $1 $2 $3
 
 

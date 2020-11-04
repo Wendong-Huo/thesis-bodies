@@ -109,6 +109,7 @@ if __name__ == "__main__":  # noqa: C901
     parser.add_argument("-uuid", "--uuid", action="store_true", default=False, help="Ensure that the run has a unique ID")
     parser.add_argument("--watch-train",action="store_true", default=False)
     parser.add_argument("--watch-eval",action="store_true", default=False)
+    parser.add_argument("--powercoeff", type=float, nargs="+", required=True)
     args = parser.parse_args()
 
     # Going through custom gym packages to let them register in the global registory
@@ -197,11 +198,13 @@ if __name__ == "__main__":  # noqa: C901
         env_kwargs[i] = {
             "xml": train_files[0],
             "param": train_params[0],
+            "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
             "render": args.watch_train and i==0,
         }
     eval_env_kwargs = [{
         "xml": train_files[0],
         "param": train_params[0],
+        "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
         "render": args.watch_eval,
     }]
 

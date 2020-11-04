@@ -10,29 +10,34 @@ from stable_baselines3.common import logger
 class Walker2D(WalkerBase):
     foot_list = ["foot", "foot_left"]
 
-    def __init__(self, xml):
+    def __init__(self, xml, powercoeffs=[1.,1.,1.]):
         self.step_num = 0
+        self.powercoeffs = powercoeffs
         WalkerBase.__init__(self, xml, "torso", action_dim=6, obs_dim=22, power=0.40)
 
     def alive_bonus(self, z, pitch):
+        # return +1
         # z is the height of torso center.
         # I can scaffold it as well.
         # Scaffold 1: make the robot straight
-        # self.start_pos_z - z < 1.25 - 0.8
+        # z > self.initial_z * 0.8 / 1.25 and abs(pitch) < 1.0
         # Scaffold 2: help the robot to stand (in first 100 steps) (pybullet_envs's implementation is giving +1 forever, which could lead to standing still, another local optima)
         if self.step_num< 100:
             b = +1
         else:
             b = +0.1
-        b = +1
-        return b if self.initial_z - z < 0.45 and abs(pitch) < 1.0 else -1
+        return b if z > self.initial_z * 0.64 and abs(pitch) < 1.0 else -1
 
     def robot_specific_reset(self, bullet_client):
         WalkerBase.robot_specific_reset(self, bullet_client)
-        # for n in ["foot_joint", "foot_left_joint"]:
-        #   self.jdict[n].power_coef = 30.0
-        self.jdict["foot_joint"].power_coef = 30.0
-        self.jdict["foot_left_joint"].power_coef = 30.0
+        torso_length = 4
+        torso_width = 5
+        torso_max_power_coef = torso_length * torso_width * torso_width
+        joint_names = ["thigh", "leg", "foot"]
+        joint_powers = [torso_max_power_coef, 100, 30] # where is 80?
+        for joint_name, joint_power, coef in zip(joint_names, joint_powers, self.powercoeffs):
+            self.jdict[f"{joint_name}_joint"].power_coef = joint_power * coef
+            self.jdict[f"{joint_name}_left_joint"].power_coef = joint_power * coef
 
 # volume of parts
 # 4 * 5 * 5 = 100
@@ -43,8 +48,8 @@ class Walker2D(WalkerBase):
 
 class Walker2DEnv(WalkerBaseBulletEnv):
 
-    def __init__(self, xml, param, render=False, max_episode_steps=1e3):
-        self.robot = Walker2D(xml)
+    def __init__(self, xml, param, powercoeffs=[1.,1.,1.], render=False, max_episode_steps=1e3):
+        self.robot = Walker2D(xml, powercoeffs)
         self.max_episode_steps = max_episode_steps
         WalkerBaseBulletEnv.__init__(self, self.robot, render)
 
@@ -55,6 +60,9 @@ class Walker2DEnv(WalkerBaseBulletEnv):
         return obs
 
     def step(self, a):
+        if self.robot.step_num % 1000 == 0:
+            for n in range(len(a)):
+                logger.record(f"debug/motor_{n}", a[n])
         self.robot.step_num += 1
         obs, r, done, info = self.super_step(a)
         if self.robot.step_num > self.max_episode_steps:
