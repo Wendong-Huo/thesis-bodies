@@ -23,7 +23,6 @@ def load_dataset(path, train_proportion=0.8, seed=0, shuffle=True):
                 param = list(_dic.values())
                 if np.max(param) > 2.0:
                     print("Warning: large parameters. Please consider normalize the value.")
-                assert param[0] == _dic["torso_center_height"], "First one is torso center height"
                 params.append(_dic)
             else:
                 params.append(pickle.load(f))
@@ -56,12 +55,14 @@ def register_env(gym_env_id, gym_env_filename, gym_env_class):
 def train_test_split(data, params, train_proportion=0.8, seed=0, shuffle=True):
     assert 0 < train_proportion < 1
     n_train = int(train_proportion * len(data))
-    data = data.copy()
+    data = np.array(data)
+    params = np.array(params)
+    indices = np.arange(start=0, stop=len(data))
     if shuffle:
         np.random.seed(seed)
-        np.random.shuffle(data)
-    train_files, test_files = data[:n_train], data[n_train:]
-    train_params, test_params = params[:n_train], params[n_train:]
+        np.random.shuffle(indices)
+    train_files, test_files = data[indices][:n_train], data[indices][n_train:]
+    train_params, test_params = params[indices][:n_train], params[indices][n_train:]
     return train_files, train_params, body_names(train_files), test_files, test_params, body_names(test_files)
 
 def body_names(filenames):

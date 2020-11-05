@@ -22,7 +22,10 @@
             "type": "python",
             "request": "launch",
             "program": "train.py",
-            "args": ["--watch-train"],
+            "args": [
+                "--watch-train",
+                "--single-idx=17"
+            ],
             "console": "integratedTerminal",
             "justMyCode": false,
         }

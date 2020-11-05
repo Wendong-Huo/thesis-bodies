@@ -109,8 +109,11 @@ if __name__ == "__main__":  # noqa: C901
     parser.add_argument("-uuid", "--uuid", action="store_true", default=False, help="Ensure that the run has a unique ID")
     parser.add_argument("--watch-train",action="store_true", default=False)
     parser.add_argument("--watch-eval",action="store_true", default=False)
-    parser.add_argument("--powercoeff", type=float, nargs="+", required=True)
+    parser.add_argument("--powercoeff", type=float, nargs="+", help="Only useful for adjusting powercoeff. Default is [1 1 1].")
+    parser.add_argument("--single-idx", type=int, default=0, help="Only useful for sweeping all bodies.")
     args = parser.parse_args()
+    if args.powercoeff is None:
+        args.powercoeff = [1., 1., 1.]
 
     # Going through custom gym packages to let them register in the global registory
     # for env_module in args.gym_packages:
@@ -128,7 +131,7 @@ if __name__ == "__main__":  # noqa: C901
     #     raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
 
     dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
-        f"dataset/pybullet_walker2d", seed=0)
+        f"dataset/walker2d_v6", seed=0, shuffle=False, train_proportion=1.0)
 
     # Unique id to ensure there is no race condition for the folder creation
     uuid_str = f"_{uuid.uuid4()}" if args.uuid else ""
@@ -193,17 +196,18 @@ if __name__ == "__main__":  # noqa: C901
 
     # args.watch_train = False
     # args.watch_eval = False
+    single_idx = args.single_idx
     env_kwargs = {}
     for i in range(n_envs):
         env_kwargs[i] = {
-            "xml": train_files[0],
-            "param": train_params[0],
+            "xml": train_files[single_idx],
+            "param": train_params[single_idx],
             "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
             "render": args.watch_train and i==0,
         }
     eval_env_kwargs = [{
-        "xml": train_files[0],
-        "param": train_params[0],
+        "xml": train_files[single_idx],
+        "param": train_params[single_idx],
         "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
         "render": args.watch_eval,
     }]

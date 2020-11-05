@@ -20,6 +20,14 @@
 
     * Sweep 216 power coeff, see their learnability. I can sort them from easiest to hardest. and form different dataset.
 
+    * I set power coeff proportional to the volumes of two connected parts, which is intuitive.
+
+    * I generated 100 random bodies with variation=1/2 in dataset/walker2d_v6, and sent them to vacc to train individually. I need to make a program to visualize those 100 bodies and evaluate them and show the total reward and total distance.
+
+    * make a training env try to get fly-away bugs. (oh, no, it's no the fly-away bug! it's the bug of shuffle in dataset... I forgot to shuffle params as well. fixed.)
+
+    
+
 3. Modify PPO, concatenate body info to observation;
 
     * 

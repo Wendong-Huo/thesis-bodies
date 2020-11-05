@@ -5,10 +5,10 @@
 #SBATCH -c 1
 #SBATCH --output slurm.out/%j
 
-# cd ${SLURM_SUBMIT_DIR}
+cd ${SLURM_SUBMIT_DIR}
 
-# conda activate thesis-bodies
+source activate thesis-bodies
 
-time python train.py -tb tb/$1_$2_$3 -f logs/$1_$2_$3 --powercoeff $1 $2 $3
+time python train.py -tb tb/$1 -f logs/$1 --single-idx $1
 
 
