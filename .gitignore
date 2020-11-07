@@ -2,6 +2,12 @@ tb_*/
 logs
 tb
 vacc
+tmp
+*.zip
+slurm.out
+to_del/
+screenshots/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

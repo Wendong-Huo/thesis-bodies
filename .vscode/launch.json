@@ -5,14 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "Enjoy",
             "type": "python",
             "request": "launch",
             "program": "enjoy.py",
             "args": [
                 // "--dataset=dataset/walker_toy_v5",
-                "-f=vacc/logs/ppo/Walker2Ds-v0_1/",
-                "--load-checkpoint=vacc/logs/ppo/Walker2Ds-v0_1/best_model.zip",
+                "-f=logs/75/ppo/Walker2Ds-v0_1/",
+                "--load-checkpoint=logs/75/ppo/Walker2Ds-v0_1/best_model.zip",
+                "--body-id=75",
+                "--dataset=dataset/walker2d_v6",
+                "--deterministic"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,

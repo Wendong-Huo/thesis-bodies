@@ -6,6 +6,7 @@ from pybullet_envs.robot_locomotors import WalkerBase
 
 from stable_baselines3.common import logger
 
+from pybullet_envs.env_bases import Camera
 
 class Walker2D(WalkerBase):
     foot_list = ["foot", "foot_left"]
@@ -47,6 +48,7 @@ class Walker2DEnv(WalkerBaseBulletEnv):
         self.robot = Walker2D(xml, param, env=self, powercoeffs=powercoeffs)
         self.max_episode_steps = max_episode_steps
         WalkerBaseBulletEnv.__init__(self, self.robot, render)
+        self.camera = MyCamera(self)
 
     def reset(self):
         logger.record("debug/body_x", self.robot.body_xyz[0])
@@ -128,3 +130,29 @@ class Walker2DEnv(WalkerBaseBulletEnv):
 
         return state, sum(self.rewards), bool(done), {}
 
+
+    def move_camera(self, distance):
+        camInfo = self._p.getDebugVisualizerCamera()
+
+        old_distance = camInfo[10]
+        print(old_distance)
+        pitch = camInfo[9]
+        yaw = camInfo[8]
+        lookat = [0,0,0]
+        self._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)
+
+class MyCamera(Camera):
+    m_lookat = [0,0,0]
+    m_decay = 0.05
+    def move_and_look_at(self, i, j, k, x, y, z):
+        lookat = [x, y, z]
+        lookat = [self.m_lookat[i]*self.m_decay + (1-self.m_decay)*lookat[i] for i in range(3)]
+        camInfo = self.env._p.getDebugVisualizerCamera()
+
+        # distance = camInfo[10]
+        # pitch = camInfo[9]
+        # yaw = camInfo[8]
+        distance = 3
+        pitch = -15
+        yaw = 20
+        self.env._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)

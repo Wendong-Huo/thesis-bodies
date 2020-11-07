@@ -53,7 +53,7 @@ def register_env(gym_env_id, gym_env_filename, gym_env_class):
     gym.register(id=gym_env_id, entry_point=f"{gym_env_filename}:{gym_env_class}", kwargs={'render': False, 'xml': "", 'param': []})
 
 def train_test_split(data, params, train_proportion=0.8, seed=0, shuffle=True):
-    assert 0 < train_proportion < 1
+    assert 0 < train_proportion <= 1
     n_train = int(train_proportion * len(data))
     data = np.array(data)
     params = np.array(params)

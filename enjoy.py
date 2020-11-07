@@ -20,7 +20,6 @@ import load_dataset
 def main():  # noqa: C901
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", help="environment ID", type=str, default="Walker2DBulletEnv-v0")
-    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="rl-trained-agents")
     parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
     parser.add_argument("-n", "--n-timesteps", help="number of timesteps", default=1000, type=int)
     parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
@@ -34,12 +33,7 @@ def main():  # noqa: C901
     parser.add_argument(
         "--load-best", action="store_true", default=False, help="Load best model instead of last model if available"
     )
-    parser.add_argument(
-        "--load-checkpoint",
-        type=str,
-        help="Load checkpoint instead of last model if available, "
-        "you must pass the path of zip file corresponding to it",
-    )
+
     parser.add_argument("--stochastic", action="store_true", default=False, help="Use stochastic actions (for DDPG/DQN/SAC)")
     parser.add_argument(
         "--norm-reward", action="store_true", default=False, help="Normalize reward if applicable (trained with VecNormalize)"
@@ -56,9 +50,15 @@ def main():  # noqa: C901
     parser.add_argument(
         "--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor"
     )
+    # === #
+    parser.add_argument("--load-checkpoint", type=str, help="pass the path of zip file corresponding to it")
+    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="rl-trained-agents")
+    parser.add_argument("--dataset", type=str, default="dataset/walker2d_v6")
+    parser.add_argument("--body-id", type=int, default=0)
     args = parser.parse_args()
 
-    dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(f"dataset/walker_toy_v5", seed=0)
+    dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
+        args.dataset, seed=0, shuffle=False, train_proportion=1)
 
     # Going through custom gym packages to let them register in the global registory
     for env_module in args.gym_packages:
@@ -130,8 +130,8 @@ def main():  # noqa: C901
     args.watch_eval = True
 
     env_kwargs = {
-        "xml": train_files[0],
-        "param": train_params[0],
+        "xml": train_files[args.body_id],
+        "param": train_params[args.body_id],
         "render": args.watch_eval,
     }
     log_dir = args.reward_log if args.reward_log != "" else None
