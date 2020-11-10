@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+from time import sleep
+import subprocess
+import argparse
+
+import sida.slackbot.bot as bot
+
+while True:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--search", required=True, type=str, help="keywords you are searching for")
+    args = parser.parse_args()
+    cmd = f"squeue -O 'JobID,Partition,Name,Nodelist,TimeUsed,UserName,StartTime,Schednodes,Command' --user=sliu1 | grep {args.search} | wc -l"
+    ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    output = ps.communicate()[0].decode('UTF-8').strip()
+    output = int(output)
+    print(output)
+    if output<=0:
+        bot.send(f"Jobs with {args.search} done.", 1, bot.channel_sida)
+        break
+    sleep(2)

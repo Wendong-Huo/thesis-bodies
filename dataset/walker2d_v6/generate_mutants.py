@@ -15,10 +15,10 @@ def write_xml(filename, data, body_xml):
     with open(filename, "w") as f:
         print(_content, file=f)
 
-def write_py(filename, data, walker2d_py):
-    _content = walker2d_py.safe_substitute(data)
-    with open(filename, "w") as f:
-        print(_content, file=f)
+# def write_py(filename, data, walker2d_py):
+#     _content = walker2d_py.safe_substitute(data)
+#     with open(filename, "w") as f:
+#         print(_content, file=f)
 
 def write_yaml(filename, data):
     with open(filename, "w") as f:
@@ -32,7 +32,7 @@ def random(mean, vary=0.5):
     return r
 
 body_xml = read_template(f"./body.template.xml")
-walker2d_py = read_template(f"./walker2d.template.py")
+# walker2d_py = read_template(f"./walker2d.template.py")
 
 variation = 0.5 # range of random variation.
 fixed_distance_to_ground = 0.1
@@ -114,4 +114,4 @@ py_data = {
     "joint_power_coef": joint_power_coef,
     "foot_list_array": foot_list,
 }
-write_py("env/walker2d.py", py_data, walker2d_py)
+# write_py("env/walker2d.py", py_data, walker2d_py)

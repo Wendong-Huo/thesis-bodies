@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 import numpy as np
 import gym
+from gym import error
 
 def load_walker2d(seed=0, shuffle=True):
     return load_dataset("dataset/walker_x", seed=seed, shuffle=shuffle)
@@ -21,7 +22,7 @@ def load_dataset(path, train_proportion=0.8, seed=0, shuffle=True):
             if p[-5:] == ".yaml":
                 _dic = yaml.safe_load(f)
                 param = list(_dic.values())
-                if np.max(param) > 2.0:
+                if np.max(param) > 3.0:
                     print("Warning: large parameters. Please consider normalize the value.")
                 params.append(_dic)
             else:
@@ -39,7 +40,11 @@ def load_dataset(path, train_proportion=0.8, seed=0, shuffle=True):
     gym_env_filename = f"{path}/{config['gym_env']['filename']}"
     gym_env_class = config["gym_env"]["class"]
     gym_env_id = config["gym_env"]["env_id"]
-    register_env(gym_env_id, gym_env_filename, gym_env_class)
+    try:
+        gym.spec(gym_env_id)
+        # print("Already registered. Skip.")
+    except error.UnregisteredEnv:
+        register_env(gym_env_id, gym_env_filename, gym_env_class)
 
     return dataset_name, gym_env_id, train_files, train_params, train_names, test_files, test_params, test_names
 

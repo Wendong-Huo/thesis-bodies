@@ -192,7 +192,7 @@ def make_env(env_id, rank=0, seed=0, log_dir=None, wrapper_class=None, env_kwarg
     def _init():
         # import load_dataset
         # load_dataset.load_dataset(f"dataset/walker_toy_v5", seed=0)
-        set_random_seed(seed + rank)
+        set_random_seed(seed * 128 + rank)
         env = gym.make(env_id, **env_kwargs)
 
         # Wrap first with a monitor (e.g. for Atari env where reward clipping is used)
@@ -207,7 +207,7 @@ def make_env(env_id, rank=0, seed=0, log_dir=None, wrapper_class=None, env_kwarg
         if wrapper_class:
             env = wrapper_class(env)
 
-        env.seed(seed + rank)
+        env.seed(seed * 128 + rank)
         return env
 
     return _init
@@ -249,16 +249,16 @@ def create_test_env(
     # Pybullet envs does not follow gym.render() interface
     elif "Bullet" in env_id or "Walker2D" in env_id:
         # HACK: force SubprocVecEnv for Bullet env
-        env = DummyVecEnv([make_env(env_id, 0, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
+        env = DummyVecEnv([make_env(env_id, 127, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
     else:
-        env = DummyVecEnv([make_env(env_id, 0, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
+        env = DummyVecEnv([make_env(env_id, 127, seed, log_dir, wrapper_class=env_wrapper, env_kwargs=env_kwargs)])
 
     # Load saved stats for normalizing input and rewards
     # And optionally stack frames
     if stats_path is not None:
         if hyperparams["normalize"]:
-            print("Loading running average")
-            print("with params: {}".format(hyperparams["normalize_kwargs"]))
+            # print("Loading running average")
+            # print("with params: {}".format(hyperparams["normalize_kwargs"]))
             path_ = os.path.join(stats_path, "vecnormalize.pkl")
             if os.path.exists(path_):
                 env = VecNormalize.load(path_, env)

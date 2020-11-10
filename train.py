@@ -56,12 +56,12 @@ if __name__ == "__main__":  # noqa: C901
         "--eval-freq", help="Evaluate the agent every n steps (if negative, no evaluation)", default=10000, type=int
     )
     parser.add_argument("--eval-episodes", help="Number of episodes to use for evaluation", default=5, type=int)
-    parser.add_argument("--save-freq", help="Save the model every n steps (if negative, no checkpoint)", default=10000, type=int)
+    parser.add_argument("--save-freq", help="Save the model every n steps (if negative, no checkpoint)", default=-1, type=int)
     parser.add_argument(
         "--save-replay-buffer", help="Save the replay buffer too (when applicable)", action="store_true", default=False
     )
     parser.add_argument("-f", "--log-folder", help="Log folder", type=str, default="logs")
-    parser.add_argument("--seed", help="Random generator seed", type=int, default=-1)
+    parser.add_argument("--seed", help="Random generator seed", type=int, default=0)
     parser.add_argument("--n-trials", help="Number of trials for optimizing hyperparameters", type=int, default=10)
     parser.add_argument(
         "-optimize", "--optimize-hyperparameters", action="store_true", default=False, help="Run hyperparameters search"
@@ -204,12 +204,14 @@ if __name__ == "__main__":  # noqa: C901
             "param": train_params[single_idx],
             "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
             "render": args.watch_train and i==0,
+            "is_eval": False,
         }
     eval_env_kwargs = [{
         "xml": train_files[single_idx],
         "param": train_params[single_idx],
         "powercoeffs": [args.powercoeff[0], args.powercoeff[1], args.powercoeff[2]],
         "render": args.watch_eval,
+        "is_eval": True,
     }]
 
     # Create schedules
@@ -298,8 +300,9 @@ if __name__ == "__main__":  # noqa: C901
         log_dir = None if eval_env or no_log else save_path
 
         if n_envs == 1:
+            # use rank=127 so eval_env won't overlap with any training_env.
             env = DummyVecEnv(
-                [make_env(env_id, 0, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=kwargs[0])]
+                [make_env(env_id, 127, args.seed, wrapper_class=env_wrapper, log_dir=log_dir, env_kwargs=kwargs[0])]
             )
         else:
             # env = SubprocVecEnv([make_env(env_id, i, args.seed) for i in range(n_envs)])

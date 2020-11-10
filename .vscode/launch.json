@@ -34,8 +34,8 @@
             "request": "launch",
             "program": "train.py",
             "args": [
-                "--watch-train",
-                "--single-idx=17"
+                // "--watch-train",
+                "--single-idx=1"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,

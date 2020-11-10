@@ -21,20 +21,31 @@ class Walker2D(WalkerBase):
 
     def alive_bonus(self, z, pitch):
         # z is the height of torso center.
+
         # I can scaffold it as well.
         # Scaffold 1: make the robot straight
+        straight = z > self.initial_z * 0.64 and abs(pitch) < 1.0
         # z > self.initial_z * 0.8 / 1.25 and abs(pitch) < 1.0
         # Scaffold 2: help the robot to stand (in first 100 steps) (pybullet_envs's implementation is giving +1 forever, which could lead to standing still, another local optima)
         b = +1 if self.step_num < 100 else +0.1
-        return b if z > self.initial_z * 0.64 and abs(pitch) < 1.0 else -1
+        
+        return b if straight else -1
 
     def robot_specific_reset(self, bullet_client):
         WalkerBase.robot_specific_reset(self, bullet_client)
-        torso_max_power_coef = self.param["volume_torso"] * 5e4
-        thigh_joint_power_coef = (self.param["volume_torso"] + self.param["volume_thigh"]) * 2e4
-        leg_joint_power_coef = (self.param["volume_thigh"] + self.param["volume_leg"]) * 2e4
-        foot_joint_power_coef = (self.param["volume_leg"] + self.param["volume_foot"]) * 2e4
+        # Adjust power coefficients so that motors won't exert power that is too large or too small.
+        # Power that is too large will cause PyBullet to have the "fly-away" bug.
+        # Power that is too small won't be possible to achieve the locomotion task.
+        empirical_c1 = 2e4
+        empirical_c2 = 2e4 # the torso is especially prone to the "fly-away" bug, so this number should keep small.
+        # power coefficients is proportional to the volume of adjacent parts.
+        thigh_joint_power_coef = (self.param["volume_torso"] + self.param["volume_thigh"]) * empirical_c1
+        leg_joint_power_coef = (self.param["volume_thigh"] + self.param["volume_leg"]) * empirical_c1
+        foot_joint_power_coef = (self.param["volume_leg"] + self.param["volume_foot"]) * empirical_c1
+        # avoid too large
+        torso_max_power_coef = self.param["volume_torso"] * empirical_c2
         thigh_joint_power_coef = min(torso_max_power_coef, thigh_joint_power_coef)
+        # set them
         joint_names = ["thigh", "leg", "foot"]
         joint_powers = [thigh_joint_power_coef, leg_joint_power_coef, foot_joint_power_coef]
         for joint_name, joint_power, coef in zip(joint_names, joint_powers, self.powercoeffs):
@@ -44,8 +55,9 @@ class Walker2D(WalkerBase):
 
 class Walker2DEnv(WalkerBaseBulletEnv):
 
-    def __init__(self, xml, param, powercoeffs=[1., 1., 1.], render=False, max_episode_steps=1e3):
+    def __init__(self, xml, param, powercoeffs=[1., 1., 1.], is_eval=False, render=False, max_episode_steps=1e3):
         self.robot = Walker2D(xml, param, env=self, powercoeffs=powercoeffs)
+        self.is_eval = is_eval
         self.max_episode_steps = max_episode_steps
         WalkerBaseBulletEnv.__init__(self, self.robot, render)
         self.camera = MyCamera(self)
@@ -64,6 +76,10 @@ class Walker2DEnv(WalkerBaseBulletEnv):
         obs, r, done, info = self.super_step(a)
         if self.robot.step_num > self.max_episode_steps:
             done = True
+        if done and self.is_eval:
+            logger.record(f"eval/body_x", self.robot.body_xyz[0])
+        if self.isRender:
+            self.camera.move_and_look_at(0,0,0,self.robot.body_xyz[0], self.robot.body_xyz[1], 1)
         return obs, r, done, info
 
     def super_step(self, a):
@@ -130,16 +146,6 @@ class Walker2DEnv(WalkerBaseBulletEnv):
 
         return state, sum(self.rewards), bool(done), {}
 
-
-    def move_camera(self, distance):
-        camInfo = self._p.getDebugVisualizerCamera()
-
-        old_distance = camInfo[10]
-        print(old_distance)
-        pitch = camInfo[9]
-        yaw = camInfo[8]
-        lookat = [0,0,0]
-        self._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)
 
 class MyCamera(Camera):
     m_lookat = [0,0,0]
