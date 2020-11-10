@@ -1,4 +1,5 @@
 import argparse
+import pickle
 import importlib
 import os
 from time import sleep
@@ -76,12 +77,24 @@ def main(train_body_id, run, test_body_id):  # noqa: C901
         model_path=f"logs_3x100/{train_body_id}_{run}/ppo/Walker2Ds-v0_1/best_model.zip", 
         dataset="dataset/walker2d_v6",
         body_id=test_body_id, 
-        n_timesteps=1000, test_time=10, render=False)
+        n_timesteps=1000, test_time=1, render=True)
     # mean_record = np.mean(record)
     print(f"test on {test_body_id}")
     print(f"distances: {record}")
 
 
 if __name__ == "__main__":
-    body = 13
-    main(body, 1, body)
+    with open("read_tb.pickle", "rb") as f:
+        (max_body_xss, max_body_x_stepss) = pickle.load(f)
+    mean_xs = np.mean(max_body_xss, axis=1)
+    arg = np.argsort(mean_xs)[::-1]
+    train_on = arg[10]
+    test_on = arg[8]
+
+    # train_on = arg[71]
+    # test_on = arg[44]
+
+    # train_on = arg[71]
+    # test_on = arg[71]
+
+    main(train_on, 1, test_on)

@@ -111,6 +111,7 @@ if __name__ == "__main__":  # noqa: C901
     parser.add_argument("--watch-eval",action="store_true", default=False)
     parser.add_argument("--powercoeff", type=float, nargs="+", help="Only useful for adjusting powercoeff. Default is [1 1 1].")
     parser.add_argument("--single-idx", type=int, default=0, help="Only useful for sweeping all bodies.")
+    parser.add_argument("--dataset", type=str, default="dataset/walker2d_v6", help="Path to dataset")
     args = parser.parse_args()
     if args.powercoeff is None:
         args.powercoeff = [1., 1., 1.]
@@ -131,7 +132,7 @@ if __name__ == "__main__":  # noqa: C901
     #     raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
 
     dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
-        f"dataset/walker2d_v6", seed=0, shuffle=False, train_proportion=1.0)
+        args.dataset, seed=0, shuffle=False, train_proportion=1.0)
 
     # Unique id to ensure there is no race condition for the folder creation
     uuid_str = f"_{uuid.uuid4()}" if args.uuid else ""

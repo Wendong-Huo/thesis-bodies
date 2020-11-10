@@ -28,7 +28,9 @@
 
     * trained 100 bodies with 3 seeds. sorted them and plot. now need to cross_test them and make a heat matrix. (random seed still have some problem, the model evaluated during training can't be reproduced on laptop.)
 
+    * cross_test cross tests 100 bodies, producing a matrix tells by default, how is the generalization. (2 steps: measure and collect data on VACC (using 100 tasks), to cross_test.pickle, produce figure using plt.matshow on laptop. )
 
+    * observation: seems training on bad body and testing on good body is slightly likely to get better result than reverse.
     
 
 3. Modify PPO, concatenate body info to observation;

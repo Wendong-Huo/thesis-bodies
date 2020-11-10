@@ -35,7 +35,11 @@
             "program": "train.py",
             "args": [
                 // "--watch-train",
-                "--single-idx=1"
+                "-tb=tb/default",
+                "-f=logs/default",
+                "--dataset=dataset/walker2d_v6_default",
+                "--seed=0",
+                "--single-idx=0",
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
