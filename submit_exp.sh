@@ -9,6 +9,6 @@ cd ${SLURM_SUBMIT_DIR}
 
 source activate thesis-bodies
 
-time python train.py -tb tb/$1_$2 -f logs/$1_$2 --seed $2 --single-idx $1
+time python train.py --algo=ppo1 -tb tb_3x100_bodyinfo/$1_$2 -f logs_3x100_bodyinfo/$1_$2 --seed $2 --single-idx $1
 
 

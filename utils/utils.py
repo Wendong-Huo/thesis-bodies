@@ -10,6 +10,7 @@ from stable_baselines3 import A2C, DDPG, DQN, HER, PPO, SAC, TD3
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecNormalize
+from policies.ppo_with_body_info import PPO_with_body_info
 
 try:
     from sb3_contrib import TQC  # pytype: disable=import-error
@@ -27,6 +28,7 @@ ALGOS = {
     "her": HER,
     "sac": SAC,
     "td3": TD3,
+    "ppo1": PPO_with_body_info
 }
 
 if TQC is not None:

@@ -35,7 +35,11 @@
 
 3. Modify PPO, concatenate body info to observation;
 
-    * 
+    * Adding 18-dim static param to observation, hope this won't hurt much. Train and test on the same body, same 3x100 carried out on VACC.
+
+    * Observation space matters paper says adding body_x to observation can hurt learning process, I think it make sense because body_x is getting larger and larger, and it doesn't get normalized. So when the agent get some place far from origin, the input will becomes very large, which is bad for neural network. But in my experiment, it doesn't hurt No.9 much. (I only did one run. and I mailed them asking for source.)
+
+
 
 4. Test one Walker2D variation with body info;
 

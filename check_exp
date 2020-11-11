@@ -18,4 +18,4 @@ while True:
     if output<=0:
         bot.send(f"Jobs with {args.search} done.", 1, bot.channel_sida)
         break
-    sleep(2)
+    sleep(30)

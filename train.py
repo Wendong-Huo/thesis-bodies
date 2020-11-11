@@ -32,105 +32,18 @@ from utils.hyperparams_opt import hyperparam_optimization
 from utils.noise import LinearNormalActionNoise
 from utils.utils import StoreDict, get_callback_class
 
+import arguments
+
 seaborn.set()
 
 import load_dataset
 
 if __name__ == "__main__":  # noqa: C901
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
-    parser.add_argument("--env", type=str, default="CartPole-v1", help="environment ID")
-    parser.add_argument("--hyperparameters", type=str, default="Walker2DBulletEnv-v0", help="")
-    parser.add_argument("-tb", "--tensorboard-log", help="Tensorboard log dir", default="tb", type=str)
-    parser.add_argument("-i", "--trained-agent", help="Path to a pretrained agent to continue training", default="", type=str)
-    parser.add_argument(
-        "--truncate-last-trajectory",
-        help="When using HER with online sampling the last trajectory in the replay buffer will be truncated after reloading the replay buffer.",
-        default=True,
-        type=bool,
-    )
-    parser.add_argument("-n", "--n-timesteps", help="Overwrite the number of timesteps", default=-1, type=int)
-    parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
-    parser.add_argument("--log-interval", help="Override log interval (default: -1, no change)", default=-1, type=int)
-    parser.add_argument(
-        "--eval-freq", help="Evaluate the agent every n steps (if negative, no evaluation)", default=10000, type=int
-    )
-    parser.add_argument("--eval-episodes", help="Number of episodes to use for evaluation", default=5, type=int)
-    parser.add_argument("--save-freq", help="Save the model every n steps (if negative, no checkpoint)", default=-1, type=int)
-    parser.add_argument(
-        "--save-replay-buffer", help="Save the replay buffer too (when applicable)", action="store_true", default=False
-    )
-    parser.add_argument("-f", "--log-folder", help="Log folder", type=str, default="logs")
-    parser.add_argument("--seed", help="Random generator seed", type=int, default=0)
-    parser.add_argument("--n-trials", help="Number of trials for optimizing hyperparameters", type=int, default=10)
-    parser.add_argument(
-        "-optimize", "--optimize-hyperparameters", action="store_true", default=False, help="Run hyperparameters search"
-    )
-    parser.add_argument("--n-jobs", help="Number of parallel jobs when optimizing hyperparameters", type=int, default=1)
-    parser.add_argument(
-        "--sampler",
-        help="Sampler to use when optimizing hyperparameters",
-        type=str,
-        default="tpe",
-        choices=["random", "tpe", "skopt"],
-    )
-    parser.add_argument(
-        "--pruner",
-        help="Pruner to use when optimizing hyperparameters",
-        type=str,
-        default="median",
-        choices=["halving", "median", "none"],
-    )
-    parser.add_argument("--n-startup-trials", help="Number of trials before using optuna sampler", type=int, default=10)
-    parser.add_argument("--n-evaluations", help="Number of evaluations for hyperparameter optimization", type=int, default=20)
-    parser.add_argument(
-        "--storage", help="Database storage path if distributed optimization should be used", type=str, default=None
-    )
-    parser.add_argument("--study-name", help="Study name for distributed optimization", type=str, default=None)
-    parser.add_argument("--verbose", help="Verbose mode (0: no output, 1: INFO)", default=1, type=int)
-    parser.add_argument(
-        "--gym-packages",
-        type=str,
-        nargs="+",
-        default=[],
-        help="Additional external Gym environment package modules to import (e.g. gym_minigrid)",
-    )
-    parser.add_argument(
-        "--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor"
-    )
-    parser.add_argument(
-        "-params",
-        "--hyperparams",
-        type=str,
-        nargs="+",
-        action=StoreDict,
-        help="Overwrite hyperparameter (e.g. learning_rate:0.01 train_freq:10)",
-    )
-    parser.add_argument("-uuid", "--uuid", action="store_true", default=False, help="Ensure that the run has a unique ID")
-    parser.add_argument("--watch-train",action="store_true", default=False)
-    parser.add_argument("--watch-eval",action="store_true", default=False)
-    parser.add_argument("--powercoeff", type=float, nargs="+", help="Only useful for adjusting powercoeff. Default is [1 1 1].")
-    parser.add_argument("--single-idx", type=int, default=0, help="Only useful for sweeping all bodies.")
-    parser.add_argument("--dataset", type=str, default="dataset/walker2d_v6", help="Path to dataset")
-    args = parser.parse_args()
+    args = arguments.get_train_args()
     if args.powercoeff is None:
         args.powercoeff = [1., 1., 1.]
-
-    # Going through custom gym packages to let them register in the global registory
-    # for env_module in args.gym_packages:
-    #     importlib.import_module(env_module)
-
-    # env_id = args.env
-    # registered_envs = set(gym.envs.registry.env_specs.keys())  # pytype: disable=module-attr
-
-    # # If the environment is not found, suggest the closest match
-    # if env_id not in registered_envs:
-    #     try:
-    #         closest_match = difflib.get_close_matches(env_id, registered_envs, n=1)[0]
-    #     except IndexError:
-    #         closest_match = "'no close match found...'"
-    #     raise ValueError(f"{env_id} not found in gym registry, you maybe meant {closest_match}?")
-
+    
+    # Load body dataset
     dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
         args.dataset, seed=0, shuffle=False, train_proportion=1.0)
 
@@ -370,14 +283,6 @@ if __name__ == "__main__":  # noqa: C901
         # Account for the number of parallel environments
         args.eval_freq = max(args.eval_freq // n_envs, 1)
 
-        # if "NeckEnv" in env_id:
-        #     # Use the training env as eval env when using the neck
-        #     # because there is only one robot
-        #     # there will be an issue with the reset
-        #     eval_callback = EvalCallback(
-        #         env, callback_on_new_best=None, best_model_save_path=save_path, log_path=save_path, eval_freq=args.eval_freq
-        #     )
-        #     callbacks.append(eval_callback)
         if args.verbose > 0:
             print("Creating test environment")
 

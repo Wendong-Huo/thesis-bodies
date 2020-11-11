@@ -2,56 +2,11 @@ import numpy as np
 
 import pybullet
 from pybullet_envs.gym_locomotion_envs import WalkerBaseBulletEnv
-from pybullet_envs.robot_locomotors import WalkerBase, Walker2D
+from pybullet_envs.robot_locomotors import Walker2D
 
 from stable_baselines3.common import logger
 
 from pybullet_envs.env_bases import Camera
-
-class Walker2D_deleted(WalkerBase):
-    foot_list = ["foot", "foot_left"]
-
-    def __init__(self, xml, param, env, powercoeffs=[1., 1., 1.]):
-        self.step_num = 0
-        self.env = env
-        self.xml = xml
-        self.param = param
-        self.powercoeffs = powercoeffs
-        WalkerBase.__init__(self, xml, "torso", action_dim=6, obs_dim=22, power=0.40)
-
-    def alive_bonus(self, z, pitch):
-        # z is the height of torso center.
-
-        # I can scaffold it as well.
-        # Scaffold 1: make the robot straight
-        straight = z > self.initial_z * 0.64 and abs(pitch) < 1.0
-        # z > self.initial_z * 0.8 / 1.25 and abs(pitch) < 1.0
-        # Scaffold 2: help the robot to stand (in first 100 steps) (pybullet_envs's implementation is giving +1 forever, which could lead to standing still, another local optima)
-        b = +1 if self.step_num < 100 else +0.1
-        
-        return b if straight else -1
-
-    def robot_specific_reset(self, bullet_client):
-        WalkerBase.robot_specific_reset(self, bullet_client)
-        # Adjust power coefficients so that motors won't exert power that is too large or too small.
-        # Power that is too large will cause PyBullet to have the "fly-away" bug.
-        # Power that is too small won't be possible to achieve the locomotion task.
-        empirical_c1 = 2e4
-        empirical_c2 = 2e4 # the torso is especially prone to the "fly-away" bug, so this number should keep small.
-        # power coefficients is proportional to the volume of adjacent parts.
-        thigh_joint_power_coef = (self.param["volume_torso"] + self.param["volume_thigh"]) * empirical_c1
-        leg_joint_power_coef = (self.param["volume_thigh"] + self.param["volume_leg"]) * empirical_c1
-        foot_joint_power_coef = (self.param["volume_leg"] + self.param["volume_foot"]) * empirical_c1
-        # avoid too large
-        torso_max_power_coef = self.param["volume_torso"] * empirical_c2
-        thigh_joint_power_coef = min(torso_max_power_coef, thigh_joint_power_coef)
-        # set them
-        joint_names = ["thigh", "leg", "foot"]
-        joint_powers = [thigh_joint_power_coef, leg_joint_power_coef, foot_joint_power_coef]
-        for joint_name, joint_power, coef in zip(joint_names, joint_powers, self.powercoeffs):
-            self.jdict[f"{joint_name}_joint"].power_coef = joint_power * coef
-            self.jdict[f"{joint_name}_left_joint"].power_coef = joint_power * coef
-
 
 class Walker2DEnv(WalkerBaseBulletEnv):
 
