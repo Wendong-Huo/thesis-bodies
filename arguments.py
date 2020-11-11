@@ -48,5 +48,5 @@ def get_train_args():
 
 def get_dissect_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--model-path", type=str, required=True, help="Path to model.zip")
+    parser.add_argument("-f", "--model-path", type=str, default="logs/malicious_info/ppo/Walker2Ds-v0_4/best_model.zip", help="Path to model.zip")
     return parser.parse_args()
