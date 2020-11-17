@@ -9,13 +9,12 @@ def get_train_args():
     parser.add_argument("--env", type=str, default="CartPole-v1", help="environment ID")
     parser.add_argument("--hyperparameters", type=str, default="Walker2DBulletEnv-v0", help="")
     parser.add_argument("-tb", "--tensorboard-log", help="Tensorboard log dir", default="tb", type=str)
-    parser.add_argument("-i", "--trained-agent", help="Path to a pretrained agent to continue training", default="", type=str)
     parser.add_argument(
         "--truncate-last-trajectory",
         help="When using HER with online sampling the last trajectory in the replay buffer will be truncated after reloading the replay buffer.", default=True,
         type=bool,)
     parser.add_argument("-n", "--n-timesteps", help="Overwrite the number of timesteps", default=-1, type=int)
-    parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
+    parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=1, type=int)
     parser.add_argument("--log-interval", help="Override log interval (default: -1, no change)", default=-1, type=int)
     parser.add_argument("--eval-freq", help="Evaluate the agent every n steps (if negative, no evaluation)", default=10000, type=int)
     parser.add_argument("--eval-episodes", help="Number of episodes to use for evaluation", default=5, type=int)
@@ -38,11 +37,11 @@ def get_train_args():
     parser.add_argument("--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor")
     parser.add_argument("-params", "--hyperparams", type=str, nargs="+", action=StoreDict,
                         help="Overwrite hyperparameter (e.g. learning_rate:0.01 train_freq:10)")
-    parser.add_argument("-uuid", "--uuid", action="store_true", default=False, help="Ensure that the run has a unique ID")
     parser.add_argument("--watch-train", action="store_true", default=False)
     parser.add_argument("--watch-eval", action="store_true", default=False)
-    parser.add_argument("--powercoeff", type=float, nargs="+", help="Only useful for adjusting powercoeff. Default is [1 1 1].")
-    parser.add_argument("--single-idx", type=int, default=0, help="Only useful for sweeping all bodies.")
+    parser.add_argument("--powercoeff", type=float, nargs=3, default=[1.,1.,1.], help="Only useful for adjusting powercoeff. Default is [1 1 1].")
+    parser.add_argument("--single-idx", type=int, default=-1, help="The body id that will be trained.")
+    parser.add_argument("--single-group", type=int, default=-1, help="The group of body that will be trained.")
     parser.add_argument("--dataset", type=str, default="dataset/walker2d_v6", help="Path to dataset")
     return parser.parse_args()
 

@@ -18,10 +18,9 @@ from utils.wrappers import TimeFeatureWrapper
 
 import load_dataset
 
-def enjoy(stats_path, model_path, dataset, body_id, n_timesteps=200, test_time=3, render=False, seed=0):
+def enjoy(stats_path, model_path, dataset, body_id, algo, n_timesteps=200, test_time=3, render=False, seed=0):
     dataset_name, env_id, train_files, train_params, train_names, test_files, test_params, test_names = load_dataset.load_dataset(
         dataset, seed=0, shuffle=False, train_proportion=1)
-    algo = "ppo"
     set_random_seed(seed * 128 + 127)
     hyperparams, stats_path = get_saved_hyperparams(stats_path, norm_reward=False, test_mode=True)
     env_kwargs = {
@@ -55,7 +54,7 @@ def enjoy(stats_path, model_path, dataset, body_id, n_timesteps=200, test_time=3
             action, state = model.predict(obs, state=state, deterministic=True)
             if isinstance(env.action_space, gym.spaces.Box):
                 action = np.clip(action, env.action_space.low, env.action_space.high)
-            body_x = env.venv.envs[0].robot.body_xyz[0]
+            body_x = env.envs[0].robot.body_xyz[0]
             obs, reward, done, infos = env.step(action)
             episode_reward += reward[0]
             ep_len += 1
@@ -69,32 +68,29 @@ def enjoy(stats_path, model_path, dataset, body_id, n_timesteps=200, test_time=3
     env.close()
     return body_x_record
 
-def main(train_body_id, run, test_body_id):  # noqa: C901
+def main():  # noqa: C901
     os.environ["CUDA_VISIBLE_DEVICES"]=""
-
+    test_body_id = 48
     record = enjoy(
-        stats_path=f"logs_3x100/{train_body_id}_{run}/ppo/Walker2Ds-v0_1/Walker2Ds-v0", 
-        model_path=f"logs_3x100/{train_body_id}_{run}/ppo/Walker2Ds-v0_1/best_model.zip", 
+        stats_path=f"logs/train_on_10/ppo1/Walker2Ds-v0_1/Walker2Ds-v0", 
+        model_path=f"logs/train_on_10/ppo1/Walker2Ds-v0_1/best_model.zip", 
         dataset="dataset/walker2d_v6",
+        algo="ppo1",
         body_id=test_body_id, 
         n_timesteps=1000, test_time=1, render=True)
+
+    # record = enjoy(
+    #     stats_path=f"experiment_results/logs_3x100/9_1/ppo/Walker2Ds-v0_1/Walker2Ds-v0", 
+    #     model_path=f"experiment_results/logs_3x100/9_1/ppo/Walker2Ds-v0_1/best_model.zip", 
+    #     dataset="dataset/walker2d_v6",
+    #     algo="ppo",
+    #     body_id=9, 
+    #     n_timesteps=1000, test_time=1, render=True)
+
     # mean_record = np.mean(record)
     print(f"test on {test_body_id}")
     print(f"distances: {record}")
 
 
 if __name__ == "__main__":
-    with open("read_tb.pickle", "rb") as f:
-        (max_body_xss, max_body_x_stepss) = pickle.load(f)
-    mean_xs = np.mean(max_body_xss, axis=1)
-    arg = np.argsort(mean_xs)[::-1]
-    train_on = arg[10]
-    test_on = arg[8]
-
-    # train_on = arg[71]
-    # test_on = arg[44]
-
-    # train_on = arg[71]
-    # test_on = arg[71]
-
-    main(train_on, 1, test_on)
+    main()

@@ -39,8 +39,12 @@
 
     * Observation space matters paper says adding body_x to observation can hurt learning process, I think it make sense because body_x is getting larger and larger, and it doesn't get normalized. So when the agent get some place far from origin, the input will becomes very large, which is bad for neural network. But in my experiment, it doesn't hurt No.9 much. (I only did one run. and I mailed them asking for source.)
 
-
-
 4. Test one Walker2D variation with body info;
+
+    * I divided 100 bodies into 10 groups. The best bodies are in the first group (group 0). The worst ones in group 9.
+
+    * Train policy on a group of 10 bodies, with body info. (obs.space = original_obs.space + 18 params about body). Trained with three seed. 3xg10. so we will have 30 policies.
+
+    * Test these policies in 100 bodies and produce heat matrix that can compare to the one in section 1.
 
 5. Test ...
