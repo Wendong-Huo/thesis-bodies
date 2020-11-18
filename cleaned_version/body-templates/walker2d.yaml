@@ -1,0 +1,11 @@
+variable:
+  z_torso_top: 1.45
+  z_thigh_top: 1.05
+  z_leg_top: 0.6
+  x_foot: 0.2
+  weight_torso: 0.05
+  weight_thigh: 0.05
+  weight_leg: 0.04
+  weight_foot: 0.06
+fixed:
+  z_foot: 0.1

@@ -14,3 +14,9 @@ def get_sorted_ids():
     arg = np.argsort(mean_xs)[::-1]
     assert(arg.shape[0]==100)
     return arg
+
+def get_unsorted_ids():
+    """ Return a group of body ids randomly """
+    arg = np.arange(0,100)
+    assert(arg.shape[0]==100)
+    return arg

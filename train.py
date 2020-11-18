@@ -35,7 +35,7 @@ from utils.utils import StoreDict, get_callback_class
 
 import arguments
 import load_dataset
-from my_utils import get_sorted_ids
+from my_utils import get_sorted_ids, get_unsorted_ids
 
 def create_env(n_envs, eval_env=False, no_log=False):
     """
@@ -142,9 +142,10 @@ if __name__ == "__main__":  # noqa: C901
         # ignore hyperparams n_envs, create an env for each body
         n_envs = 20
 
-        ids = get_sorted_ids()
+        ids = get_unsorted_ids()
+        # ids = get_sorted_ids()
         ids = ids[args.single_group*20: args.single_group*20+20]
-
+        print(f"Train on bodies: {ids}")
         env_kwargs = {}
         for i in range(n_envs):
             env_kwargs[i] = {

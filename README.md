@@ -43,8 +43,20 @@
 
     * I divided 100 bodies into 10 groups. The best bodies are in the first group (group 0). The worst ones in group 9.
 
-    * Train policy on a group of 10 bodies, with body info. (obs.space = original_obs.space + 18 params about body). Trained with three seed. 3xg10. so we will have 30 policies.
+    * Train policy on a group of 10 bodies, with body info. (obs.space = original_obs.space + 18 params about body). Trained with three seed. 3xg10. so we will have 30 policies. (This is g10)
 
     * Test these policies in 100 bodies and produce heat matrix that can compare to the one in section 1.
 
-5. Test ...
+    * train on a group of 20 bodies, (g20 train on sorted group, 20u train on unsorted group).
+    
+    * I am going to clean up the code and make it more reuseable. In Cleaned_version
+
+5. Test
+
+    * preliminary test results: in 900 tests, w/o bodyinfo 28 successes, w/ bodyinfo 38 successes.
+
+    * I only train them for 2M steps. I'll increase training time, see if there will be more successes.
+    
+    * I should take 80% bodies to train, and 20% bodies to test, the data will be nicer.
+
+    
