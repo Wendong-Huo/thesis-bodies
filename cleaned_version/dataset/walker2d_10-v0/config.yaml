@@ -1,0 +1,29 @@
+bodies:
+  files:
+  - bodies/0.xml
+  - bodies/1.xml
+  - bodies/2.xml
+  - bodies/3.xml
+  - bodies/4.xml
+  - bodies/5.xml
+  - bodies/6.xml
+  - bodies/7.xml
+  - bodies/8.xml
+  - bodies/9.xml
+  params:
+  - params/0.yaml
+  - params/1.yaml
+  - params/2.yaml
+  - params/3.yaml
+  - params/4.yaml
+  - params/5.yaml
+  - params/6.yaml
+  - params/7.yaml
+  - params/8.yaml
+  - params/9.yaml
+  total: 10
+dataset_name: walker2d
+gym_env:
+  class: Walker2dEnv
+  env_id: walker2d_10-v0
+  filename: walker2d.py

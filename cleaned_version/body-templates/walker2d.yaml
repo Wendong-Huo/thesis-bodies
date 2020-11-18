@@ -1,11 +1,17 @@
+part: [ "torso", "thigh", "leg", "foot" ]
 variable:
-  z_torso_top: 1.45
-  z_thigh_top: 1.05
-  z_leg_top: 0.6
-  x_foot: 0.2
+  length_torso: 0.4
+  length_thigh: 0.45
+  length_leg: 0.5
+  length_foot: 0.2
   weight_torso: 0.05
   weight_thigh: 0.05
   weight_leg: 0.04
   weight_foot: 0.06
 fixed:
   z_foot: 0.1
+combination:
+  z_torso_top: ["z_foot", "length_leg", "length_thigh", "length_torso"]
+  z_thigh_top: ["z_foot", "length_leg", "length_thigh"]
+  z_leg_top: ["z_foot", "length_leg"]
+  x_foot: ["length_foot"]

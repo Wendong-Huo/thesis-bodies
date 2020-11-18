@@ -1,0 +1,17 @@
+length_foot: 0.1835
+length_leg: 0.4976
+length_thigh: 0.464
+length_torso: 0.409
+volume_foot: 0.0023674552339
+volume_leg: 0.00292944812896
+volume_thigh: 0.0042014209824
+volume_torso: 0.003539741625
+weight_foot: 0.0641
+weight_leg: 0.0433
+weight_thigh: 0.0537
+weight_torso: 0.0525
+x_foot: 0.1835
+z_foot: 0.1
+z_leg_top: 0.5976
+z_thigh_top: 1.0616
+z_torso_top: 1.4706

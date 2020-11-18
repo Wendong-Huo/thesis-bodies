@@ -1,5 +1,11 @@
 {
     "python.analysis.extraPaths": [
         "cleaned_version",
-    ]
+    ],
+    "files.watcherExclude": {
+        "vacc/**": true,
+        "experiment_results/**": true,
+        "logs/**": true,
+        "tb/**": true,
+    }
 }
