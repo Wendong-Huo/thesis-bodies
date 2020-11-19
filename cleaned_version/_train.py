@@ -3,6 +3,7 @@ import shutil
 import yaml
 from collections import OrderedDict
 
+import numpy as np
 # For custom activation fn in hyperparams
 from torch import nn as nn  # noqa: F401 pytype: disable=unused-import
 
@@ -60,8 +61,8 @@ def _train():
         }]
     else:  # train on a group of bodies
         # ignore hyperparams n_envs, create an env for each body
-        n_envs = len(args.training_idx)
-        ids = args.training_idx
+        ids = np.fromstring(args.body_ids, dtype=int, sep=',')
+        n_envs = len(ids)
         print(f"Train on bodies: {ids}")
         env_kwargs = {}
         for i in range(n_envs):
@@ -86,8 +87,11 @@ def _train():
     # Setting num threads to 1 makes things run faster on cpu
     th.set_num_threads(1)
 
-    tensorboard_log = f"outputs/{args.exp_name}/tb/{args.exp_idx}"
-    log_path = f"outputs/{args.exp_name}/logs/{args.exp_idx}"
+    mode = "single" if args.single else "multi"
+    if args.with_bodyinfo:
+        mode += "_body"
+    tensorboard_log = f"outputs/{args.exp_name}/tb/{mode}/i{args.exp_idx}_s{args.seed}"
+    log_path = f"outputs/{args.exp_name}/logs/{mode}/i{args.exp_idx}_s{args.seed}"
 
     output(f"Training on {n_envs} environments", 2)
 

@@ -10,6 +10,8 @@ slurm.out
 to_del/
 screenshots/
 experiment_results/
+outputs/
+trash/
 
 
 # Byte-compiled / optimized / DLL files
