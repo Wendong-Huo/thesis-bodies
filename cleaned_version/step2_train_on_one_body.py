@@ -109,10 +109,13 @@ def start_experiment_multi(script):
             "train_bodies": train_bodies.tolist(),
             "test_bodies": test_bodies.tolist(),
         }
-        write_yaml(f"{exp_path}/exp_{i}_bodies.yml", data)
+        write_yaml(f"{exp_path}/exp_multi_{i}_bodies.yml", data)
 
         str_train_bodies = np.array2string(train_bodies, separator=',')[1:-1]
         str_train_bodies = str_train_bodies.replace(' ', '')
+
+        str_test_bodies = np.array2string(all_bodies, separator=',')[1:-1]
+        str_test_bodies = str_test_bodies.replace(' ', '')
 
         for j_seed in range(2):
             output(f"Starting {script} with exp-idx {i} seed {j_seed}", 1)
@@ -120,8 +123,8 @@ def start_experiment_multi(script):
                 bash = "sbatch"
             else:
                 bash = "bash"        
-            cmd_w = [bash, script, g_exp_name, str(i), str_train_bodies, str(j_seed), "--with-bodyinfo", f"{args.n_timesteps}"]
-            cmd_wo = [bash, script, g_exp_name, str(i), str_train_bodies, str(j_seed), "", f"{args.n_timesteps}"]
+            cmd_w = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(j_seed), "--with-bodyinfo", f"{args.n_timesteps}"]
+            cmd_wo = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(j_seed), "", f"{args.n_timesteps}"]
             output(" ".join(cmd_w),2)
             output(" ".join(cmd_wo),2)
             if args.in_parallel:

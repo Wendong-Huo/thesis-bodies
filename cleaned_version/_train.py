@@ -68,9 +68,8 @@ def _train():
             # ignore hyperparams n_envs, create an env for each body
             ids = np.fromstring(args.body_ids, dtype=int, sep=',')
             n_envs = len(ids)
-            print(f"Train on bodies: {ids}")
+            output(f"Train on bodies: {ids}", 2)
             env_kwargs = {}
-            eval_env_kwargs = {}
             for i in range(n_envs):
                 env_kwargs[i] = {
                     "xml": files[ids[i]],
@@ -80,11 +79,16 @@ def _train():
                     "render": args.watch_train and i == 0,
                     "is_eval": False,
                 }
+            eval_ids = np.fromstring(args.eval_ids, dtype=int, sep=',')
+            eval_n_envs = len(eval_ids)
+            output(f"Evaluate on bodies: {eval_ids}", 2)
+            eval_env_kwargs = {}
+            for i in range(eval_n_envs):
                 # Use the best body in the group to eval
                 eval_env_kwargs[i] = {
-                    "xml": files[ids[i]],
-                    "param": params[ids[i]],
-                    "name": ids[i],
+                    "xml": files[eval_ids[i]],
+                    "param": params[eval_ids[i]],
+                    "name": eval_ids[i],
                     "powercoeffs": [1, 1, 1],
                     "render": args.watch_eval and i == 0,
                     "is_eval": True,
@@ -157,8 +161,6 @@ def _train():
         # Eval right before dumping the log:
         eval_freq = hyperparams["n_steps"] * args.log_interval
 
-        env = create_env(n_envs, env_id, env_kwargs, seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=False, log_dir=log_path)
-
         all_callbacks = []
         for i, _kwargs in enumerate(eval_env_kwargs):
             save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=params_path)
@@ -173,12 +175,12 @@ def _train():
             )
             all_callbacks.append(eval_callback)
 
-    if args.with_bodyinfo:
-        algo = "ppo_w_body"
-    else:
-        algo = "ppo"
 
-    model = ALGOS[algo](env=env, tensorboard_log=tensorboard_log, seed=args.seed, verbose=True, **hyperparams)
+    # Start training
+    if True:
+        env = create_env(n_envs, env_id, env_kwargs, seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=False, log_dir=log_path)
+        algo = "ppo_w_body" if args.with_bodyinfo else "ppo"
+        model = ALGOS[algo](env=env, tensorboard_log=tensorboard_log, seed=args.seed, verbose=True, **hyperparams)
 
     # Save params and arguments
     if True:

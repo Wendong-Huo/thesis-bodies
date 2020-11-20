@@ -37,6 +37,7 @@ def get_args_train():
     parser.add_argument("--single", action="store_true", default=False, help="Train using one single body.")
     parser.add_argument("--single-idx", type=int, default=0, help="Which single body is used to train on.")
     parser.add_argument("--body-ids", type=str, default="0", help="Which bodies are used to train on, seperate by comma, e.g. --body-ids=0,1,2,3")
+    parser.add_argument("--eval-ids", type=str, default="0", help="Which bodies are used to evaluate, seperate by comma, e.g. --body-ids=0,1,2,3")
 
     # Visualization during training
     parser.add_argument("--watch-train", action="store_true", default=False, help="Show pybullet window of the training agent during training.")
