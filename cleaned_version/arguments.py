@@ -6,7 +6,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose-level", type=int, default=2, help="Output information level: 0. nothing, 1. critical info, 2. common info, 3. debug info.")
 
-    parser.add_argument("--exp-name", type=str, default="default", help="Name of experiment.")
+    parser.add_argument("--exp-name", type=str, default="", help="Name of experiment.")
 
     # For step 1
     parser.add_argument("--num-bodies", type=int, default=20, help="Number of total different bodies you want to use in the experiments.")
@@ -19,6 +19,8 @@ def get_args():
     parser.add_argument("--in-parallel", action="store_true", help="We can start all experiments in parallel and it will need a huge amount of resources. For testing, you can start experiment in series, one by one.")
     parser.add_argument("-n", "--n-timesteps", type=float, default=1e7, help="Setting training timesteps for both multi-body and single-body.")
     parser.add_argument("-p", "--partition", type=str, default="bluemoon", help="Setting the partition on VACC that used to run the experiments.")
+    parser.add_argument("--no-single", action="store_true", help="Skip the single-body training.")
+    parser.add_argument("--no-multi", action="store_true", help="Skip the multi-body training.")
     return parser.parse_args()
 
 def get_args_train():
@@ -44,7 +46,7 @@ def get_args_train():
     parser.add_argument("--log-folder", type=str, default="out.logs", help="Path to log models.")
     
     parser.add_argument("--n-timesteps", type=float, default=3e5, help="Training timesteps.")
-    parser.add_argument("--eval-freq", type=float, default=1e3, help="Evaluate policy on the training body every # timesteps.")
+    # parser.add_argument("--eval-freq", type=float, default=1e4, help="Evaluate policy on the training body every # timesteps.") # eval right before dumping the log, no need to set.
     parser.add_argument("--log-interval", type=int, default=1, help="Write tensorboard log every # iteraction.")
     parser.add_argument("--eval-episodes", type=int, default=1, help="Every evaluation contains # episodes.")
 

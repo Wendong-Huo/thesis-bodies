@@ -59,4 +59,10 @@
     
     * I should take 80% bodies to train, and 20% bodies to test, the data will be nicer.
 
+    * I increased the replay buffer size according to the number of env.
+
+    * two experiments started.
+
+    * walker2d_20_10-v0 started on short
     
+    * walker2d_30_20-v0 started on bluemoon

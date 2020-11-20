@@ -5,19 +5,37 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "cleaned _train.py",
+            "name": "cleaned single _train.py",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/cleaned_version/_train.py",
             "cwd": "${workspaceFolder}/cleaned_version",
             "args": [
-                "--exp-name=walker2d_10-v0",
+                "--exp-name=walker2d_20_10-v0",
                 "--exp-idx=19",
                 "--single",
                 "--single-idx=19",
                 "--seed=1",
                 "--with-bodyinfo",
-                "--dataset=dataset/walker2d_10-v0"
+                "--dataset=dataset/walker2d_20_10-v0"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "cleaned multi _train.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/cleaned_version/_train.py",
+            "cwd": "${workspaceFolder}/cleaned_version",
+            "args": [
+                "--exp-name=walker2d_20_10-v0",
+                "--exp-idx=0",
+                "--body-ids=18,1,19,8,10,17,6,13,4,2,5,14,9,7,16,11",
+                "--seed=1",
+                "--with-bodyinfo",
+                "--dataset=dataset/walker2d_20_10-v0",
+                "--n-timesteps=10000000.0"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,

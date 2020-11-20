@@ -19,6 +19,8 @@ def train(env_id, dataset_path):
     np.random.seed(0)
     g_env_id = env_id
     g_exp_name = f"{env_id}"
+    if args.exp_name != "":
+        g_exp_name = f"{args.exp_name}_{env_id}"
     config = read_yaml(f"{dataset_path}/config.yaml")
     g_total_bodies = config["bodies"]["total"]
 
@@ -28,17 +30,19 @@ def train(env_id, dataset_path):
     clean_outputs_folder()
 
     # 2. Train on multi bodies
-    script = create_scripts(mode="multi")
-    start_experiment_multi(script)
+    if not args.no_multi:
+        script = create_scripts(mode="multi")
+        start_experiment_multi(script)
 
     # 1. Train on single bodies
-    script = create_scripts(mode="single")
-    start_experiment_single(script)
+    if not args.no_single:
+        script = create_scripts(mode="single")
+        start_experiment_single(script)
     
     
     # 3. Wait for results
     if args.vacc:
-        output(f"Optional. Use the following command to monitor process:\n  check_exp --search={g_exp_name}", 1)
+        output(f"Optional. Use the following command on VACC to get a slack msg after experiments complete:\n\n  nohup check_exp --search={g_exp_name} &", 1)
 
 
 def create_scripts(mode="single"):
@@ -102,12 +106,13 @@ def start_experiment_multi(script):
         exp_path = f"outputs/{g_exp_name}"
         os.makedirs(exp_path, exist_ok=True)
         data = {
-            "train_bodies": train_bodies,
-            "test_bodies": test_bodies,
+            "train_bodies": train_bodies.tolist(),
+            "test_bodies": test_bodies.tolist(),
         }
         write_yaml(f"{exp_path}/exp_{i}_bodies.yml", data)
 
         str_train_bodies = np.array2string(train_bodies, separator=',')[1:-1]
+        str_train_bodies = str_train_bodies.replace(' ', '')
 
         for j_seed in range(2):
             output(f"Starting {script} with exp-idx {i} seed {j_seed}", 1)

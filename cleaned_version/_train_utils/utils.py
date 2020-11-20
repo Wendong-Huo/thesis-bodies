@@ -72,7 +72,7 @@ def create_env(n_envs, env_id, kwargs, seed=0, normalize=False, normalize_kwargs
     if n_envs == 1:
         # use rank=127 so eval_env won't overlap with any training_env.
         env = DummyVecEnv(
-            [make_env(env_id, 127, seed, log_dir=log_dir, env_kwargs=kwargs[0])]
+            [make_env(env_id, 127, seed, log_dir=log_dir, env_kwargs=kwargs)]
         )
     else:
         # env = SubprocVecEnv([make_env(env_id, i, args.seed) for i in range(n_envs)])

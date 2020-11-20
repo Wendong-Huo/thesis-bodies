@@ -8,8 +8,8 @@ g_verbose_level = 2
 output_color = {
     -1: ['grey', 'on_red'],  # Error
     0: ['yellow'],           # Warning
-    1: ['blue'],             # Important info
-    2: ['green'],            # Details
+    1: ['green'],             # Important info
+    2: ['blue'],            # Details
     3: ['white'],            # Debug
 }
 
