@@ -12,7 +12,9 @@ screenshots/
 experiment_results/
 outputs/
 trash/
-
+dataset/
+scripts/
+out.slurm/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

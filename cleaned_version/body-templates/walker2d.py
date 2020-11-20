@@ -11,11 +11,12 @@ from pybullet_envs.env_bases import Camera
 class Walker2d(WalkerBase):
     foot_list = ["foot", "foot_left"]
 
-    def __init__(self, xml, param, env, powercoeffs=[1., 1., 1.]):
+    def __init__(self, xml, param, name, env, powercoeffs=[1., 1., 1.]):
         self.step_num = 0
         self.env = env
         self.xml = xml
         self.param = param
+        self.name = name
         self.powercoeffs = powercoeffs
         WalkerBase.__init__(self, xml, "torso", action_dim=6, obs_dim=22, power=0.40)
 
@@ -55,15 +56,15 @@ class Walker2d(WalkerBase):
 
 class Walker2dEnv(WalkerBaseBulletEnv):
 
-    def __init__(self, xml, param, powercoeffs=[1., 1., 1.], is_eval=False, render=False, max_episode_steps=1e3):
-        self.robot = Walker2d(xml, param, env=self, powercoeffs=powercoeffs)
+    def __init__(self, xml, param, name=None, powercoeffs=[1., 1., 1.], is_eval=False, render=False, max_episode_steps=1e3):
+        self.robot = Walker2d(xml, param, name, env=self, powercoeffs=powercoeffs)
         self.is_eval = is_eval
         self.max_episode_steps = max_episode_steps
         WalkerBaseBulletEnv.__init__(self, self.robot, render)
         self.camera = MyCamera(self)
 
     def reset(self):
-        logger.record("debug/body_x", self.robot.body_xyz[0])
+        logger.record(f"debug/d{self.robot.name}_body_x", self.robot.body_xyz[0])
         self.robot.step_num = 0
         obs = super().reset()
         return obs
@@ -77,7 +78,7 @@ class Walker2dEnv(WalkerBaseBulletEnv):
         if self.robot.step_num > self.max_episode_steps:
             done = True
         if done and self.is_eval:
-            logger.record(f"eval/body_x", self.robot.body_xyz[0])
+            logger.record(f"eval/e{self.robot.name}_body_x", self.robot.body_xyz[0])
         if self.isRender:
             self.camera.move_and_look_at(0,0,0,self.robot.body_xyz[0], self.robot.body_xyz[1], 1)
         return obs, r, done, info

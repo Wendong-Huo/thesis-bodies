@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --partition bluemoon
+#SBATCH --partition $partition
 #SBATCH --mem 24G
 #SBATCH -c 1
 #SBATCH --output $cwd/out.slurm/%j

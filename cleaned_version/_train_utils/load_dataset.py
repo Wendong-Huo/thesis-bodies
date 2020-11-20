@@ -54,7 +54,7 @@ def register_env(gym_env_id, gym_env_filename, gym_env_class):
     assert gym_env_filename[-3:] == ".py"
     gym_env_filename = gym_env_filename[:-3] # remove ".py"
     gym_env_filename = gym_env_filename.replace("/",".") # turn file path into python class path
-    gym.register(id=gym_env_id, entry_point=f"{gym_env_filename}:{gym_env_class}", kwargs={'render': False, 'xml': "", 'param': []})
+    gym.register(id=gym_env_id, entry_point=f"{gym_env_filename}:{gym_env_class}", kwargs={'name': 0, 'render': False, 'xml': "", 'param': []})
 
 def body_names(filenames):
     names = []

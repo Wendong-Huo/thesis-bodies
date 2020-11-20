@@ -65,20 +65,23 @@ def _train():
         n_envs = len(ids)
         print(f"Train on bodies: {ids}")
         env_kwargs = {}
+        eval_env_kwargs = {}
         for i in range(n_envs):
             env_kwargs[i] = {
                 "xml": files[ids[i]],
                 "param": params[ids[i]],
+                "name": ids[i],
                 "powercoeffs": [1, 1, 1],
                 "render": args.watch_train and i == 0,
                 "is_eval": False,
             }
             # Use the best body in the group to eval
-            eval_env_kwargs = [{
-                "xml": files[ids[0]],
-                "param": params[ids[0]],
+            eval_env_kwargs[i] = [{
+                "xml": files[ids[i]],
+                "param": params[ids[i]],
+                "name": ids[i],
                 "powercoeffs": [1, 1, 1],
-                "render": args.watch_eval,
+                "render": args.watch_eval and i == 0,
                 "is_eval": True,
             }]
 
@@ -139,16 +142,20 @@ def _train():
 
     env = create_env(n_envs, env_id, env_kwargs, seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=False, log_dir=log_path)
 
-    save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=params_path)
-    eval_callback = EvalCallback(
-        create_env(1, env_id, eval_env_kwargs, seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=True),
-        callback_on_new_best=save_vec_normalize,
-        best_model_save_path=save_path,
-        n_eval_episodes=args.eval_episodes,
-        log_path=save_path,
-        eval_freq=args.eval_freq,
-        deterministic=True,
-    )
+    all_callbacks = []
+    for i in eval_env_kwargs:
+        save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=params_path)
+        eval_callback = EvalCallback(
+            create_env(1, env_id, eval_env_kwargs[i], seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=True),
+            callback_on_new_best=save_vec_normalize,
+            best_model_save_path=save_path,
+            n_eval_episodes=args.eval_episodes,
+            log_path=save_path,
+            eval_freq=args.eval_freq,
+            deterministic=True,
+        )
+        all_callbacks.append(eval_callback)
+
     if args.with_bodyinfo:
         algo = "ppo_w_body"
     else:
@@ -171,7 +178,7 @@ def _train():
     if args.log_interval > -1:
         kwargs = {"log_interval": args.log_interval}
 
-    kwargs["callback"] = eval_callback
+    kwargs["callback"] = all_callbacks
     
     output(f"n_timesteps: {n_timesteps}", 2)
     

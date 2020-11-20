@@ -27,14 +27,14 @@ def train(env_id, dataset_path):
     # create folder for slurm output
     clean_outputs_folder()
 
-    # 1. Train on single bodies
-    if True:
-        script = create_scripts(mode="single")
-        start_experiment_single(script)
-    
     # 2. Train on multi bodies
     script = create_scripts(mode="multi")
     start_experiment_multi(script)
+
+    # 1. Train on single bodies
+    script = create_scripts(mode="single")
+    start_experiment_single(script)
+    
     
     # 3. Wait for results
     if args.vacc:
@@ -48,6 +48,7 @@ def create_scripts(mode="single"):
     filename = f"scripts/{g_env_id}_submit_{mode}.sh"
     data = {
         "cwd": os.path.abspath(os.getcwd()),
+        "partition": args.partition,
         "dataset": f"dataset/{g_env_id}",
     }
     write_script(filename, data, script_template)

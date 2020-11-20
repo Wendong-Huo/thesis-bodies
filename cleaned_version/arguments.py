@@ -9,7 +9,7 @@ def get_args():
     parser.add_argument("--exp-name", type=str, default="default", help="Name of experiment.")
 
     # For step 1
-    parser.add_argument("--num-bodies", type=int, default=10, help="Number of total different bodies you want to use in the experiments.")
+    parser.add_argument("--num-bodies", type=int, default=20, help="Number of total different bodies you want to use in the experiments.")
     parser.add_argument("--seed-bodies", type=int, default=0, help="Seed for generating random bodies.")
     parser.add_argument("--body-variation-range", type=int, default=10, help="A percentage, maximum variation range. If set to 10, all variables will randomly scale from 0.9 to 1.1 uniformly.")
     parser.add_argument("--dataset-exist-ok", type=int, default=1, help="Overwrite bodies without warning.")
@@ -17,7 +17,8 @@ def get_args():
     # For step 2
     parser.add_argument("--vacc", action="store_true", help="If run program on vacc, use this flag to speed up.")
     parser.add_argument("--in-parallel", action="store_true", help="We can start all experiments in parallel and it will need a huge amount of resources. For testing, you can start experiment in series, one by one.")
-    parser.add_argument("--n-timesteps", type=float, default=1e7, help="Setting training timesteps for both multi-body and single-body.")
+    parser.add_argument("-n", "--n-timesteps", type=float, default=1e7, help="Setting training timesteps for both multi-body and single-body.")
+    parser.add_argument("-p", "--partition", type=str, default="bluemoon", help="Setting the partition on VACC that used to run the experiments.")
     return parser.parse_args()
 
 def get_args_train():

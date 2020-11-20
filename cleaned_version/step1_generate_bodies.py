@@ -44,7 +44,7 @@ def generate_bodies():
         param_list.append(f"params/{i}.yaml")
 
     # 4. Write config file
-    env_id = f"{args.template_body}_{args.body_variation_range}-v{args.seed_bodies}"
+    env_id = f"{args.template_body}_{args.num_bodies}_{args.body_variation_range}-v{args.seed_bodies}"
     config_yaml = {
         "dataset_name": args.template_body,
         "bodies": {
@@ -84,7 +84,7 @@ def significant_digits(var, num_digit):
 
 
 def create_folder():
-    dataset_path = f"dataset/{args.template_body}_{args.body_variation_range}-v{args.seed_bodies}"
+    dataset_path = f"dataset/{args.template_body}_{args.num_bodies}_{args.body_variation_range}-v{args.seed_bodies}"
     if os.path.exists(dataset_path):
         if args.dataset_exist_ok:
             output(f"Overwrite dataset {args.template_body}.", 0)
