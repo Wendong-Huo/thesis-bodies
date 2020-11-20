@@ -64,7 +64,6 @@ class Walker2dEnv(WalkerBaseBulletEnv):
         self.camera = MyCamera(self)
 
     def reset(self):
-        logger.record(f"debug/d{self.robot.name}_body_x", self.robot.body_xyz[0])
         self.robot.step_num = 0
         obs = super().reset()
         return obs
@@ -77,8 +76,11 @@ class Walker2dEnv(WalkerBaseBulletEnv):
         obs, r, done, info = self.super_step(a)
         if self.robot.step_num > self.max_episode_steps:
             done = True
-        if done and self.is_eval:
-            logger.record(f"eval/e{self.robot.name}_body_x", self.robot.body_xyz[0])
+        if done:
+            if self.is_eval:
+                logger.record(f"eval/e{self.robot.name}_body_x", self.robot.body_xyz[0])
+            else:
+                logger.record(f"debug/d{self.robot.name}_body_x", self.robot.body_xyz[0])
         if self.isRender:
             self.camera.move_and_look_at(0,0,0,self.robot.body_xyz[0], self.robot.body_xyz[1], 1)
         return obs, r, done, info
