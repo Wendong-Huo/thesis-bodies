@@ -34,7 +34,8 @@ def read_template(filename):
 def read_yaml(filename):
     output(f"Reading yaml {filename}", 2)
     with open(filename, "r") as f:
-        return yaml.load(f, Loader=yaml.SafeLoader)
+        return yaml.load(f, Loader=yaml.Loader)
+        # return yaml.load(f, Loader=yaml.SafeLoader)
 
 
 def write_yaml(filename, data):

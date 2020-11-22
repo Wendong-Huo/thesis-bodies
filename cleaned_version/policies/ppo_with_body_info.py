@@ -1,17 +1,26 @@
+import time
 from typing import Callable, List, Optional, Tuple, Union
 import pathlib, io
 
 import gym
+from gym import spaces
 import numpy as np
 import torch as th
+from torch.nn import functional as F
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.buffers import RolloutBuffer
-from stable_baselines3.common.utils import get_schedule_fn
 from stable_baselines3.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback
+from stable_baselines3.common.utils import safe_mean
+from stable_baselines3.common import logger
+from stable_baselines3.common.utils import explained_variance
+from .ppo_without_body_info import PPO_without_body_info
+from utils import output
+from arguments import get_args_train
+args = get_args_train()
 
 def expand_space(space, env, num):
     if env is None:
@@ -23,8 +32,9 @@ def expand_space(space, env, num):
     expaned_space = gym.spaces.Box(low, high, dtype=observation.dtype)
     return expaned_space
 
-class PPO_with_body_info(PPO):
+class PPO_with_body_info(PPO_without_body_info):
     def _setup_model(self) -> None:
+        """with body info"""
         self.n_param = None
         # read params from the robot once
         robot_param = self.env.envs[0].robot.param
@@ -34,6 +44,7 @@ class PPO_with_body_info(PPO):
         self.param = np.array(self.param).reshape([1,-1])
         # expand obs space
         self.observation_space = expand_space(self.observation_space, self.env, len(robot_param))
+
         super()._setup_model()
 
     def collect_rollouts(
@@ -62,6 +73,7 @@ class PPO_with_body_info(PPO):
         callback.on_rollout_start()
 
         while n_steps < n_rollout_steps:
+            """with body info"""
             self._last_expanded_obs = np.concatenate([self._last_obs, self.n_param], axis=1)
             if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
                 # Sample a new noise matrix
@@ -127,6 +139,7 @@ class PPO_with_body_info(PPO):
         :return: the model's action and the next state
             (used in recurrent policies)
         """
+        """with body info"""
         expanded_observation = np.concatenate([observation, self.param], axis=1)
         return self.policy.predict(expanded_observation, state, mask, deterministic)
 
@@ -139,7 +152,7 @@ class PPO_with_body_info(PPO):
         **kwargs,
     ) -> "BaseAlgorithm":
         """
-        Load the model from a zip-file
+        Load the model from a zip-file (modify to avoid confliction)
 
         :param path: path to the file (or a file-like) where to
             load the agent from

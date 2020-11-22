@@ -95,7 +95,18 @@ def start_experiment_single(script):
 
 def start_experiment_multi(script):
     percentage_train = 0.8
-    for i in range(10): # no matter how many bodies are there in the dataset, we only do random experiment 10 times.
+    num_exp = 10
+    num_seed = 2
+    exp_path = f"outputs/{g_exp_name}"
+    os.makedirs(exp_path, exist_ok=True)
+    data = {
+        "num-exp": num_exp,
+        "num-seed": num_seed,
+        "num-bodies": g_total_bodies,
+        "args": args,
+    }
+    write_yaml(f"{exp_path}/config.yml", data)
+    for i in range(num_exp): # no matter how many bodies are there in the dataset, we only do random experiment 10 times.
         all_bodies = np.arange(0,g_total_bodies)
         np.random.shuffle(all_bodies)
         train_bodies = all_bodies[:int(percentage_train*g_total_bodies)]
@@ -103,11 +114,10 @@ def start_experiment_multi(script):
         
         output(f"train_bodies {train_bodies}", 2)
         output(f"test_bodies {test_bodies}", 2)
-        exp_path = f"outputs/{g_exp_name}"
-        os.makedirs(exp_path, exist_ok=True)
         data = {
             "train_bodies": train_bodies.tolist(),
-            "test_bodies": test_bodies.tolist(),
+            "not_train_bodies": test_bodies.tolist(),
+            "test_bodies": all_bodies.tolist(),
         }
         write_yaml(f"{exp_path}/exp_multi_{i}_bodies.yml", data)
 
@@ -117,7 +127,7 @@ def start_experiment_multi(script):
         str_test_bodies = np.array2string(all_bodies, separator=',')[1:-1]
         str_test_bodies = str_test_bodies.replace(' ', '')
 
-        for j_seed in range(2):
+        for j_seed in range(num_seed):
             output(f"Starting {script} with exp-idx {i} seed {j_seed}", 1)
             if args.vacc:
                 bash = "sbatch"

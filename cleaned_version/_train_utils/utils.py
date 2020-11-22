@@ -8,6 +8,7 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 
 from policies.ppo_with_body_info import PPO_with_body_info
+from policies.ppo_without_body_info import PPO_without_body_info
 
 ALGOS = {
     # "a2c": A2C,
@@ -16,7 +17,7 @@ ALGOS = {
     # "her": HER,
     # "sac": SAC,
     # "td3": TD3,
-    "ppo": PPO,
+    "ppo": PPO_without_body_info,
     "ppo_w_body": PPO_with_body_info
 }
 

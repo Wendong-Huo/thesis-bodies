@@ -66,3 +66,34 @@
     * walker2d_20_10-v0 started on short
     
     * walker2d_30_20-v0 started on bluemoon
+
+    * Now the replay buffer size is too big. The learning is super slow. Shouldn't replay buffer size change according to the performance?
+
+    * Apply a simple strategy: when reward<1000, use small buf size to speedup learning. when reward>1000, use large buf size to stable learned.
+    
+    * Start Experiment: walker2d_20_10-v0 on partition bluemoon (canceled); walker2d_10_10-v1 on partition short (finished).
+
+    * Use `proxy_uvm.sh` start a proxy, and use Firefox to access Web inside UVM.
+
+    * Start Experiment: walker2d_20_10-v1, walker2d_20_10-v2, walker2d_100_10-v0, walker2d_100_10-v1, walker2d_100_30-v0 on partition ib.
+
+    * After look at the learning curve, give a reasonable max_step for training. maybe 3e6 (10_10 indicates that) or 5e6 (more body or high variation need more steps?).
+
+    * Planning experiments for two plots, y-axis is the distance, x-axis is the following: 
+
+        1. with variation = 10%, num-bodies = [10, 20, 50, 100]
+
+        2. with num-bodies = 20, variation = [10%, 20%, 50%, 90%]
+
+        * commands:
+
+        ```bash
+        python main.py --vacc -p ib --num-bodies=10 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=50 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=100 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=20 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=50 --seed-bodies=10 --no-single --n-timesteps=5e6
+        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=90 --seed-bodies=10 --no-single --n-timesteps=5e6
+        ```

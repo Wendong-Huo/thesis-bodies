@@ -1,5 +1,7 @@
 # Author: Sida Liu, 2020
-
+#   Starting experiments
+#
+# for all available arguments, refer to arguments.py
 from arguments import get_args
 import step1_generate_bodies
 import step2_train_on_one_body

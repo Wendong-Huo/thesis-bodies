@@ -55,6 +55,15 @@ def get_args_train():
     parser.add_argument("--with-bodyinfo", action="store_true", default=False, help="Train with body infomation, which means the training algorithms will concatenate params to observation.")
     return parser.parse_args()
 
+def get_args_report():
+    """arguments for _report.py"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--folder", type=str, default="vacc_download/walker2d_10_10-v1", help="Path to stored experiment data.")
+    # parser.add_argument("--folder", type=str, default="outputs/walker2d_10_10-v0", help="Path to stored experiment data.")
+
+    parser.add_argument("--figure-1", action="store_true", default=True, help="Figure 1")
+    return parser.parse_args()
+
 
 # args = get_args()
 # args_train = get_args_train()
