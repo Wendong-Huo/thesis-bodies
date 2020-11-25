@@ -88,12 +88,58 @@
         * commands:
 
         ```bash
-        python main.py --vacc -p ib --num-bodies=10 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=50 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=100 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=20 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=50 --seed-bodies=10 --no-single --n-timesteps=5e6
-        python main.py --vacc -p ib --num-bodies=20 --body-variation-range=90 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=10 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=20 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=50 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=100 --body-variation-range=10 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=20 --body-variation-range=20 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=20 --body-variation-range=50 --seed-bodies=10 --no-single --n-timesteps=5e6
+            python main.py --vacc -p ib --num-bodies=20 --body-variation-range=90 --seed-bodies=10 --no-single --n-timesteps=5e6
         ```
+
+    * Oh, don't use partition `ib`, that stands for Infinity Bendwidth.
+    
+    * Not significant:
+
+        * body: 10, variation: 10% => 33.7 +- 4.4 vs 31.7 +- 2.2 (body:i3_s0,i7_s0,i7_s1 is missing; nobody:i1_s0, i1_s1, i2_s0, i3_s1, i4_s1, i6_s0, i8_s1 is missing.)
+
+        * body: 20, variation: 10% => 35.0 +- 4.2 vs 33.4 +- 4.2
+
+        * body: 50, variation: 10% => 26.2 +- 5.1 vs 28.1 +- 6.0
+
+        * body: 100, variation: 10% => 9.6 +- 10.2 vs 8.5 +- 9.3 (stop earlier at 4e6, not 5e6)
+
+        * body: 20, variation: 20% => 33.0 +- 6.9 vs 28.8 +- 5.0
+
+        * body: 20, variation: 50% => 7.6 +- 6.1 vs 8.8 +- 6.9
+
+        * body: 20, variation: 90% => 1.5 +- 0.8 vs 1.6 +- 1.0
+
+    * Plot is in folder `_report_utils`. At least we now know blindly adding body information doesn't help.
+
+    * Korea animation paper uses [128,128,128] network. so let's try it. Start [20, 30%], [20, 40%], [20, 50%] experiment on partition short.
+
+    * 3-layer network doesn't help.
+    
+
+6. Test again more carefully.
+
+    * First, send 20% 20, with 30 replicates, with 5 unique seeds. (total tasks = 2 x 30 x 5 = 300.) `walker2d_20_20-v40`
+
+    * Second, the rest 4500 tasks.
+
+    * 20_20 is still not significant:
+    
+    ```
+    (should have 600, but some of them stopped accidentally.)
+    body group has 556 non-zero value.
+    nobody group has 568 non-zero value.
+    with body) mean: 23.78560829012514, std: 7.030475298774249
+    without body) mean: 23.0331832302708, std: 7.904171451290839
+    ```
+
+7. Argument
+
+    * Changes in parameter and topology. People usually think topology is more important than parameter changes. But if we think about this https://sustainablefisheries-uw.org/wp-content/uploads/2018/06/ShingletonFigure-1.jpg, we will realize parameter is important.
+
+    

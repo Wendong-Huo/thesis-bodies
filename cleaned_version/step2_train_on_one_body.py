@@ -16,7 +16,7 @@ g_total_bodies = 0
 
 def train(env_id, dataset_path):
     global g_env_id, g_exp_name, g_total_bodies
-    np.random.seed(0)
+    np.random.seed(args.seed_bodies)
     g_env_id = env_id
     g_exp_name = f"{env_id}"
     if args.exp_name != "":
@@ -75,6 +75,7 @@ def clean_outputs_folder():
         os.makedirs(folder)
 
 def start_experiment_single(script):
+    assert False, "Single is not tested after modification."
     for i in range(g_total_bodies):
         for j_seed in range(2):
             output(f"Starting {script} with body-idx {i} seed {j_seed}", 1)
@@ -95,54 +96,69 @@ def start_experiment_single(script):
 
 def start_experiment_multi(script):
     percentage_train = 0.8
-    num_exp = 10
-    num_seed = 2
+    num_exp = 30 # suggested by Josh
     exp_path = f"outputs/{g_exp_name}"
     os.makedirs(exp_path, exist_ok=True)
     data = {
         "num-exp": num_exp,
-        "num-seed": num_seed,
         "num-bodies": g_total_bodies,
         "args": args,
     }
     write_yaml(f"{exp_path}/config.yml", data)
-    for i in range(num_exp): # no matter how many bodies are there in the dataset, we only do random experiment 10 times.
-        all_bodies = np.arange(0,g_total_bodies)
-        np.random.shuffle(all_bodies)
-        train_bodies = all_bodies[:int(percentage_train*g_total_bodies)]
-        test_bodies = all_bodies[int(percentage_train*g_total_bodies):]
-        
+    repeated_train_bodies = {}
+    for i in range(num_exp): # no matter how many bodies are there in the dataset, we only do random experiment 30 times.
+        train_bodies, test_bodies = [], []
+        for j in range(100): # retry 100 times if we have chose the same training bodies before. probably will happen when num-bodies is small.
+            all_bodies = np.arange(0,g_total_bodies)
+            np.random.shuffle(all_bodies)
+            train_bodies = all_bodies[:int(percentage_train*g_total_bodies)]
+            test_bodies = all_bodies[int(percentage_train*g_total_bodies):]
+            
+            train_bodies = np.sort(train_bodies)
+            test_bodies = np.sort(test_bodies)
+            _t = tuple(train_bodies)
+            if _t not in repeated_train_bodies:
+                repeated_train_bodies[tuple(train_bodies)] = 1
+                break
+        if j>=100:
+            abort("Can't generate enough unique replicates. Maybe there are not enough bodies in the dataset.")
+
         output(f"train_bodies {train_bodies}", 2)
         output(f"test_bodies {test_bodies}", 2)
+        train_seed = args.num_bodies*100000 + args.body_variation_range*10000 + args.seed_bodies* 100 + i # Unique seeds suggested by Sam
         data = {
             "train_bodies": train_bodies.tolist(),
             "not_train_bodies": test_bodies.tolist(),
-            "test_bodies": all_bodies.tolist(),
+            # "test_bodies": all_bodies.tolist(),
+            "test_bodies": test_bodies.tolist(), # only evaluate on test set to save training time, so things can be done on partition short.
+            "train_seed": train_seed,
         }
         write_yaml(f"{exp_path}/exp_multi_{i}_bodies.yml", data)
 
         str_train_bodies = np.array2string(train_bodies, separator=',')[1:-1]
-        str_train_bodies = str_train_bodies.replace(' ', '')
+        str_train_bodies = str_train_bodies.replace(' ', '').replace('\n','')
+        output(f"str_train_bodies: {str_train_bodies}", 2)
 
-        str_test_bodies = np.array2string(all_bodies, separator=',')[1:-1]
-        str_test_bodies = str_test_bodies.replace(' ', '')
+        str_test_bodies = np.array2string(test_bodies, separator=',')[1:-1] # only evaluate on test set to save training time, so things can be done on partition short.
+        str_test_bodies = str_test_bodies.replace(' ', '').replace('\n','')
+        output(f"str_test_bodies: {str_test_bodies}", 2)
+        # calculate a propriate seed smaller than 2**32-1
 
-        for j_seed in range(num_seed):
-            output(f"Starting {script} with exp-idx {i} seed {j_seed}", 1)
-            if args.vacc:
-                bash = "sbatch"
-            else:
-                bash = "bash"        
-            cmd_w = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(j_seed), "--with-bodyinfo", f"{args.n_timesteps}"]
-            cmd_wo = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(j_seed), "", f"{args.n_timesteps}"]
-            output(" ".join(cmd_w),2)
-            output(" ".join(cmd_wo),2)
-            if args.in_parallel:
-                Popen(cmd_w)
-                Popen(cmd_wo)
-            else:
-                call(cmd_w)
-                call(cmd_wo)
+        output(f"Starting {script} with exp-idx {i} seed {train_seed}", 1)
+        if args.vacc:
+            bash = "sbatch"
+        else:
+            bash = "bash"        
+        cmd_w = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(train_seed), "--with-bodyinfo", f"{args.n_timesteps}"]
+        cmd_wo = [bash, script, g_exp_name, str(i), str_train_bodies, str_test_bodies, str(train_seed), "", f"{args.n_timesteps}"]
+        output(" ".join(cmd_w),2)
+        output(" ".join(cmd_wo),2)
+        if args.in_parallel:
+            Popen(cmd_w)
+            Popen(cmd_wo)
+        else:
+            call(cmd_w)
+            call(cmd_wo)
 
 if __name__ == "__main__":
     train("walker2d_10-v0", "dataset/walker2d_10-v0")

@@ -9,8 +9,12 @@ args = get_args()
 
 
 def generate_bodies():
-    random.seed(args.seed_bodies)
-    output(f"Start generating bodies {args.num_bodies}", 1)
+    assert args.seed_bodies<100, "The way we combining real seeds only allow seed_bodies to be smaller than 100."
+    assert args.body_variation_range%10==0, "The way we combining real seeds only allow body_variation_range to be multiplication of 10, e.g. 10, 20, ... 90."
+    assert args.num_bodies%10==0, "The way we combining real seeds only allow num_bodies to be multiplication of 10, e.g. 10, 20, 30 ..."
+    real_seed = args.num_bodies*1000 + args.body_variation_range * 100 + args.seed_bodies # if I only apply seed_bodies, the first 20 of walker2d_30_10-v0 will be the same of walker2d_20_10-v0.
+    random.seed(real_seed)
+    output(f"Start generating bodies {args.num_bodies} with seed {real_seed}", 1)
 
     # 1. Check templates
     template_files = check_templates()
@@ -47,6 +51,7 @@ def generate_bodies():
     env_id = f"{args.template_body}_{args.num_bodies}_{args.body_variation_range}-v{args.seed_bodies}"
     config_yaml = {
         "dataset_name": args.template_body,
+        "real_seed": real_seed,
         "bodies": {
             "total": len(file_list),
             "files": file_list,

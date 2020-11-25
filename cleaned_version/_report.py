@@ -11,22 +11,24 @@ from utils import output
 args = get_args_report()
 
 
-def figure_1(force_reload=True):
+def figure_1():
     fname = f"_report_cache/figure_1.pickle"
-    if os.path.exists(fname) and not force_reload:
+    if os.path.exists(fname) and not args.force_reload:
         with open(fname, "rb") as f:
             (data_body, data_nobody) = pickle.load(f)
     else:
-        data_body = load_multi_data(args.folder, bodyinfo=True, only_see_not_trained=True, max_measured_steps=3e6)
-        data_nobody = load_multi_data(args.folder, bodyinfo=False, only_see_not_trained=True, max_measured_steps=3e6)
+        data_body = load_multi_data(args.folder, bodyinfo=True, only_see_not_trained=True, max_measured_steps=args.n_timesteps)
+        data_nobody = load_multi_data(args.folder, bodyinfo=False, only_see_not_trained=True, max_measured_steps=args.n_timesteps)
         with open(fname, "wb") as f:
             pickle.dump((data_body, data_nobody), f)
     
-    valid_value_idx_body = np.where( data_body>0 )
-    valid_value_idx_nobody = np.where( data_nobody>0 )
-    for i in range(len(valid_value_idx_body)):
-        assert np.array_equal(valid_value_idx_body[i], valid_value_idx_nobody[i])
-    output(f"{len(valid_value_idx_body[0])} non-zero value.",2)
+    valid_value_idx_body = np.where( data_body!=0 )
+    valid_value_idx_nobody = np.where( data_nobody!=0 )
+    # numbers might be different, because some tasks ended up not finished.
+    # for i in range(len(valid_value_idx_body)):
+    #     assert np.array_equal(valid_value_idx_body[i], valid_value_idx_nobody[i]), f"body {valid_value_idx_body[i]} nobody {valid_value_idx_nobody[i]}"
+    output(f"body group has {len(valid_value_idx_body[0])} non-zero value.",2)
+    output(f"nobody group has {len(valid_value_idx_nobody[0])} non-zero value.",2)
     mu = np.mean(data_body[valid_value_idx_body], keepdims=False)
     std = np.std(data_body[valid_value_idx_body], keepdims=False)
     output(f"with body) mean: {mu}, std: {std}", 2)
