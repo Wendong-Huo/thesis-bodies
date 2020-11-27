@@ -15,6 +15,7 @@ from stable_baselines3.common.vec_env.obs_dict_wrapper import ObsDictWrapper
 
 from arguments import get_args_train
 from utils import output, delete_key
+from callbacks.callbacks import DumpWeightsCallback
 
 from _train_utils.load_dataset import load_dataset
 from _train_utils.utils import ALGOS, linear_schedule, get_latest_run_id, create_env, SaveVecNormalizeCallback
@@ -162,6 +163,8 @@ def _train():
         eval_freq = hyperparams["n_steps"] * args.log_interval
 
         all_callbacks = []
+        dump_callback = DumpWeightsCallback()
+        all_callbacks.append(dump_callback)
         for i, _kwargs in enumerate(eval_env_kwargs):
             save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=params_path)
             eval_callback = EvalCallback(
@@ -187,6 +190,7 @@ def _train():
         saved_hyperparams = OrderedDict([(key, hyperparams[key]) for key in sorted(hyperparams.keys())])
 
         # Save hyperparams
+        # TODO: don't save some items and need to save same items.
         with open(os.path.join(params_path, "config.yml"), "w") as f:
             yaml.dump(saved_hyperparams, f)
 
@@ -194,6 +198,15 @@ def _train():
         with open(os.path.join(params_path, "args.yml"), "w") as f:
             ordered_args = OrderedDict([(key, vars(args)[key]) for key in sorted(vars(args).keys())])
             yaml.dump(ordered_args, f)
+
+    # Make a joke! To see how much the weights change during training.
+    if True:
+        d = model.policy.mlp_extractor.policy_net._modules["0"].weight.data
+        import imageio
+        _weights = imageio.imread("weights/39x256.png")
+        _weights = (_weights[:,:,0] / 256.0 * 0.32 - 0.16).astype(np.float32)
+        print(model.policy.mlp_extractor.policy_net._modules["0"].weight.data.shape)
+        model.policy.mlp_extractor.policy_net._modules["0"].weight.data = th.from_numpy(_weights)
 
     # Start training
     if True:

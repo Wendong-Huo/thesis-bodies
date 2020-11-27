@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition $partition
-#SBATCH --mem 24G
+#SBATCH --mem $memory
 #SBATCH -c 1
 #SBATCH --output $cwd/out.slurm/%j
 

@@ -70,13 +70,14 @@ class PPO_without_body_info(PPO):
 
         while self.num_timesteps < total_timesteps:
             """Replay buffer size"""
+            ### No need to use larger buffer, because that doesn't solve the catastrophic forgetting problem.
+            ### For this experiment, just count the best score is enough.
             # Determine buffer size using safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])
             # I want it to be stable when learned walking.
-            ep_rew_mean = safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])
-            if ep_rew_mean>1000:
-                self.use_small_buffer = False
-            else:
-                self.use_small_buffer = True
+            # Start with small buffer, once 
+            # ep_len_mean = safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer])
+            # if ep_len_mean>=1000:
+            #     self.use_small_buffer = False
 
             if not args.single and self.use_small_buffer:
                 output(f"Collect rollouts for {self.n_steps//self.env.num_envs} steps.", 2)

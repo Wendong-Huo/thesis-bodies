@@ -19,6 +19,7 @@ def get_args():
     parser.add_argument("--in-parallel", action="store_true", help="We can start all experiments in parallel and it will need a huge amount of resources. For testing, you can start experiment in series, one by one.")
     parser.add_argument("-n", "--n-timesteps", type=float, default=5e6, help="Setting training timesteps for both multi-body and single-body.")
     parser.add_argument("-p", "--partition", type=str, default="short", help="Setting the partition on VACC that used to run the experiments.")
+    parser.add_argument("-m", "--memory", type=str, default="6G", help="Setting the memory needed on VACC that used to run the experiments.")
     parser.add_argument("--no-single", action="store_true", default=True, help="Skip the single-body training.")
     parser.add_argument("--no-multi", action="store_true", help="Skip the multi-body training.")
     return parser.parse_args()
@@ -31,7 +32,7 @@ def get_args_train():
 
     parser.add_argument("--hyperparam", type=str, default="default", help="Which hyper parameter set is used.")
     parser.add_argument("--seed", type=int, default=0, help="Training seed.")
-    parser.add_argument("--dataset", type=str, default="dataset/walker2d_10-v0", help="Path of dataset.")
+    parser.add_argument("--dataset", type=str, default="dataset/walker2d_10_10-v0", help="Path of dataset.")
     
     # Train on one body or multiple bodies
     parser.add_argument("--single", action="store_true", default=False, help="Train using one single body.")
@@ -65,6 +66,12 @@ def get_args_report():
     parser.add_argument("--n-timesteps", type=float, default=1e6, help="How long an episode do we measure.")
     parser.add_argument("--force-reload", action="store_true", help="Don't use pickle cache.")
     
+    return parser.parse_args()
+
+def get_args_eval():
+    """arguments for _eval.py"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--folder", type=str, default="vacc_download/walker2d_10_10-v1", help="Path to stored experiment data.")
     return parser.parse_args()
 
 

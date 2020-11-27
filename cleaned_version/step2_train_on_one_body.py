@@ -46,6 +46,13 @@ def train(env_id, dataset_path):
 
 
 def create_scripts(mode="single"):
+    if False: # dynamically adjust the memory allocation
+        memory_needed = {
+            10: "2G",
+            20: "4G",
+            50: "5G",
+            100: "6G",
+        }
     template_filename = f"script-templates/submit_{mode}.sh"
     script_template = read_template(template_filename)
 
@@ -53,6 +60,7 @@ def create_scripts(mode="single"):
     data = {
         "cwd": os.path.abspath(os.getcwd()),
         "partition": args.partition,
+        "memory": args.memory,
         "dataset": f"dataset/{g_env_id}",
     }
     write_script(filename, data, script_template)
