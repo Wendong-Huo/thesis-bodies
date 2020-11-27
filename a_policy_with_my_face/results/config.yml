@@ -1,0 +1,17 @@
+args: !!python/object:argparse.Namespace
+  body_variation_range: 10
+  dataset_exist_ok: 1
+  exp_name: ''
+  in_parallel: false
+  memory: 6G
+  n_timesteps: 5000000.0
+  no_multi: false
+  no_single: true
+  num_bodies: 20
+  partition: short
+  seed_bodies: 0
+  template_body: walker2d
+  vacc: false
+  verbose_level: 2
+num-bodies: 20
+num-exp: 30

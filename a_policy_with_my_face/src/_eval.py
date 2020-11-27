@@ -60,9 +60,9 @@ def eval_model(seed=0):
 
 if __name__ == "__main__":
     args.dataset = "dataset/walker2d_20_10-v0"
-    args.conf_yml = "outputs/walker2d_20_10-v0/exp_multi_0_bodies.yml"
-    args.stats_path = "outputs/walker2d_20_10-v0/logs/multi_body/i0_s1100000/walker2d_20_10-v0_23/walker2d_20_10-v0"
-    args.model_zip = "outputs/walker2d_20_10-v0/logs/multi_body/i0_s1100000/walker2d_20_10-v0_23/best_model.zip"
+    args.conf_yml = "../results/exp_multi_0_bodies.yml"
+    args.stats_path = "../results/logs/multi_body/i0_s2100000/walker2d_20_10-v0_1/walker2d_20_10-v0"
+    args.model_zip = "../results/logs/multi_body/i0_s2100000/walker2d_20_10-v0_1/best_model.zip"
     args.n_timesteps = 300
     args.render = True
 
