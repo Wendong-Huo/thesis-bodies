@@ -16,7 +16,7 @@
                 "--single",
                 "--single-idx=19",
                 "--seed=1",
-                "--with-bodyinfo",
+                // "--with-bodyinfo",
                 "--dataset=dataset/walker2d_20_10-v0"
             ],
             "console": "integratedTerminal",

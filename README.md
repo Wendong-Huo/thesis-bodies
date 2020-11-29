@@ -138,6 +138,37 @@
     without body) mean: 23.0331832302708, std: 7.904171451290839
     ```
 
+7. Open up the neural network
+
+    * input space with body information:
+
+        * in total: 39
+
+        * so called "more"
+        
+            * 0: relative height, usually negative, z - self.initial_z
+
+            * 1-2: angle to target, always zero for Walker2D, sin(angle_to_target), cos(angle_to_target)
+
+            * 3-5: speed of the "torso" (rotate back in yaw, which doesn't change anything),  vx, vy, vz, (vy==0 for Walker2D)
+
+            * 6: Roll of body, always zero for Walker2D.
+
+            * 7: Pitch of body, facing up or facing down.
+
+        * 8-20: there are 6 joints in Walker2D
+            
+            * 8: the position of the first joint, scaled to -1, 1, with a little overshoot.
+            
+            * 9: change in position of the first joint. (however not in the same scale with position.)
+
+            * 10-20: other joints.
+        
+        * 21-22: feet contact. 0 for no, 1 for yes. two feet.
+
+        * 23-39: body params from our param file.
+
+
 7. Argument
 
     * Changes in parameter and topology. People usually think topology is more important than parameter changes. But if we think about this https://sustainablefisheries-uw.org/wp-content/uploads/2018/06/ShingletonFigure-1.jpg, we will realize parameter is important.

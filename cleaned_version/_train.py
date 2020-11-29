@@ -205,6 +205,8 @@ def _train():
         import imageio
         _weights = imageio.imread("weights/39x256.png")
         _weights = (_weights[:,:,0] / 256.0 * 0.32 - 0.16).astype(np.float32)
+        if args.single:
+            _weights = _weights[:,:22]
         print(model.policy.mlp_extractor.policy_net._modules["0"].weight.data.shape)
         model.policy.mlp_extractor.policy_net._modules["0"].weight.data = th.from_numpy(_weights)
 
