@@ -104,7 +104,7 @@ def start_experiment_single(script):
 
 def start_experiment_multi(script):
     percentage_train = 0.8
-    num_exp = 30 # suggested by Josh
+    num_exp = args.replicates
     exp_path = f"outputs/{g_exp_name}"
     os.makedirs(exp_path, exist_ok=True)
     data = {

@@ -15,7 +15,7 @@ from stable_baselines3.common.vec_env.obs_dict_wrapper import ObsDictWrapper
 
 from arguments import get_args_train
 from utils import output, delete_key
-from callbacks.callbacks import DumpWeightsCallback
+from callbacks.callbacks import DumpWeightsCallback, EvalCallback_with_bodyinfo
 
 from _train_utils.load_dataset import load_dataset
 from _train_utils.utils import ALGOS, linear_schedule, get_latest_run_id, create_env, SaveVecNormalizeCallback
@@ -161,13 +161,14 @@ def _train():
     if True:
         # Eval right before dumping the log:
         eval_freq = hyperparams["n_steps"] * args.log_interval
+        # eval_freq = 100 # only for debug
 
         all_callbacks = []
-        dump_callback = DumpWeightsCallback()
-        all_callbacks.append(dump_callback)
+        # dump_callback = DumpWeightsCallback()
+        # all_callbacks.append(dump_callback)
         for i, _kwargs in enumerate(eval_env_kwargs):
             save_vec_normalize = SaveVecNormalizeCallback(save_freq=1, save_path=params_path)
-            eval_callback = EvalCallback(
+            eval_callback = EvalCallback_with_bodyinfo(
                 create_env(1, env_id, eval_env_kwargs[i], seed=args.seed, normalize=True, normalize_kwargs=normalize_kwargs, eval_env=True),
                 callback_on_new_best=save_vec_normalize,
                 best_model_save_path=save_path,
@@ -200,13 +201,21 @@ def _train():
             yaml.dump(ordered_args, f)
 
     # Make a joke! To see how much the weights change during training.
-    if True:
+    if False:
         d = model.policy.mlp_extractor.policy_net._modules["0"].weight.data
         import imageio
         _weights = imageio.imread("weights/39x256.png")
         _weights = (_weights[:,:,0] / 256.0 * 0.32 - 0.16).astype(np.float32)
-        if args.single:
-            _weights = _weights[:,:22]
+        if "walker2d" in args.dataset:
+            if args.single or not args.with_bodyinfo:
+                _weights = _weights[:,:22]
+        elif "ant" in args.dataset:
+            if not args.with_bodyinfo:
+                _weights = _weights[:,:28]
+            else:
+                _weights = _weights[:,:35]
+
+
         print(model.policy.mlp_extractor.policy_net._modules["0"].weight.data.shape)
         model.policy.mlp_extractor.policy_net._modules["0"].weight.data = th.from_numpy(_weights)
 

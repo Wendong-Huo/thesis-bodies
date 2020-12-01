@@ -13,7 +13,7 @@ def get_args():
     parser.add_argument("--seed-bodies", type=int, default=0, help="Seed for generating random bodies, working together with num-bodies and body-variation-range.")
     parser.add_argument("--body-variation-range", type=int, default=10, help="A percentage, maximum variation range. If set to 10, all variables will randomly scale from 0.9 to 1.1 uniformly.")
     parser.add_argument("--dataset-exist-ok", type=int, default=1, help="Overwrite bodies without warning.")
-    parser.add_argument("--template-body", type=str, default="walker2d", help="The template file used for generating new bodies. Filename in the `body-templates` folder.")
+    parser.add_argument("--template-body", type=str, default="ant", help="The template file used for generating new bodies. Filename in the `body-templates` folder.")
     # For step 2
     parser.add_argument("--vacc", action="store_true", help="If run program on vacc, use this flag to speed up.")
     parser.add_argument("--in-parallel", action="store_true", help="We can start all experiments in parallel and it will need a huge amount of resources. For testing, you can start experiment in series, one by one.")
@@ -22,6 +22,7 @@ def get_args():
     parser.add_argument("-m", "--memory", type=str, default="6G", help="Setting the memory needed on VACC that used to run the experiments.")
     parser.add_argument("--no-single", action="store_true", default=True, help="Skip the single-body training.")
     parser.add_argument("--no-multi", action="store_true", help="Skip the multi-body training.")
+    parser.add_argument("--replicates", type=int, default=10, help="Number of different replicates. Randomly draw training set from dataset and use a unique random seed.")
     return parser.parse_args()
 
 def get_args_train():
@@ -32,7 +33,7 @@ def get_args_train():
 
     parser.add_argument("--hyperparam", type=str, default="default", help="Which hyper parameter set is used.")
     parser.add_argument("--seed", type=int, default=0, help="Training seed.")
-    parser.add_argument("--dataset", type=str, default="dataset/walker2d_10_10-v0", help="Path of dataset.")
+    parser.add_argument("--dataset", type=str, default="dataset/ant_20_10-v0", help="Path of dataset.")
     
     # Train on one body or multiple bodies
     parser.add_argument("--single", action="store_true", default=False, help="Train using one single body.")
@@ -72,6 +73,9 @@ def get_args_eval():
     """arguments for _eval.py"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", type=str, default="vacc_download/walker2d_10_10-v1", help="Path to stored experiment data.")
+    parser.add_argument("--body-id", type=int, default=-1)
+    parser.add_argument("--with-bodyinfo", action="store_true", help="Using bodyinfo or not")
+    
     return parser.parse_args()
 
 

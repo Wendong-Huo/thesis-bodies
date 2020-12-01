@@ -1,14 +1,24 @@
 import os
 import shutil
 import random
-
+import math
 from arguments import get_args
 from utils import output, abort, read_template, read_yaml, write_xml, write_yaml
 
 args = get_args()
 
-
 def generate_bodies():
+    if args.template_body=="walker2d":
+        return generate_bodies_walker2d()
+    elif args.template_body=="ant":
+        return generate_bodies_walker2d()
+    else:
+        assert "Not implemented"
+
+def generate_bodies_ant():
+    assert False, "Not implemented"
+
+def generate_bodies_walker2d():
     assert args.seed_bodies<100, "The way we combining real seeds only allow seed_bodies to be smaller than 100."
     assert args.body_variation_range%10==0, "The way we combining real seeds only allow body_variation_range to be multiplication of 10, e.g. 10, 20, ... 90."
     assert args.num_bodies%10==0, "The way we combining real seeds only allow num_bodies to be multiplication of 10, e.g. 10, 20, 30 ..."
@@ -23,21 +33,34 @@ def generate_bodies():
     dataset_path = create_folder()
 
     # 3. Generate variations and write body, param files
+    scale_factor = 2.0
     body_xml = read_template(template_files[0])
     body_yaml = read_yaml(template_files[1])
     file_list, param_list = [], []
     for i in range(args.num_bodies):
-        data = {}
-        for key in body_yaml['variable']:
-            data[key] = body_yaml['variable'][key] * ((random.random() * 2 - 1) * args.body_variation_range / 100 + 1.0)
-            data[key] = significant_digits(data[key], 4)
-        for key in body_yaml['fixed']:
-            data[key] = body_yaml['fixed'][key]
-        for key in body_yaml['combination']:
-            data[key] = 0
-            for key1 in body_yaml['combination'][key]:
-                data[key] += data[key1]
-            data[key] = significant_digits(data[key], 4)
+        while True:
+            data = {}
+            for key in body_yaml['variable']:
+                # data[key] = body_yaml['variable'][key] * ((random.random() * 2 - 1) * args.body_variation_range / 100 + 1.0)
+                scale = scale_factor**((random.random()*2-1)* args.body_variation_range / 100)
+                data[key] = body_yaml['variable'][key] * scale
+                data[key] = significant_digits(data[key], 4)
+            for key in body_yaml['fixed']:
+                data[key] = body_yaml['fixed'][key]
+            for key in body_yaml['combination']:
+                data[key] = 0
+                for key1 in body_yaml['combination'][key]:
+                    data[key] += data[key1]
+                data[key] = significant_digits(data[key], 4)
+            
+            if args.template_body=="ant": # Specific Constraint for Ant
+                if data["length_foot"] * math.sqrt(2) < data["size_torso"] * 2: # foot is shorter than torso, no possible to move due to Ant's alive_bonus()
+                    continue
+                if data["length_leg"] * math.sqrt(2) < data["size_torso"]: #leg is too short
+                    continue
+                if data["size_torso"] < data["weight_leg"] or data["size_torso"] < data["weight_foot"]: # torso is too small
+                    continue
+            break
         # Volume calculation
         for part in body_yaml['part']:
             data[f"volume_{part}"] = data[f"length_{part}"] * 3.14 * data[f"weight_{part}"] * data[f"weight_{part}"]

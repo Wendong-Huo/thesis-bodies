@@ -1,0 +1,11 @@
+part: [ "leg", "foot"]
+variable:
+  size_torso: 0.25
+  length_leg: 0.2
+  length_foot: 0.4
+  weight_leg: 0.08
+  weight_foot: 0.08
+fixed:
+  _initial_offset_z: 0.5
+combination:
+  _initial_z: ["size_torso", "_initial_offset_z"]

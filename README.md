@@ -140,7 +140,7 @@
 
 7. Open up the neural network
 
-    * input space with body information:
+    * Walker2D input space with body information:
 
         * in total: 39
 
@@ -167,7 +167,49 @@
         * 21-22: feet contact. 0 for no, 1 for yes. two feet.
 
         * 23-39: body params from our param file.
+    
+    * Ant input space with body information:
 
+        * in total: 35
+
+        * so called "more" (same as Walker2D, but not confined in 2D, so angle to target, vy, roll are not zero.
+
+        * 8-23: 8 joints in an Ant
+
+        * 24-27: 4 feet contact.
+
+        * 28-34: our params
+        
+
+8. Is the network not learning sufficiently fast on body infomation?
+
+    * invesitgate on walker2d_20_50-v10 on VACC (with body and without body)
+
+    * Starting ant_20_50-v0 experiments on VACC
+    
+    * One possible reason that there's no significant difference in Walker2D might be my modification of the env python file. I adjusted the power coefficient according to volume, so I leak the body info into the network without body info.
+
+    * Start testing ant_20_50-v0, ant_20_100-v0 formally on VACC short. Seems there will be difference (different thickness need different power).
+
+    * change variation range to log scale, so now we can have more than 100% variation. 
+
+    * Start testing ant_20_200-v0, ant_50_200-v0 on VACC bluemoon. Large body variation tend to cause difference.
+
+9. I found a fatal error! I didn't pass param into the neural network! Shame!
+
+    * I made the ppo with bodyinfo when I deal with single body training, however I forgot to change it to multi body version, so the training was actually using only the first body's parameters! Shame!
+
+    Now I am running ant_20_100 on both laptop and VACC short.
+
+    * No difference again!
+
+    * Trying to add another network module, to turn the body params into softmax info. But the weights are not learning. need debug.
+
+    * OK, the weights are updating by Torch. So the new module transfers the body params (7 numbers) into a probability of being in one of 7 categories. So the dimension doesn't change. (If do walker2d, need to change this.)
+
+    * Start ant_20_100 on VACC short. hope there's difference.
+
+    * We might modify _eval.py to see which category does the network assign to one set of body parameters.
 
 7. Argument
 

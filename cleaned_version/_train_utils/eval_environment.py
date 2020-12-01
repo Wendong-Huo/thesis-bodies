@@ -27,6 +27,7 @@ def get_saved_hyperparams(stats_path, norm_reward=False, test_mode=False):
     hyperparams = {}
     if not os.path.isdir(stats_path):
         stats_path = None
+        output(f"Not a valid path {stats_path}.",-1)
     else:
         config_file = os.path.join(stats_path, "config.yml")
         if os.path.isfile(config_file):

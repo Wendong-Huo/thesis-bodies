@@ -1,6 +1,7 @@
 import time
-from typing import Callable, List, Optional, Tuple, Union
-import pathlib, io
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+import pathlib
+import io
 
 import gym
 from gym import spaces
@@ -9,6 +10,8 @@ import torch as th
 from torch.nn import functional as F
 
 from stable_baselines3 import PPO
+from stable_baselines3.common.policies import ActorCriticPolicy
+
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.buffers import RolloutBuffer
@@ -20,7 +23,10 @@ from stable_baselines3.common.utils import explained_variance
 from .ppo_without_body_info import PPO_without_body_info
 from utils import output
 from arguments import get_args_train
+from .policy_with_bodyinfo import PolicyWithBodyInfo
+
 args = get_args_train()
+
 
 def expand_space(space, env, num):
     if env is None:
@@ -32,18 +38,75 @@ def expand_space(space, env, num):
     expaned_space = gym.spaces.Box(low, high, dtype=observation.dtype)
     return expaned_space
 
+
 class PPO_with_body_info(PPO_without_body_info):
+    def __init__(
+        self,
+        policy: Union[str, Type[ActorCriticPolicy]],
+        env: Union[GymEnv, str],
+        learning_rate: Union[float, Callable] = 3e-4,
+        n_steps: int = 2048,
+        batch_size: Optional[int] = 64,
+        n_epochs: int = 10,
+        gamma: float = 0.99,
+        gae_lambda: float = 0.95,
+        clip_range: float = 0.2,
+        clip_range_vf: Optional[float] = None,
+        ent_coef: float = 0.0,
+        vf_coef: float = 0.5,
+        max_grad_norm: float = 0.5,
+        use_sde: bool = False,
+        sde_sample_freq: int = -1,
+        target_kl: Optional[float] = None,
+        tensorboard_log: Optional[str] = None,
+        create_eval_env: bool = False,
+        policy_kwargs: Optional[Dict[str, Any]] = None,
+        verbose: int = 0,
+        seed: Optional[int] = None,
+        device: Union[th.device, str] = "auto",
+        _init_setup_model: bool = True,
+    ):
+        super().__init__(PolicyWithBodyInfo,
+                         env,
+                         learning_rate,
+                         n_steps,
+                         batch_size,
+                         n_epochs,
+                         gamma,
+                         gae_lambda,
+                         clip_range,
+                         clip_range_vf,
+                         ent_coef,
+                         vf_coef,
+                         max_grad_norm,
+                         use_sde,
+                         sde_sample_freq,
+                         target_kl,
+                         tensorboard_log,
+                         create_eval_env,
+                         policy_kwargs,
+                         verbose,
+                         seed,
+                         device,
+                         _init_setup_model)
+
     def _setup_model(self) -> None:
         """with body info"""
         self.n_param = None
+        robot_params = []
         # read params from the robot once
-        robot_param = self.env.envs[0].robot.param
-        self.param = []
-        for key in robot_param:
-            self.param.append(robot_param[key])
-        self.param = np.array(self.param).reshape([1,-1])
+        for i in range(self.env.num_envs):
+            robot_param = self.env.envs[i].robot.param
+            robot_params.append(robot_param)
+
+        self.param = np.zeros(shape=[self.env.num_envs, len(robot_params[0])], dtype=np.float32)
+        for i in range(self.env.num_envs):
+            j = 0
+            for key in robot_params[i]:
+                self.param[i, j] = robot_params[i][key]
+                j += 1
         # expand obs space
-        self.observation_space = expand_space(self.observation_space, self.env, len(robot_param))
+        self.observation_space = expand_space(self.observation_space, self.env, len(robot_params[0]))
 
         super()._setup_model()
 
@@ -63,7 +126,8 @@ class PPO_with_body_info(PPO_without_body_info):
         """
         assert self._last_obs is not None, "No previous observation was provided"
         if self.n_param is None:
-            self.n_param = np.broadcast_to(self.param, shape=[env.num_envs, self.param.shape[1]])
+            # self.n_param = np.broadcast_to(self.param, shape=[env.num_envs, self.param.shape[1]])
+            self.n_param = self.param
         n_steps = 0
         rollout_buffer.reset()
         # Sample new weights for the state dependent exploration
@@ -122,6 +186,11 @@ class PPO_with_body_info(PPO_without_body_info):
 
         return True
 
+    def predict_with_bodyinfo(self, observation, env, state, deterministic):
+        assert env.num_envs == 1
+        expanded_observation = np.concatenate([observation, np.array(list(env.envs[0].robot.param.values())).reshape(1, -1)], axis=1)
+        return self.policy.predict(expanded_observation, state, None, deterministic)
+
     def predict(
         self,
         observation: np.ndarray,
@@ -140,7 +209,29 @@ class PPO_with_body_info(PPO_without_body_info):
             (used in recurrent policies)
         """
         """with body info"""
-        expanded_observation = np.concatenate([observation, self.param], axis=1)
+        if False:
+            print("baseline")
+            a = self.param
+            a = a.flatten()
+            print("param:")
+            print(f"{a[0]:.03f} {a[1]:.03f} {a[2]:.03f} {a[3]:.03f} {a[4]:.03f} {a[5]:.03f} {a[6]:.03f}")
+            (a, _) = self.policy.predict(expanded_observation, state, mask, deterministic)
+            a = a.flatten()
+            print(f"{a[0]:.03f} {a[1]:.03f} {a[2]:.03f} {a[3]:.03f} {a[4]:.03f} {a[5]:.03f} {a[6]:.03f} {a[7]:.03f}")
+            print("probe zeros")
+            tmp_expanded_observation = np.concatenate([observation, np.zeros_like(self.param)], axis=1)
+            (a, _) = self.policy.predict(tmp_expanded_observation, state, mask, deterministic)
+            a = a.flatten()
+            print(f"{a[0]:.03f} {a[1]:.03f} {a[2]:.03f} {a[3]:.03f} {a[4]:.03f} {a[5]:.03f} {a[6]:.03f} {a[7]:.03f}")
+            print("probe ones")
+            tmp_expanded_observation = np.concatenate([observation, np.ones_like(self.param)], axis=1)
+            (a, _) = self.policy.predict(tmp_expanded_observation, state, mask, deterministic)
+            a = a.flatten()
+            print(f"{a[0]:.03f} {a[1]:.03f} {a[2]:.03f} {a[3]:.03f} {a[4]:.03f} {a[5]:.03f} {a[6]:.03f} {a[7]:.03f}")
+            print("")
+        else:
+            # expanded_observation = np.concatenate([observation, np.zeros_like(self.param)], axis=1)
+            expanded_observation = np.concatenate([observation, self.param], axis=1)
         return self.policy.predict(expanded_observation, state, mask, deterministic)
 
     @classmethod
