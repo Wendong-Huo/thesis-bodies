@@ -18,6 +18,7 @@ scripts/
 out.slurm/
 vacc_download/
 _report_cache/
+debug_version/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

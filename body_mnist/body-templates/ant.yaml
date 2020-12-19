@@ -1,0 +1,21 @@
+part: [ "leg", "foot"]
+classA:
+  _initial_z: 0.75
+  size_torso: 0.25
+  length_leg: 0.2
+  length_foot: 0.4
+  weight_leg: 0.08
+  weight_foot: 0.08
+
+classB:
+  _initial_z: 0.75
+  size_torso: 0.15
+  length_leg: 0.25
+  length_foot: 0.4
+  weight_leg: 0.08
+  weight_foot: 0.03
+
+fixed:
+  _initial_offset_z: 0.5
+combination:
+  _initial_z: ["size_torso", "_initial_offset_z"]

@@ -211,6 +211,12 @@
 
     * We might modify _eval.py to see which category does the network assign to one set of body parameters.
 
+    * Start ant_50_100 and ant_100_100 on VACC bluemoon. hope.
+
+10. A very good suggestion from Josh
+
+    * train two policies on a dataset with only two bodies which are different significantly. One run with body info and the other run without. There will be a good chance that the agent will use the body info to treat two bodies slightly differently. If this won't work, there must be still something wrong in the code!
+
 7. Argument
 
     * Changes in parameter and topology. People usually think topology is more important than parameter changes. But if we think about this https://sustainablefisheries-uw.org/wp-content/uploads/2018/06/ShingletonFigure-1.jpg, we will realize parameter is important.
