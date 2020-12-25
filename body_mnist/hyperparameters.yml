@@ -14,7 +14,8 @@ AntBulletEnv-v0:
   max_grad_norm: 0.5
   vf_coef: 0.5
   learning_rate: !!float 3e-5
-  use_sde: True
+  # use_sde: True
+  use_sde: False
   clip_range: 0.4
   policy_kwargs: "dict(log_std_init=-1,
                        ortho_init=False,

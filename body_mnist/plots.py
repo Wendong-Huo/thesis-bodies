@@ -32,9 +32,10 @@ def autolabel(rects, ax):
                 ha='center', va=va)
 error_kw=dict(ecolor=[0.1,0.1,0.1], lw=0.1, capsize=3, capthick=1)
 
-colors_for_columns = [ [0.1, 0.5, 0.7], [0.7, 0.5, 0.1], [0.5, 0.1, 0.7],]
+colors_for_columns = [ [0.3, 0.6, 0.7], [0.7, 0.6, 0.3], [0.6, 0.3, 0.7], ]
+colors_for_columns_1 = [ [0.1, 0.5, 0.7], [0.7, 0.5, 0.1], [0.5, 0.1, 0.7], ]
 
-variable_name = "reward"
+variable_name = "distance"
 all_time_max_value = 0
 all_time_min_value = 0
 fig,ax = plt.subplots(nrows=6, ncols=3, sharey='row', figsize=[8,10])
@@ -64,6 +65,7 @@ xs, means, errs = zip(*sorted(zip(xs,means, errs)))
 xs = [str(x) for x in xs]
 bar = axbig.bar(xs, means, yerr=errs, color=[0.5]*3, error_kw=error_kw)
 autolabel(bar, axbig)
+axbig.set_title("Train and Test on same body")
 max_value = np.max(np.array(means) + np.array(errs))
 min_value = np.min(np.array(means) - np.array(errs))
 all_time_max_value = max_value if all_time_max_value<max_value else all_time_max_value
@@ -100,7 +102,7 @@ for str_key in trainons:
         xs = [str(x) for x in xs]
         bar = ax[1 + col_id//3, col_id%3].bar(xs, means, yerr=errs, color=[0.5]*3, error_kw=error_kw)
         autolabel(bar, ax[1 + col_id//3, col_id%3])
-        ax[1 + col_id//3, col_id%3].set_title(str_key)
+        ax[1 + col_id//3, col_id%3].set_title(f"Train on {str_key}")
         max_value = np.max(np.array(means) + np.array(errs))
         min_value = np.min(np.array(means) - np.array(errs))
         all_time_max_value = max_value if all_time_max_value<max_value else all_time_max_value
@@ -135,7 +137,7 @@ for str_key in trainons:
         xs = [str(x) for x in xs]
         bar = ax[3,col_id].bar(xs, means, yerr=errs, color=colors_for_columns[col_id], error_kw=error_kw)
         autolabel(bar, ax[3,col_id])
-        ax[3, col_id].set_title(str_key)
+        ax[3, col_id].set_title(str_key + "\n without Group info")
         max_value = np.max(np.array(means) + np.array(errs))
         min_value = np.min(np.array(means) - np.array(errs))
         all_time_max_value = max_value if all_time_max_value<max_value else all_time_max_value
@@ -169,9 +171,9 @@ for group in [0,1]:
                 print(mean, err)
             xs, means, errs = zip(*sorted(zip(xs,means, errs)))
             xs = [str(x) for x in xs]
-            bar = ax[4+group,col_id].bar(xs, means, yerr=errs, color=colors_for_columns[col_id], error_kw=error_kw)
+            bar = ax[4+group,col_id].bar(xs, means, yerr=errs, color=colors_for_columns_1[col_id], error_kw=error_kw)
             autolabel(bar, ax[4+group,col_id])
-            ax[4+group, col_id].set_title(str_key)
+            ax[4+group, col_id].set_title(f"with Group info\nTest as Group {group}")
             max_value = np.max(np.array(means) + np.array(errs))
             min_value = np.min(np.array(means) - np.array(errs))
             all_time_max_value = max_value if all_time_max_value<max_value else all_time_max_value

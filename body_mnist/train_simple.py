@@ -27,7 +27,7 @@ if __name__ == "__main__":  # noqa: C901
 
     debug = args.debug
     with_bodyinfo = args.with_bodyinfo
-    train_num_envs = 16 if not debug else 2
+    train_num_envs = 24 if not debug else 2
     total_timesteps = 2e6 if not debug else 1
 
     training_bodies = [int(x) for x in args.train_bodies.split(",")]
@@ -57,7 +57,7 @@ if __name__ == "__main__":  # noqa: C901
             eval_env=eval_env,
             prefix=f"{test_body}",
             n_eval_episodes=3,
-            eval_freq=1e4, # will implicitly multiplied by 16 (train_num_envs)
+            eval_freq=1e4, # will implicitly multiplied by (train_num_envs)
             deterministic=True,
         )
         all_callbacks.append(eval_callback)

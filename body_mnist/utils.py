@@ -8,22 +8,23 @@ import arguments
 
 args = arguments.get_args()
 folder = args.exp
-seed = 1
+seed = args.seed
 
 def make_env(rank=0, seed=0, render=True, wrapper=wrapper.BodyinfoWrapper, robot_body=-1, body_info=-1):
+    print(f"make_env( rank={rank}, seed={seed}, wrapper={'None' if wrapper is None else wrapper.__name__}, robot_body={robot_body}, body_info={body_info}")
     def _init():
         try:
-            gym.spec(f'AntBulletEnv-v{robot_body}')
+            gym.spec(f'MyAntBulletEnv-v{robot_body}')
         except:
-            gym.envs.registration.register(id=f'AntBulletEnv-v{robot_body}',
-                entry_point=f'gym_envs.ant:AntBulletEnv',
+            gym.envs.registration.register(id=f'MyAntBulletEnv-v{robot_body}',
+                entry_point=f'gym_envs.ant:MyAntBulletEnv',
                 max_episode_steps=1000,
                 reward_threshold=2500.0, 
                 kwargs={"xml":f"{os.getcwd()}/{folder}/envs/{robot_body}.xml"})
         _render = False
         if render:
             _render = rank in [0]
-        env = gym.make(f'AntBulletEnv-v{robot_body}', render=_render)
+        env = gym.make(f'MyAntBulletEnv-v{robot_body}', render=_render)
         if wrapper is not None:
             if body_info<0:
                 _body_info = robot_body

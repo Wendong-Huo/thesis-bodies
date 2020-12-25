@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --partition bluemoon
+#SBATCH --partition short
 #SBATCH --mem 4G
 #SBATCH -c 1
 #SBATCH --output slurm.out/%j

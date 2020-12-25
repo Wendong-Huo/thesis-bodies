@@ -107,16 +107,21 @@ def test_all():
 
     print(all_testons)
 
+    # with open(f"{folder}/test-results.pickle", "rb") as f:
+    #     test_results = pickle.load(f)
+
     test_results = {}
     test_results["reward"] = {}
     test_results["distance"] = {}
     for with_bodyinfo in range(2):
-        test_results["reward"][with_bodyinfo] = {}
-        test_results["distance"][with_bodyinfo] = {}
         if with_bodyinfo:
             str_with_bodyinfo = "-with-bodyinfo"
         else:
             str_with_bodyinfo = ""
+            # continue
+
+        test_results["reward"][with_bodyinfo] = {}
+        test_results["distance"][with_bodyinfo] = {}
 
         for trainon in trainons:
             if len(trainon) == 1 and with_bodyinfo == 1:
@@ -150,7 +155,7 @@ def test_all():
                         reward, distance  = test(seed=s, model_filename=model_filename, vec_filename=vec_filename, train=trainon, test=test_body, body_info=bodyinfo, render=False)
                         n += 1
                         test_results["reward"][with_bodyinfo][str_trainon][test_body][bodyinfo].append(reward)
-                        test_results["distance"][with_bodyinfo][str_trainon][test_body][bodyinfo].append(reward)
+                        test_results["distance"][with_bodyinfo][str_trainon][test_body][bodyinfo].append(distance)
 
     with open(f"{folder}/test-results.pickle", "wb") as f:
         pickle.dump(test_results, f)
@@ -162,7 +167,14 @@ def test_all():
 
 
 if __name__ == "__main__":  # noqa: C901
+    args = utils.args
+    folder = utils.folder
+    
     # test_all()
-    model_filename = "exp_v2/model-ant-0-1-2-4-100-101-102-104-with-bodyinfo.zip"
-    vec_filename = model_filename[:-4] + "-vecnormalize.pkl"
-    test(1, model_filename, vec_filename, [], 103, body_info=100, render=True)
+    train_bodies = [int(x) for x in args.train_bodies.split(',')]
+    test_bodies = [int(x) for x in args.test_bodies.split(',')]
+    for train_body in train_bodies:
+        for test_body in test_bodies:
+            model_filename = f"{folder}/model-ant-{train_body}.zip"
+            vec_filename = model_filename[:-4] + "-vecnormalize.pkl"
+            test(1, model_filename, vec_filename, [], test_body, body_info=0, render=args.render)
