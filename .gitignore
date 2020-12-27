@@ -20,6 +20,13 @@ vacc_download/
 _report_cache/
 debug_version/
 
+*-ubyte
+*.mp4
+*.npy
+*.png
+*.gz
+*.pt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

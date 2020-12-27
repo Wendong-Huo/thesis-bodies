@@ -17,4 +17,6 @@ def get_args():
     parser.add_argument("--with-checkpoint", action="store_true", help="save checkpoints along training.")
 
     parser.add_argument("--save-fmri", action="store_true", help="save fMRI data.")
+    parser.add_argument("--compare-seed", action="store_true", help="add another experiment with another seed.")
+    parser.add_argument("--test-steps", type=int, default=10, help="total time steps for testing.")
     return parser.parse_args()
