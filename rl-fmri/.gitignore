@@ -4,3 +4,6 @@ tb/
 *.zip
 *.pkl
 test-results/
+*.mp4
+*.png
+*.npy

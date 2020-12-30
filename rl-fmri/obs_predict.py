@@ -16,13 +16,13 @@ class MyDataset(Dataset):
         if not is_train:
             idx_0 += 1
             idx_100 += 1
-        print(f"loading exp_0/fMRI_data_{idx_0}.npy...")
-        x_0 = np.load(f"exp_0/fMRI_data_{idx_0}.npy")
-        # x_0 = np.zeros(shape=[10,256], dtype=np.float32)
+        print(f"loading exp_1/obs_data_{idx_0}.npy...")
+        x_0 = np.load(f"exp_1/obs_data_{idx_0}.npy")
+        # x_0 = np.zeros(shape=[10,len_obs], dtype=np.float32)
         y_0 = np.zeros(shape=(len(x_0)))
-        print(f"loading exp_0/fMRI_data_{idx_100}.npy...")
-        x_1 = np.load(f"exp_0/fMRI_data_{idx_100}.npy")
-        # x_1 = np.ones(shape=[10,256], dtype=np.float32)
+        print(f"loading exp_1/obs_data_{idx_100}.npy...")
+        x_1 = np.load(f"exp_1/obs_data_{idx_100}.npy")
+        # x_1 = np.ones(shape=[10,len_obs], dtype=np.float32)
         x = np.concatenate((x_0, x_1))
         y = np.zeros(shape=(len(x)), dtype=np.int64)
         y[len(x_0):] = 1
@@ -32,6 +32,9 @@ class MyDataset(Dataset):
         p = np.random.permutation(len(x))
         self.x, self.y, self.idx = x[p], y[p], idx[p]
         self.y = self.y.astype(np.int64)
+
+        if args.exclude_z:
+            self.x = self.x[:,1:]
 
     def __len__(self):
         return self.x.shape[0]
@@ -45,7 +48,10 @@ class MyDataset(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(256, 2)
+        len_obs = 28
+        if args.exclude_z:
+            len_obs -= 1
+        self.fc1 = nn.Linear(len_obs, 2)
         # self.fc2 = nn.Linear(2, 2)
 
     def forward(self, x):
@@ -89,30 +95,8 @@ def test(model, device, test_loader):
     print(f'\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{ len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n')
 
 if __name__ == "__main__":
-    # Training settings
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
-    # parser.add_argument('--test-batch-size', type=int, default=1000000, metavar='N',
-    #                     help='input batch size for testing (default: 1000000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
-                        help='learning rate (default: 1.0)')
-    parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
-                        help='Learning rate step gamma (default: 0.7)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
-    parser.add_argument('--dry-run', action='store_true', default=False,
-                        help='quickly check a single pass')
-    parser.add_argument('--seed', type=int, default=1, metavar='S',
-                        help='random seed (default: 1)')
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
-                        help='For Saving the current Model')
-    args = parser.parse_args()
-
+    args = utils.args
+    
     torch.manual_seed(args.seed)
 
     train_kwargs = {'batch_size': args.batch_size}
@@ -132,3 +116,13 @@ if __name__ == "__main__":
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
         scheduler.step()
+
+    for p in model.parameters():
+        data = p.detach().numpy()
+        print("="*10)
+        print("[data]")
+        print(data)
+        print("[most important dimension]")
+        print(np.argsort(np.sum(np.abs(data),axis=0))[::-1])
+        print("[shape]")
+        print(data.shape)

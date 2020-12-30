@@ -3,35 +3,59 @@ import yaml
 import torch.nn as nn
 import gym
 from stable_baselines3.common.callbacks import BaseCallback
-import common.wrapper as wrapper
+import common.wrapper as md_wrapper
 import common.arguments as arguments
 
 args = arguments.get_args()
 folder = args.exp
 seed = args.seed
 
-def make_env(rank=0, seed=0, render=True, wrapper=wrapper.BodyinfoWrapper, robot_body=-1, body_info=-1):
+
+def template(body):
+
+    _template = {
+            6: "hopper",
+            5: "ant",
+            4: "halfcheetah",
+            3: "walker2d",
+            0: "ant",
+        }
+    return _template[body//100]
+    
+def make_env(rank=0, seed=0, render=True, template="ant", wrapper=md_wrapper.BodyinfoWrapper, robot_body=-1, body_info=-1):
     # print(f"make_env( rank={rank}, seed={seed}, wrapper={'None' if wrapper is None else wrapper.__name__}, robot_body={robot_body}, body_info={body_info}")
     def _init():
+        env_names = {
+            "ant": "MyAntBulletEnv",
+            "walker2d": "MyWalker2DBulletEnv",
+            "hopper": "MyHopperBulletEnv",
+            "halfcheetah": "MyHalfCheetahBulletEnv",
+        }
+        env_name = env_names[template]
+        env_id = f'{env_name}-v{robot_body}'
         try:
-            gym.spec(f'MyAntBulletEnv-v{robot_body}')
+            gym.spec(env_id)
         except:
-            gym.envs.registration.register(id=f'MyAntBulletEnv-v{robot_body}',
-                entry_point=f'gym_envs.ant:MyAntBulletEnv',
+            gym.envs.registration.register(id=env_id,
+                entry_point=f'gym_envs.{template}:{env_name}',
                 max_episode_steps=1000,
                 reward_threshold=2500.0, 
                 kwargs={"xml":f"{os.getcwd()}/{folder}/envs/{robot_body}.xml"})
+        
         _render = False
         if render:
             _render = rank in [0]
-        env = gym.make(f'MyAntBulletEnv-v{robot_body}', render=_render)
+        env = gym.make(env_id, render=_render)
         if wrapper is not None:
-            if body_info<0:
-                _body_info = robot_body
+            if isinstance(wrapper,md_wrapper.BodyinfoWrapper):
+                if body_info<0:
+                    _body_info = robot_body
+                else:
+                    _body_info = body_info
+                env = wrapper(env, _body_info)
             else:
-                _body_info = body_info
-            env = wrapper(env, _body_info)
-
+                env = wrapper(env)
+            
         if seed is not None:
             env.seed(seed*100 + rank)
             env.action_space.seed(seed*100 + rank)
@@ -42,7 +66,7 @@ def make_env(rank=0, seed=0, render=True, wrapper=wrapper.BodyinfoWrapper, robot
 def load_hyperparameters():
     with open("common/hyperparameters.yml", "r") as f:
         hp = yaml.load(f, Loader=yaml.SafeLoader)
-    hyperparams = hp["AntBulletEnv-v0"]
+    hyperparams = hp["MyWalkerEnv"]
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
     return hyperparams
 
