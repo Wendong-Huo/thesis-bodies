@@ -1,0 +1,3 @@
+{
+    "python.analysis.extraPaths": ["./experiments/exp0/src"]
+}

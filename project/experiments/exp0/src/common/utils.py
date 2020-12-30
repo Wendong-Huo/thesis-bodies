@@ -25,7 +25,27 @@ def get_exp_folder():
         _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "tmp"]
         for _sub in _subs:
             (_path / _sub).mkdir(exist_ok=True)
+    
+    # Create a symlink to output_data
+    _sym_link = pathlib.Path("output_data")
+    if _sym_link.exists():
+        _sym_link.unlink()
+    _sym_link.symlink_to(_path, target_is_directory=True)
+
     return folder
+
+def check_exp_folder():
+    """Make sure .exp_folder contains the right folder name"""
+    _exp_folder = pathlib.Path(".exp_folder")
+
+    _folder = get_exp_folder()
+
+    if _exp_folder.exists():
+        _str = _exp_folder.read_text()
+        if _folder==_str:
+            return
+    _exp_folder.write_text(_folder)
+    return
 
 
 def mean_and_error(_data):
