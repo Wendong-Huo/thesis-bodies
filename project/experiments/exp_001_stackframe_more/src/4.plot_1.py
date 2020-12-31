@@ -7,8 +7,8 @@ from common.tflogs2pandas import tflog2pandas, many_logs2pandas
 from common.gym_interface import template
 
 bodies = [300,400,500,600]
-all_seeds = [0,1,2,3,4]
-all_stackframe = [0,4,8]
+all_seeds = list(range(20))
+all_stackframe = [0,4,8,16]
 
 cache_filename = "output_data/tmp/plot0"
 try:
