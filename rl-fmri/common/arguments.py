@@ -23,7 +23,7 @@ def get_args():
     parser.add_argument("--test-steps", type=int, default=10, help="total time steps for testing.")
     parser.add_argument("--train-steps", type=float, default=1e6, help="total time steps for testing.")
 
-    parser.add_argument("--initialize-weights-from", type=str, default="", help="better initialization from model file.")
+    parser.add_argument("--initialize_weights_from", type=str, default="", help="better initialization from model file.")
 
     parser.add_argument("--vec-normalize", action="store_true", help="use VecNormalize")
     parser.add_argument("--disable-saving-image", action="store_true", help="")

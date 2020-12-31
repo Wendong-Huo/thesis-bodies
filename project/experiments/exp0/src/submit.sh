@@ -2,7 +2,9 @@
 #SBATCH --partition bluemoon
 #SBATCH --mem 4G
 #SBATCH -c 1
+#SBATCH --output /users/s/l/sliu1/slurm.out/%j-%x
+
 cd ${SLURM_SUBMIT_DIR}
-source activate what_ever_your_conda_environment_is
+source activate thesis-bodies
 echo $@
 $@

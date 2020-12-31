@@ -12,7 +12,7 @@ def template(body):
         }
     return _template[body//100]
     
-def make_env(rank=0, seed=0, render=True, wrapper=None, robot_body=-1, body_info=-1):
+def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=-1):
     # print(f"make_env( rank={rank}, seed={seed}, wrapper={'None' if wrapper is None else wrapper.__name__}, robot_body={robot_body}, body_info={body_info}")
     _template=template(robot_body)
     def _init():
@@ -37,15 +37,16 @@ def make_env(rank=0, seed=0, render=True, wrapper=None, robot_body=-1, body_info
         if render:
             _render = rank in [0]
         env = gym.make(env_id, render=_render)
-        if wrapper is not None:
-            if isinstance(wrapper, BodyinfoWrapper):
-                if body_info<0:
-                    _body_info = robot_body
+        if len(wrappers)>0:
+            for _wrapper in wrappers:
+                if isinstance(_wrapper, BodyinfoWrapper):
+                    if body_info<0:
+                        _body_info = robot_body
+                    else:
+                        _body_info = body_info
+                    env = _wrapper(env, _body_info)
                 else:
-                    _body_info = body_info
-                env = wrapper(env, _body_info)
-            else:
-                env = wrapper(env)
+                    env = _wrapper(env)
             
         if seed is not None:
             env.seed(seed*100 + rank)

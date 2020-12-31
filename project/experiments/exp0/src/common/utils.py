@@ -23,11 +23,10 @@ def get_output_data_folder():
         print(f"mkdir {_path.resolve()}")
         _path.mkdir()
     output_data_folder = _path / get_exp_name()
-    if not output_data_folder.is_dir():
-        output_data_folder.mkdir(exist_ok=True)
-        _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "tmp"]
-        for _sub in _subs:
-            (output_data_folder / _sub).mkdir(exist_ok=True)
+    output_data_folder.mkdir(exist_ok=True)
+    _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "checkpoints", "tmp"]
+    for _sub in _subs:
+        (output_data_folder / _sub).mkdir(exist_ok=True)
 
     # Create a symlink to output_data
     _sym_link = pathlib.Path("output_data")
@@ -59,6 +58,23 @@ def check_exp_folder():
     _exp_folder.write_text(_folder)
     return
 
+
+def build_model_filename(args):
+    filename = "model-"
+    filename += args.train_bodies_str.replace(",", "-")
+    if args.with_bodyinfo:
+        filename += "-body"
+    if args.vec_normalize:
+        filename += "-vnorm"
+    if args.stack_frames>1:
+        filename += f"-stack{args.stack_frames}"
+    if args.threshold_threshold!=0:
+        filename += f"-thr{args.threshold_threshold}"
+    if len(args.initialize_weights_from) > 0:
+        filename += f"-initw"
+
+    filename += f"-sd{args.seed}"
+    return filename
 
 def mean_and_error(_data):
     """A helper for creating error bar"""
