@@ -24,6 +24,8 @@ def get_args():
 
     parser.add_argument("--initialize_weights_from", type=str, default="", help="better initialization from model file.")
 
+    parser.add_argument("--model_filename", type=str, default="", help="model to test.")
+    
     args = parser.parse_args()
 
     args.train_steps = int(args.train_steps)

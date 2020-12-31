@@ -12,12 +12,9 @@ from common.activation_fn import MyThreshold
 
 if __name__ == "__main__":
 
-    print(str(common.output_data_folder / "tensorboard"))
-    print(str(common.input_data_folder / "bodies"))
-
     args = common.args
     print(args)
-    
+
     # PPO.learn need this. If use SubprocVecEnv instead of DummyVecEnv, you need to seed in each subprocess.
     set_random_seed(common.seed)
 
@@ -32,9 +29,8 @@ if __name__ == "__main__":
     assert len(args.train_bodies) > 0, "No body to train."
     if args.with_bodyinfo:
         default_wrapper += [wrapper.BodyinfoWrapper]
-    else:
-        venv = DummyVecEnv([gym_interface.make_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
-                                               robot_body=args.train_bodies[i % len(args.train_bodies)], body_info=0) for i in range(args.num_venvs)])
+    venv = DummyVecEnv([gym_interface.make_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
+                                               robot_body=args.train_bodies[i % len(args.train_bodies)]) for i in range(args.num_venvs)])
 
     normalize_kwargs = {}
     if args.vec_normalize:
@@ -52,7 +48,7 @@ if __name__ == "__main__":
     for test_body in args.test_bodies:
         body_info = 0
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed+1, wrappers=default_wrapper, render=False,
-                                                       robot_body=test_body, body_info=body_info)])
+                                                        robot_body=test_body, body_info=body_info)])
         if args.vec_normalize:
             eval_venv = VecNormalize(eval_venv, norm_reward=False, **normalize_kwargs)
         if args.stack_frames > 1:
@@ -67,12 +63,12 @@ if __name__ == "__main__":
         )
         all_callbacks.append(eval_callback)
 
-
     if args.with_checkpoint:
         checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=str(common.output_data_folder/'checkpoints'), name_prefix=args.train_bodies)
         all_callbacks.append(checkpoint_callback)
         if args.vec_normalize:
-            save_vec_callback = callbacks.SaveVecNormalizeCallback(save_freq=1000, save_path=str(common.output_data_folder/'checkpoints'), name_prefix=args.train_bodies)
+            save_vec_callback = callbacks.SaveVecNormalizeCallback(save_freq=1000, save_path=str(
+                common.output_data_folder/'checkpoints'), name_prefix=args.train_bodies)
             all_callbacks.append(save_vec_callback)
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
@@ -96,7 +92,7 @@ if __name__ == "__main__":
     model.save(str(common.output_data_folder/"models"/saved_model_filename))
 
     if args.vec_normalize:
-    # Important: save the running average, for testing the agent we need that normalization
+        # Important: save the running average, for testing the agent we need that normalization
         model.get_vec_normalize_env().save(str(common.output_data_folder/"models"/f"{saved_model_filename}.vnorm.pkl"))
 
     venv.close()

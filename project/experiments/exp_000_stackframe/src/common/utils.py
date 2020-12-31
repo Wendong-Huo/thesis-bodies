@@ -15,7 +15,7 @@ def get_exp_name():
     return _folder_name
 
 
-def get_output_data_folder():
+def get_output_data_folder(init=False):
     # Create output folder is not exist yet.
     _path = pathlib.Path("../../../output_data")
     if not _path.is_dir():
@@ -28,13 +28,14 @@ def get_output_data_folder():
     for _sub in _subs:
         (output_data_folder / _sub).mkdir(exist_ok=True)
 
-    # Create a symlink to output_data
-    _sym_link = pathlib.Path("output_data")
-    if _sym_link.exists():
-        _sym_link.unlink()
-    _sym_link.symlink_to(output_data_folder, target_is_directory=True)
+    if init:
+        # Create a symlink to output_data
+        _sym_link = pathlib.Path("output_data")
+        if _sym_link.exists():
+            _sym_link.unlink()
+        _sym_link.symlink_to(output_data_folder, target_is_directory=True)
 
-    return _sym_link
+    return output_data_folder
 
 
 def get_input_data_folder():

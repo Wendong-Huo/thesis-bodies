@@ -1,5 +1,9 @@
 #!/bin/sh
+source activate thesis-bodies
+
 set -x
+
+python 0.init.py
 
 for seed in 0 1 2 3 4
 do
