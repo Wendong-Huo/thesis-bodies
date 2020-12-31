@@ -1,3 +1,3 @@
 {
-    "python.analysis.extraPaths": ["./experiments/exp0/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_000_stackframe/src"]
 }

@@ -31,7 +31,7 @@ def get_output_data_folder(init=False):
     if init:
         # Create a symlink to output_data
         _sym_link = pathlib.Path("output_data")
-        if _sym_link.exists():
+        if _sym_link.is_symlink():
             _sym_link.unlink()
         _sym_link.symlink_to(output_data_folder, target_is_directory=True)
 
