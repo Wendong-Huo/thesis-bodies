@@ -13,8 +13,4 @@ Treatment:
 
 # What are the results? (in short)
 
-Seems work for Walker2D and some other morphologies.
-
 # Other Thoughts?
-
-Let's try more seeds.
