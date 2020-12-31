@@ -1,48 +1,60 @@
-from genericpath import exists
 import os
 import pathlib
-
+import yaml
+import torch.nn as nn
 import numpy as np
 
 
-def get_exp_folder():
+def get_exp_name():
     """Return current experiment folder, such as exp0."""
     _full_path = str(pathlib.Path().absolute())
     _paths = _full_path.split('/')
     assert _paths[-1] == "src", "Project structure has been changed. utils.get_exp_folder() should be changed accordingly."
     assert len(_paths) > 2, "Why path is so short?"
-    folder = _paths[-2]
+    _folder_name = _paths[-2]
+    return _folder_name
 
+
+def get_output_data_folder():
     # Create output folder is not exist yet.
     _path = pathlib.Path("../../../output_data")
     if not _path.is_dir():
         print("Starting a new project? Congratulations! \n\nCreating output data path for the first time.")
         print(f"mkdir {_path.resolve()}")
         _path.mkdir()
-    _path = _path / folder
-    if not _path.is_dir():
-        _path.mkdir(exist_ok=True)
+    output_data_folder = _path / get_exp_name()
+    if not output_data_folder.is_dir():
+        output_data_folder.mkdir(exist_ok=True)
         _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "tmp"]
         for _sub in _subs:
-            (_path / _sub).mkdir(exist_ok=True)
-    
+            (output_data_folder / _sub).mkdir(exist_ok=True)
+
     # Create a symlink to output_data
     _sym_link = pathlib.Path("output_data")
     if _sym_link.exists():
         _sym_link.unlink()
-    _sym_link.symlink_to(_path, target_is_directory=True)
+    _sym_link.symlink_to(output_data_folder, target_is_directory=True)
 
-    return folder
+    return _sym_link
+
+
+def get_input_data_folder():
+    _path = pathlib.Path("../input_data")
+    assert _path.exists()
+    return _path
+
+def get_current_folder():
+    return pathlib.Path()
 
 def check_exp_folder():
     """Make sure .exp_folder contains the right folder name"""
     _exp_folder = pathlib.Path(".exp_folder")
 
-    _folder = get_exp_folder()
+    _folder = get_exp_name()
 
     if _exp_folder.exists():
         _str = _exp_folder.read_text()
-        if _folder==_str:
+        if _folder == _str:
             return
     _exp_folder.write_text(_folder)
     return
@@ -70,3 +82,10 @@ def linux_fullscreen():
     k.press_key(k.control_key)
     k.tap_key(k.function_keys[11])
     k.release_key(k.control_key)
+
+def load_hyperparameters():
+    with (get_input_data_folder() / "hyperparameters.yml").open() as f:
+        hp = yaml.load(f, Loader=yaml.SafeLoader)
+    hyperparams = hp["MyWalkerEnv"]
+    hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
+    return hyperparams
