@@ -17,13 +17,14 @@
             "name": "1.train.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/experiments/exp0/src/1.train.py",
+            "program": "${file}",
             "args": [
                 "--train_bodies=400",
+                "--skip_frames=3",
                 // "--test_bodies=400",
                 "--render",
             ],
-            "cwd": "${workspaceFolder}/experiments/exp0/src",
+            "cwd": "${fileDirname}",
             "console": "integratedTerminal",
             "justMyCode": false,
         }

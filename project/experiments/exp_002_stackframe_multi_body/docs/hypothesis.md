@@ -12,6 +12,14 @@ Treatment:
 
 # What are the results? (in short)
 
+similar to train on one test on one.
+
+The best Walker2D stand still.
+
+in halfcheetah stackframe4 is better than 0
+
+in ant and hopper, 0 is best.
+
 # Other Thoughts?
 
 stack-frames is an idea introduced in DeepMind’s two papers (from NIPS workshop 2013 and NATURE 2015) when they played Atari.
