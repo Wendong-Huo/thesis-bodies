@@ -1,4 +1,4 @@
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
@@ -15,12 +15,12 @@ if __name__ == "__main__":
     args = common.args
     print(args)
 
-    # PPO.learn need this. If use SubprocVecEnv instead of DummyVecEnv, you need to seed in each subprocess.
+    # SAC.learn need this. If use SubprocVecEnv instead of DummyVecEnv, you need to seed in each subprocess.
     set_random_seed(common.seed)
 
     saved_model_filename = common.build_model_filename(args)
 
-    hyperparams = common.load_hyperparameters()
+    hyperparams = common.load_hyperparameters(conf_name="SAC")
     print(hyperparams)
 
     # Make every env has the same obs space and action space
@@ -42,7 +42,8 @@ if __name__ == "__main__":
 
     keys_remove = ["normalize", "n_envs", "n_timesteps", "policy"]
     for key in keys_remove:
-        del hyperparams[key]
+        if key in hyperparams:
+            del hyperparams[key]
 
     all_callbacks = []
     for test_body in args.test_bodies:
@@ -73,11 +74,11 @@ if __name__ == "__main__":
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 
-    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/"tensorboard"/saved_model_filename), seed=common.seed, **hyperparams)
+    model = SAC('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/"tensorboard"/saved_model_filename), seed=common.seed, **hyperparams)
 
     if len(args.initialize_weights_from) > 0:
         try:
-            load_model = PPO.load(args.initialize_weights_from)
+            load_model = SAC.load(args.initialize_weights_from)
             load_weights = load_model.policy.state_dict()
             model.policy.load_state_dict(load_weights)
             print(f"Weights loaded from {args.initialize_weights_from}")

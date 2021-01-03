@@ -12,4 +12,8 @@ Treatment:
 
 # What are the results? (in short)
 
+No, skipping makes things worse, the agents never learned to do meaningful things in the treatment experiments.
+
 # Other Thoughts?
+
+Forget about skipping

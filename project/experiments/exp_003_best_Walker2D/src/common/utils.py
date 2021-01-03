@@ -100,9 +100,9 @@ def linux_fullscreen():
     k.tap_key(k.function_keys[11])
     k.release_key(k.control_key)
 
-def load_hyperparameters():
+def load_hyperparameters(conf_name="MyWalkerEnv"):
     with (get_input_data_folder() / "hyperparameters.yml").open() as f:
         hp = yaml.load(f, Loader=yaml.SafeLoader)
-    hyperparams = hp["MyWalkerEnv"]
+    hyperparams = hp[conf_name]
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
     return hyperparams

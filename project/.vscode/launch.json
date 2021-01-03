@@ -19,8 +19,9 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--train_bodies=400",
-                "--skip_frames=3",
+                "--train_bodies=300",
+                "--num_venv=1",
+                // "--skip_frames=3",
                 // "--test_bodies=400",
                 "--render",
             ],
