@@ -15,3 +15,6 @@ SAC + gSDE + StackFrame4 + SkipFrame
 
 # Other Thoughts?
 
+Forget about Skip.
+
+But for Stack Frame 4, there seems to be significant improvement! exciting!

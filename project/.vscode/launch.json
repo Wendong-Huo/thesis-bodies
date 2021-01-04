@@ -12,22 +12,23 @@
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",
             "justMyCode": false,
-        },
-        {
-            "name": "1.train.py",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "args": [
-                "--train_bodies=300",
-                "--num_venv=1",
-                // "--skip_frames=3",
-                // "--test_bodies=400",
-                "--render",
-            ],
-            "cwd": "${fileDirname}",
-            "console": "integratedTerminal",
-            "justMyCode": false,
         }
+        // ,
+        // {
+        //     "name": "1.train.py",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${file}",
+        //     "args": [
+        //         "--train_bodies=300",
+        //         "--num_venv=1",
+        //         // "--skip_frames=3",
+        //         // "--test_bodies=400",
+        //         "--render",
+        //     ],
+        //     "cwd": "${fileDirname}",
+        //     "console": "integratedTerminal",
+        //     "justMyCode": false,
+        // }
     ]
 }
