@@ -13,20 +13,20 @@
       Bullet doesn't support global coordinates in bodies, little motivation to fix this, as long as it works without pos="" as well.
       After this change, Hopper still loads and works in MuJoCo simulator.
       -->
-      <body name="torso" pos="0 0 $height">
+      <body name="torso" pos="0 0 1.45">
         <joint armature="0" axis="1 0 0" damping="0" limited="false" name="ignore1" pos="0 0 0" stiffness="0" type="slide"/>
         <joint armature="0" axis="0 0 1" damping="0" limited="false" name="ignore2" pos="0 0 0" ref="1.25" stiffness="0" type="slide"/>
         <joint armature="0" axis="0 1 0" damping="0" limited="false" name="ignore3" pos="0 0 0" stiffness="0" type="hinge"/>
-        <geom fromto="0 0 0 0 0 -$torso_length" name="torso_geom" size="$torso_thickness" type="capsule"/>
-        <body name="thigh" pos="0 0 -$torso_length">
+        <geom fromto="0 0 0 0 0 -.3" name="torso_geom" size="0.05" type="capsule"/>
+        <body name="thigh" pos="0 0 -.3">
           <joint axis="0 -1 0" name="thigh_joint" pos="0 0 0" range="-150 0" type="hinge"/>
-          <geom fromto="0 0 0 0 0 -$thigh_length" name="thigh_geom" size="$thigh_thickness" type="capsule"/>
-          <body name="leg" pos="0 0 -$thigh_length">
+          <geom fromto="0 0 0 0 0 -.45" name="thigh_geom" size="0.05" type="capsule"/>
+          <body name="leg" pos="0 0 -.45">
             <joint axis="0 -1 0" name="leg_joint" pos="0 0 0" range="-150 0" type="hinge"/>
-            <geom fromto="0 0 0 0 0 -$leg_length" name="leg_geom" size="$leg_thickness" type="capsule"/>
-            <body name="foot" pos="0 0 -$leg_length">
+            <geom fromto="0 0 0 0 0 -.5" name="leg_geom" size="0.04" type="capsule"/>
+            <body name="foot" pos="0 0 -.5">
               <joint axis="0 -1 0" name="foot_joint" pos="0 0 0" range="-45 45" type="hinge"/>
-              <geom fromto="$foot_posterior 0 0 $foot_anterior 0 0" name="foot_geom" size="$foot_thickness" type="capsule"/>
+              <geom fromto="-0.13 0 0 0.26 0 0" name="foot_geom" size="0.06" type="capsule"/>
             </body>
           </body>
         </body>
