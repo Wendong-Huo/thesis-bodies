@@ -8,5 +8,7 @@ train them to see if there is any difference in body thickness.
 
 # What are the results? (in short)
 
+fatter bodies are bad. 1M can't make them walk as well as the original ones.
+
 # Other Thoughts?
 

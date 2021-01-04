@@ -24,7 +24,6 @@
           <body name="bfoot" pos="$bshin_x 0 $bshin_z">
             <joint axis="0 1 0" damping="3" name="bfoot" pos="0 0 0" range="23 45" stiffness="120" type="hinge"/>
             <geom fromto="0 0 0 $bfoot_x 0 $bfoot_z" size="$bfoot_thickness" type="capsule"/>
-            <inertial mass="10"/>
           </body>
         </body>
       </body>
@@ -37,7 +36,6 @@
           <body name="ffoot" pos="$fshin_x 0 $fshin_z">
             <joint axis="0 1 0" damping="1.5" name="ffoot" pos="0 0 0" range="-177 -17" stiffness="60" type="hinge"/>
             <geom fromto="0 0 0 $ffoot_x 0 $ffoot_z" name="ffoot" rgba="0.9 0.6 0.6 1" size="$ffoot_thickness" type="capsule"/>
-            <inertial mass="10"/>
           </body>
         </body>
       </body>

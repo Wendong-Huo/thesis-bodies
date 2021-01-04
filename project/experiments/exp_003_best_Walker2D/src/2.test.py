@@ -2,7 +2,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             eval_venv = VecFrameStack(eval_venv, args.stack_frames)
 
         eval_venv.seed(common.seed)
-        model = PPO.load(args.model_filename)
+        model = SAC.load(args.model_filename)
 
         obs = eval_venv.reset()
         g_obs_data = np.zeros(shape=[args.test_steps, obs.shape[1]], dtype=np.float32)

@@ -11,7 +11,12 @@ SAC + gSDE + StackFrame4 + SkipFrame
 
 # What are the results? (in short)
 
+slightly better. At around 6M steps (with 2 std):
 
+control
+2038.779 +- 290.108
+treatment: stackframe
+2158.110 +- 227.775
 
 # Other Thoughts?
 

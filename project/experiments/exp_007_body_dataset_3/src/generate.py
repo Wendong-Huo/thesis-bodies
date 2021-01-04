@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 import string
 import math
+import numpy as np
 
 body_template_folder = str(Path("../input_data/body-templates").resolve())
 body_folder = str(Path("output_data/bodies").resolve())
@@ -15,7 +16,7 @@ body_folder = str(Path("output_data/bodies").resolve())
 with open(f"{body_template_folder}/variables.yml", "r") as f:
     variables = yaml.load(f, Loader=yaml.Loader)
 
-def make_body(body, fatter):
+def make_body(body, mutate_seed=0):
     with open(f"{body_template_folder}/{body}.xml", "r") as f:
         _content = f.read()
         tempalte_content = string.Template(_content)
@@ -37,12 +38,28 @@ def make_body(body, fatter):
     elif body==600:
         data["foot_posterior"] = - data["foot_length"] / 3
         data["foot_anterior"] = data["foot_posterior"] + data["foot_length"]
+    
+    # mutate
+    if mutate_seed>0:
+        largest_noise = 1.4 # Most likely the mutation is within this range (99.7% three deviation)
+        np.random.seed(body+mutate_seed)
+        mutate_noise = np.random.normal(loc=0, scale=1/3, size=len(data))
+        mutate_noise = largest_noise**mutate_noise
+        for idx,key in enumerate(data.keys()):
+            data[key] *= mutate_noise[idx]
+            # print(f"{key}: {data[key]} *= {mutate_noise[idx]}")
 
-    # make robot fatter
-    if fatter:
-        for key in data:
-            if "_thickness" in key:
-                data[key] += .05
+    # calculate height
+    fixed_height = 0.1
+    if body==300:
+        data["height"] = data["torso_length"] + data["thigh_length"] + data["leg_length"] + data["foot_thickness"] + fixed_height
+    elif body==400:
+        data["height"] = max(-data["bthigh_z"] - data["bshin_z"] - data["bfoot_z"] + data["bfoot_thickness"], -data["fthigh_z"] - data["fshin_z"] - data["ffoot_z"] + data["ffoot_thickness"]) + fixed_height
+    elif body==500:
+        data["height"] = data["foot_length"] + fixed_height + 0.2
+    elif body==600:
+        data["height"] = data["torso_length"] + data["thigh_length"] + data["leg_length"] + data["foot_thickness"] + fixed_height
+    
     # keep two decimals
     cleaned_data = {}
     for key in data:
@@ -51,9 +68,10 @@ def make_body(body, fatter):
     _content = tempalte_content.safe_substitute(cleaned_data)
     assert "$" not in _content, "some variable not substituted."
 
-    with open(f"{body_folder}/{body+(1 if fatter else 0)}.xml", "w") as f:
+    with open(f"{body_folder}/{body+mutate_seed}.xml", "w") as f:
         print(_content, file=f)
 
 for body in [300,400,500,600]:
-    make_body(body, fatter=True)
-    make_body(body, fatter=False)
+    make_body(body)
+    for mutation in range(50):
+        make_body(body, mutate_seed=mutation)

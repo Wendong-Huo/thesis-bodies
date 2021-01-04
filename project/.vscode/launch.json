@@ -9,6 +9,9 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "args": [
+                "--test_bodies=300","--model_filename=output_data/models/model-300-sd0.zip",
+            ],
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",
             "justMyCode": false,
