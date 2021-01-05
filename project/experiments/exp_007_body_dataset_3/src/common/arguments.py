@@ -9,7 +9,7 @@ def get_args():
     parser.add_argument("--train_bodies", type=str, default="", help="Format: --train_bodies=0,100,300")
     parser.add_argument("--test_bodies", type=str, default="", help="Format: --test_bodies=0,100,300")
 
-    parser.add_argument("--test_steps", type=int, default=10, help="total time steps for testing.")
+    parser.add_argument("--test_steps", type=int, default=1000, help="total time steps for testing.")
     parser.add_argument("--train_steps", type=float, default=1e6, help="total time steps for testing.")
 
     parser.add_argument("--num_venvs", type=int, default=16, help="How many envs you want to vectorize (train together).")

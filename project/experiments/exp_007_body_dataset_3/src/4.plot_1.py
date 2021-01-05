@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from numpy.core.shape_base import stack
 import seaborn as sns
 import pandas as pd
 

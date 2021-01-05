@@ -36,13 +36,3 @@ for bodyfile in files:
         d = p.getDynamicsInfo(robot, joint_id)
         print(d[0])
     time.sleep(2)
-# env = gym_interface.make_env(rank=0, render=True, robot_body=401, dataset_folder="../input_data/body-templates")()
-
-# env.reset()
-    # # for i in range(1000):
-    # #     action = env.action_space.sample()
-    # #     obs, reward, done, _ = env.step(action)
-    # #     time.sleep(100)
-
-    # time.sleep(3)
-    # env.close()
