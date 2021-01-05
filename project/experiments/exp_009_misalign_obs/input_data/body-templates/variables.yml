@@ -1,0 +1,68 @@
+body-300:
+  # walker2d
+  height: 1.45
+  torso_length: 0.4
+  torso_thickness: 0.05
+  thigh_length: 0.45
+  thigh_thickness: 0.05
+  leg_length: 0.5
+  leg_thickness: 0.04
+  foot_length: 0.2
+  foot_thickness: 0.06
+
+body-400:
+  # halfcheetah
+  height: 0.7
+  torso_length: 1
+  # torso_posterior = - torso_length / 2
+  # torso_anterior = torso_length / 2
+  torso_thickness: 0.046
+  head_length: 0.33
+  head_angle: 43
+  head_thickness: 0.046
+  # head_x = head_length * cos(head_angle)
+  # head_z = head_length * sin(head_angle)
+  # neck_x = head_x + torso_posterior
+  bthigh_length: 0.3
+  bthigh_angle: -57
+  bthigh_thickness: 0.046
+  bshin_length: 0.31
+  bshin_angle: -154
+  bshin_thickness: 0.046
+  bfoot_length: 0.22
+  bfoot_angle: -76
+  bfoot_thickness: 0.046
+  fthigh_length: 0.28
+  fthigh_angle: -120
+  fthigh_thickness: 0.046
+  fshin_length: 0.22
+  fshin_angle: -54
+  fshin_thickness: 0.046
+  ffoot_length: 0.22
+  ffoot_angle: -54
+  ffoot_thickness: 0.046
+
+body-500:
+  # ant
+  height: 0.75
+  torso_size: 0.25
+  leg_length: 0.2
+  leg_thickness: 0.08
+  aux_length: 0.2
+  aux_thickness: 0.08
+  foot_length: 0.4
+  foot_thickness: 0.08
+
+body-600:
+  # hopper
+  height: 1.45
+  torso_length: 0.4
+  torso_thickness: 0.05
+  thigh_length: 0.45
+  thigh_thickness: 0.05
+  leg_length: 0.5
+  leg_thickness: 0.04
+  foot_length: 0.4
+  # foot_posterior = - foot_length / 3
+  # foot_anterior = foot_length + foot_posterior
+  foot_thickness: 0.06
