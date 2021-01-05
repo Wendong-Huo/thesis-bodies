@@ -18,3 +18,10 @@ for body_base in args.train_bodies:
 
     results = results.sort_values(by="value")
     print(results)
+    print("\n"*2)
+    print("selected:")
+    results = results[results["value"]<10000]
+    results = results.iloc[-5:]
+
+    print(results)
+    
