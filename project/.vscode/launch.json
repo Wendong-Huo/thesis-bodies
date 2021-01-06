@@ -10,7 +10,10 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--test_bodies=300","--model_filename=output_data/models/model-300-sd0.zip",
+                "--train_bodies=400,500",
+                "--test_bodies=400,500",
+                "--random_align_obs",
+                // "--model_filename=output_data/models/model-300-sd0.zip",
             ],
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",
