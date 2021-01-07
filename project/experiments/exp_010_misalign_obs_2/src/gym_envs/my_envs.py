@@ -4,7 +4,10 @@ from pybullet_envs.gym_locomotion_envs import WalkerBaseBulletEnv
 from pybullet_envs.robot_locomotors import WalkerBase
 
 class MyWalkerBase(WalkerBase):
-    pass
+    def __init__(self, fn, robot_name, action_dim, obs_dim, power):
+        super().__init__(fn, robot_name, action_dim, obs_dim, power)
+        # e.g. fn = "".../300.xml"
+        self.robot_id = int(fn.split("/")[-1].split(".")[0])
 
 class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def __init__(self, robot, render=False):

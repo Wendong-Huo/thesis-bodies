@@ -24,6 +24,8 @@ Will the treatment need less training steps? or can the treatment perform better
 
 # What are the results? (in short)
 
+No obvious difference when training two bodies with obs in different orders.
+
 # Other Thoughts?
 
 other thoughts from the Jan 5 meeting:
