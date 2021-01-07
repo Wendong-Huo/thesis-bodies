@@ -1,7 +1,12 @@
 # What is tested?
 
-Suppose there are 16 walker2ds.
-Is training on random order walker2ds the same with aligned order?
+Suppose there are 16 body variations, and they are the same type, e.g. walker2d.
+The control is training a policy on them.
+The treatment is training a policy on them after shuffling the order of observations for all of them.
+
+We do this for 10 runs, in 4 types of bodies.
+
+Will there be any difference in performance?
 
 # What are Treatment and Control groups?
 
