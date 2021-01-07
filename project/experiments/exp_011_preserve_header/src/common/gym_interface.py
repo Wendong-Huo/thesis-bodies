@@ -47,6 +47,7 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
         if render:
             _render = rank in [0]
         env = gym.make(env_id, render=_render)
+        env.rank = rank
         if len(wrappers)>0:
             for _wrapper in wrappers:
                 if isinstance(_wrapper, BodyinfoWrapper):
@@ -57,7 +58,6 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
                     env = _wrapper(env, _body_info)
                 else:
                     env = _wrapper(env)
-            
         if seed is not None:
             env.seed(seed*100 + rank)
             env.action_space.seed(seed*100 + rank)

@@ -78,6 +78,12 @@ def build_model_filename(args):
         filename += f"-mis"
     if args.random_align_obs:
         filename += f"-ra"
+    if args.preserve_header:
+        filename += f"-ph"
+    if args.random_even_same_body:
+        filename += f"-resb"
+    if args.preserve_feet_contact:
+        filename += f"-pfc"
 
     filename += f"-sd{args.seed}"
     return filename

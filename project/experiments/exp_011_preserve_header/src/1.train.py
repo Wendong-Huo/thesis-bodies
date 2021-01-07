@@ -38,7 +38,8 @@ if __name__ == "__main__":
     assert len(args.train_bodies) > 0, "No body to train."
     if args.with_bodyinfo:
         default_wrapper.append(wrapper.BodyinfoWrapper)
-        
+
+    print("Making train environments...")
     venv = DummyVecEnv([gym_interface.make_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                robot_body=args.train_bodies[i % len(args.train_bodies)]) for i in range(args.num_venvs)])
 
@@ -55,6 +56,7 @@ if __name__ == "__main__":
         if key in hyperparams:
             del hyperparams[key]
 
+    print("Making eval environments...")
     all_callbacks = []
     for test_body in args.test_bodies:
         body_info = 0

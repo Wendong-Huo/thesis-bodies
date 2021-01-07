@@ -23,3 +23,8 @@ The difference is clear!
 # Other Thoughts?
 
 Waiting to add "oracle" curve, which is still running.
+
+take a look at the nodes that is running my jobs
+```
+squeue -u sliu1 -h | awk '{print $8}' | xargs -I {} scontrol show node {} | grep -P '(NodeName|CPULoad)'
+```
