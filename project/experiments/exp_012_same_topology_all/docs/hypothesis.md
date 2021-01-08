@@ -1,30 +1,34 @@
 # What is tested?
 
-Suppose there are 16 body variations, and they are the same type, e.g. walker2d.
-The control is training a policy on them.
-The treatment is training a policy on them after shuffling the order of observations for all of them.
+Still we have 16 bodies. (later we will test 2/4/8 bodies)
 
-We do this for 10 runs, in 4 types of bodies.
+All bodies have the same topology, the dimensions of bodies slightly vary. (later we will test bodies with different topologies)
 
-Will there be any difference in performance?
+These cases are:
+
+1. Aligned. [done]
+2. Only randomize "General" part. [-general_only]
+3. Only randomize "Joints" part. [done] old name [-ph-pfc] new name [-joints_only]
+4. Only randomize "FeetContact" part. [-feetcontact_only]
+5. Randomize "General" and "Joints" parts. [-general_joints]
+6. Randomize "General" and "FeetContact" parts. [-general_feetcontact]
+7. Randomize "Joints" and "FeetContact" parts. [done] old name [-ph] new name [-joints_feetcontact]
+
+And another compare curve 0. Oracle. (Train and test on the same body) [done] 
 
 # What are Treatment and Control groups?
 
 Treatment:
-16 walkers with different orders
+Case 2,4,5,6
 
 Control:
-16 walkers with the same order.
+we have controled cases "Aligned"
 
 # What are the results? (in short)
 
-The difference is clear!
 
 # Other Thoughts?
 
-Waiting to add "oracle" curve, which is still running.
-
-take a look at the nodes that is running my jobs
-```
-squeue -u sliu1 -h | awk '{print $8}' | xargs -I {} scontrol show node {} | grep -P '(NodeName|CPULoad)'
-```
+Re-train oracle for 5e6 steps.
+Re-train everything for 5e6 steps.
+There's something strange happen at about 2e6!

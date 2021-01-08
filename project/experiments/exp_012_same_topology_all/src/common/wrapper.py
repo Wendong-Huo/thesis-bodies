@@ -1,28 +1,8 @@
 import gym
-from gym.spaces.space import Space
 import numpy as np
 
-from gym_envs.ant import MyAntBulletEnv
-from gym_envs.walker2d import MyWalker2DBulletEnv
-
-class BodyinfoWrapper(gym.ObservationWrapper):
-    def __init__(self, env: gym.Env, bodyinfo=0):
-        # one-hot encoding length for bodyinfo: 10
-        self.bodyinfo_length = 2
-
-        gym.ObservationWrapper.__init__(self, env)
-        self.old_obs_space = self.observation_space
-        low = self.old_obs_space.low[0]
-        high = self.old_obs_space.high[0]
-        obs_length = len(self.old_obs_space.high) + self.bodyinfo_length
-        self.observation_space = gym.spaces.Box(low=low, high=high, shape=[obs_length])
-
-        self.bodyinfo = np.zeros(shape=[self.bodyinfo_length], dtype=np.float32)
-        self.bodyinfo[bodyinfo] = 1
-
-    def observation(self, obs: np.ndarray) -> np.ndarray:
-        obs = np.concatenate((obs, self.bodyinfo))
-        return obs
+from common import common
+from common.seeds import temp_seed
 
 class WalkerWrapper(gym.ObservationWrapper):
     """ unify ant and walker2d, align the observation and action """
@@ -74,3 +54,84 @@ class WalkerWrapper(gym.ObservationWrapper):
         if self.num_feet < self.max_num_feet:
             observation = np.concatenate( (observation, [0]*(self.max_num_feet-self.num_feet) ))
         return observation
+
+class ReAlignedWrapper(gym.ObservationWrapper):
+    def __init__(self, env: WalkerWrapper):
+        """Before using this wrapper, first wrap with WalkerWrapper"""
+        super().__init__(env)
+        self.realign_method = common.args.realign_method
+
+        print(self.realign_method)
+        if self.realign_method=="general_only":
+            self.realign_length = 8
+        elif self.realign_method=="joints_only":
+            self.realign_length = 16
+        elif self.realign_method=="feetcontact_only":
+            self.realign_length = 6
+        elif self.realign_method=="general_joints":
+            self.realign_length = 8+16
+        elif self.realign_method=="general_feetcontact":
+            self.realign_length = 8+6
+        elif self.realign_method=="joints_feetcontact":
+            self.realign_length = 16+6
+        elif self.realign_method=="general_joints_feetcontact":
+            self.realign_length = 8+16+6
+        else:
+            raise NotImplementedError
+
+        self.realign_idx = np.arange(self.realign_length)
+        
+        with temp_seed(common.seed):
+            np.random.shuffle(self.realign_idx)
+        with temp_seed(self.robot.robot_id):
+            np.random.shuffle(self.realign_idx)
+        if common.args.random_even_same_body:
+            with temp_seed(env.rank):
+                np.random.shuffle(self.realign_idx)
+
+        if self.realign_method=="general_only":
+            self.realign_idx = np.concatenate((
+                self.realign_idx,
+                np.arange(start=8, stop=8+16+6)
+            ))
+        elif self.realign_method=="joints_only":
+            self.realign_idx = np.concatenate((
+                np.arange(start=0,stop=8),
+                self.realign_idx + 8,
+                np.arange(start=8+16, stop=8+16+6)
+            ))
+        elif self.realign_method=="feetcontact_only":
+            self.realign_idx = np.concatenate((
+                np.arange(start=0,stop=8+16),
+                self.realign_idx + 8 + 16,
+            ))
+        elif self.realign_method=="general_joints":
+            self.realign_idx = np.concatenate((
+                self.realign_idx,
+                np.arange(start=8+16,stop=8+16+6),
+            ))
+        elif self.realign_method=="general_feetcontact":
+            self.realign_idx = np.concatenate((
+                self.realign_idx[:8],
+                np.arange(start=8,stop=8+16),
+                self.realign_idx[8:]
+            ))
+        elif self.realign_method=="joints_feetcontact":
+            self.realign_idx = np.concatenate((
+                np.arange(start=0,stop=8),
+                self.realign_idx
+            ))
+        elif self.realign_method=="general_joints_feetcontact":
+            self.realign_idx = self.realign_idx
+        else:
+            raise NotImplementedError
+
+        print(self.realign_idx)
+
+    def observation(self, obs):
+        # debug:
+        # obs = np.arange(30)
+        obs = obs[self.realign_idx]
+        # print(obs)
+        # exit(0)
+        return obs

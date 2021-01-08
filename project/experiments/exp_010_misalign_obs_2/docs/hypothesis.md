@@ -20,6 +20,13 @@ Control:
 
 The difference is clear!
 
+[oracle] is the best, [tensorboard_oracles/*]
+[aligned] is the second best, [no-addition-in-filename]
+
+[general_joints_feetcontact] is the worse. [-ra]
+
+see: plots/exp_all_values.png
+
 # Other Thoughts?
 
-Waiting to add "oracle" curve, which is still running.
+others should be in the middle.

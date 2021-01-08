@@ -2,7 +2,7 @@
 
 Total 28 dimensions:
 
-[more]
+[General]
 0: relative height of torso `z - self.initial_z`
 1: yaw `sin(angle_to_target)`
 2: yaw `cos(angle_to_target)`
@@ -12,7 +12,7 @@ Total 28 dimensions:
 6: roll
 7: pitch
 
-[joints_position_value]
+[Joints]
 8: `front_left_hip` position `(2 * (pos - pos_mid) / (self.upperLimit - self.lowerLimit)`
 9: `front_left_hip` changing velocity `0.1 * vel`
 10: `front_left_ankle` position
@@ -30,7 +30,7 @@ Total 28 dimensions:
 22: `back_right_ankle` position
 23: `back_right_ankle` changing velocity
 
-[feet_contact]
+[FeetContact]
 24: does `front_left_foot` contact with the floor 
 25: `front_right_foot`
 26: `left_back_foot`

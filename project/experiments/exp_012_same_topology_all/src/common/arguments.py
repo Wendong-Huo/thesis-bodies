@@ -10,7 +10,7 @@ def get_args():
     parser.add_argument("--test_bodies", type=str, default="", help="Format: --test_bodies=0,100,300")
 
     parser.add_argument("--test_steps", type=int, default=1000, help="total time steps for testing.")
-    parser.add_argument("--train_steps", type=float, default=1e6, help="total time steps for testing.")
+    parser.add_argument("--train_steps", type=float, default=5e6, help="total time steps for training.")
 
     parser.add_argument("--num_venvs", type=int, default=16, help="How many envs you want to vectorize (train together).")
 
@@ -26,12 +26,12 @@ def get_args():
 
     parser.add_argument("--model_filename", type=str, default="", help="model to test.")
     
-    parser.add_argument("--misalign_obs", action="store_true", help="first misalignment test.")
-    parser.add_argument("--random_align_obs", action="store_true", help="second misalignment test.")
-    parser.add_argument("--preserve_header", action="store_true", help="preserve_header when misalign others")
-    parser.add_argument("--random_even_same_body", action="store_true", help="preserve_header when misalign others")
-    parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
-    
+    parser.add_argument("--realign_method", type=str, default="", help="See exp_012's hypothesis. Could be: general_only|joints_only|feetcontact_only|...")
+    # parser.add_argument("--misalign_obs", action="store_true", help="first misalignment test.")
+    # parser.add_argument("--random_align_obs", action="store_true", help="second misalignment test.")
+    # parser.add_argument("--preserve_header", action="store_true", help="preserve_header when misalign others")
+    parser.add_argument("--random_even_same_body", action="store_true", help="all training bodies have different orders in observation.")
+    # parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
     args = parser.parse_args()
 
     args.train_steps = int(args.train_steps)

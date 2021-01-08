@@ -9,7 +9,6 @@ import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 import common.callbacks as callbacks
 from common.activation_fn import MyThreshold
-from misalign_wrapper import MisalignedWalkerWrapper, RandomAlignedWalkerWrapper
 
 if __name__ == "__main__":
 
@@ -26,13 +25,10 @@ if __name__ == "__main__":
 
     # Make every env has the same obs space and action space
     default_wrapper = []
-
-    if args.misalign_obs:
-        default_wrapper.append(MisalignedWalkerWrapper)
-    elif args.random_align_obs:
-        default_wrapper.append(RandomAlignedWalkerWrapper)
-    else:
-        default_wrapper.append(wrapper.WalkerWrapper)
+    default_wrapper.append(wrapper.WalkerWrapper)
+    
+    if args.realign_method!="":
+        default_wrapper.append(wrapper.ReAlignedWrapper)
     
 
     assert len(args.train_bodies) > 0, "No body to train."
@@ -86,7 +82,7 @@ if __name__ == "__main__":
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 
-    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/"tensorboard"/saved_model_filename), seed=common.seed, **hyperparams)
+    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/f"tensorboard"/saved_model_filename), seed=common.seed, **hyperparams)
 
     if len(args.initialize_weights_from) > 0:
         try:

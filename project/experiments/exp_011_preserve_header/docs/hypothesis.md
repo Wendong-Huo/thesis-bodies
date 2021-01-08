@@ -10,21 +10,20 @@ Will there be any difference in performance?
 
 # What are Treatment and Control groups?
 
-Treatment:
-16 walkers with different orders
-
-Control:
-16 walkers with the same order.
+If we only allow joints part and feet contact part to be randomized, what will the learning curve looks like in 16 same-topology bodies.
+Comparing to previous oracle and aligned.
 
 # What are the results? (in short)
 
-The difference is clear!
+the result of [joints_only] and [joints_feetcontact] is [-ph-pfc] and [-ph], respectively.
+
+better than [general_joints_feetcontact], worse than [aligned], as expected.
+
+see: plots/exp_all_values.png
 
 # Other Thoughts?
 
-Waiting to add "oracle" curve, which is still running.
-
 take a look at the nodes that is running my jobs
 ```
-squeue -u sliu1 -h | awk '{print $8}' | xargs -I {} scontrol show node {} | grep -P '(NodeName|CPULoad)'
+squeue -u sliu1 -h | awk '{print $8}' | xargs -I {} scontrol show node {} | grep -P 'NodeName'
 ```

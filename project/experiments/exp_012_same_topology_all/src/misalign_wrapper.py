@@ -1,4 +1,6 @@
 import numpy as np
+import gym
+
 from common import common
 from common.wrapper import WalkerWrapper
 from common.seeds import temp_seed
@@ -12,6 +14,7 @@ class MisalignedWalkerWrapper(WalkerWrapper):
             observation = np.concatenate((observation, [0]*((self.max_num_joint*2 + self.max_num_feet)-(self.num_joint*2 + self.num_feet))))
 
         return observation
+
 
 class RandomAlignedWalkerWrapper(WalkerWrapper):
     def __init__(self, env):

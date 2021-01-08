@@ -1,7 +1,6 @@
 import pathlib
 import gym
 import common.common as common
-from common.wrapper import BodyinfoWrapper
 
 def template(body):
     _template = {
@@ -50,14 +49,7 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
         env.rank = rank
         if len(wrappers)>0:
             for _wrapper in wrappers:
-                if isinstance(_wrapper, BodyinfoWrapper):
-                    if body_info<0:
-                        _body_info = robot_body
-                    else:
-                        _body_info = body_info
-                    env = _wrapper(env, _body_info)
-                else:
-                    env = _wrapper(env)
+                env = _wrapper(env)
         if seed is not None:
             env.seed(seed*100 + rank)
             env.action_space.seed(seed*100 + rank)
