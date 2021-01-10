@@ -1,0 +1,24 @@
+import time
+import glob
+import common.gym_interface as gym_interface
+import pybullet as p
+import os
+import pybullet_data
+import shutil
+import re
+p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+files = glob.glob("../input_data/bodies/5*.xml")
+files.sort()
+print(files)
+p.resetSimulation()
+
+filename = os.path.join(pybullet_data.getDataPath(), "plane_stadium.sdf")
+_ = p.loadSDF(filename)
+robots = [None]*len(files)
+for i in range(len(files)):
+    (robots[i],) = p.loadMJCF(files[i])
+    p.resetBasePositionAndOrientation(robots[i], [i*2,0,1], [0,0,0,1])
+while True:
+    p.stepSimulation()
+    time.sleep(0.01)
