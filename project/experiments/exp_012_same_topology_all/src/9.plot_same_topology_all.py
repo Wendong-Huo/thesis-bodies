@@ -93,7 +93,7 @@ def same_topology_get_oracles(tensorboard_path, read_cache=False):
                     print(f"Loading {path}")
                     df = tflog2pandas(path)
                     df_body = df[df["metric"]==f"eval/{body}_mean_reward"].copy()
-                    if df_body.shape[0]!=62:
+                    if df_body.shape[0]!=312:
                         print(df_body.shape)
                         raise Exception("Data is not complete.")
                     df_body["body"] = template(body)
@@ -101,15 +101,14 @@ def same_topology_get_oracles(tensorboard_path, read_cache=False):
                     df_results = df_results.append(df_body)
         df_results["method"] = "oracle"
         df_results["num_bodies"] = 1
+        print(f"Saving file output_data/tmp/same_topology_{method}...")
         df_results.to_pickle(f"output_data/tmp/same_topology_{method}")
     return df_results
 
 
 df_all = []
 
-read_cache = False
-
-df = same_topology_get_oracles(tensorboard_path=f"output_data/tensorboard_same_topology_all/oracles", read_cache=True)
+df = same_topology_get_oracles(tensorboard_path=f"output_data/tensorboard_oracles", read_cache=True)
 df_all.append(df)
 
 methods = ["aligned", "general_only", "joints_only", "feetcontact_only", "general_joints", "general_feetcontact", "joints_feetcontact", "general_joints_feetcontact"]
@@ -118,44 +117,25 @@ for job in all_jobs.values():
     print(f"seed: {job['seed']}")
     arr = job['arr']
     seed = job['seed']
-    # body_types = [3,4,5,6]
-    # for body_type in body_types:
-    #     str_bodies = '-'.join([f"{body_type}{x:02}" for x in arr])
-    #     # print( str_bodies )
-    #     path = f"output_data/tensorboard/model-{str_bodies}--sd{seed}"
-    #     if os.path.exists(path):
+
     for method in methods:
         try:
-            df = same_topology_get_results(tensorboard_path=f"output_data/tensorboard", method=method, seed=seed, body_arr=arr, read_cache=read_cache)
+            df = same_topology_get_results(tensorboard_path=f"output_data/tensorboard", method=method, seed=seed, body_arr=arr, read_cache=True)
             df_all.append(df)
         except Exception as e:
             if str(e)=="Data is not complete.":
                 print(e)
                 continue
-        # else:
-        #     print(f"missing path: {path}")
 
 df_all = pd.concat(df_all)
 df_all.to_pickle("output_data/tmp/same_topology_all.pickle")
-g = sns.FacetGrid(df_all, col="body",  hue="method", legend_out=True)
-g.map(sns.lineplot, "step", "value")
-g.add_legend()
-plt.savefig("output_data/plots/plot_same_topology_all.png")
-plt.close()
 
-exit(0)
-
-df_all = {}
-df_all["oracles"] = same_topology_get_oracles(f"output_data/tensorboard_same_topology_all/oracles", False)
-
-methods = ["aligned", "general_only", "joints_only", "feetcontact_only", "general_joints", "general_feetcontact", "joints_feetcontact", "general_joints_feetcontact"]
-for method in methods:
-    df_all[method] = same_topology_get_results(f"output_data/tensorboard_same_topology_all/{method}", method, False)
-df = pd.concat(df_all.values())
-print(df)
-
-g = sns.FacetGrid(df, col="body",  hue="method", legend_out=True)
-g.map(sns.lineplot, "step", "value")
-g.add_legend()
-plt.savefig("output_data/plots/plot_same_topology_all.png")
-plt.close()
+for plot_num_bodies in [2,4,8,16]:
+    df_all = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
+    print(df_all)
+    print("Plotting...")
+    g = sns.FacetGrid(df_all, col="body", hue="method", legend_out=True)
+    g.map(sns.lineplot, "step", "value")
+    g.add_legend()
+    plt.savefig(f"output_data/plots/plot_same_topology_all_{plot_num_bodies}.png")
+    plt.close()

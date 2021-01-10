@@ -26,6 +26,23 @@ we have controled cases "Aligned"
 
 # What are the results? (in short)
 
+In short: N=5?
+
+For data of treatment and control:
+average over: 5 seeds x body numbers (2,4,8,16) = 10,20,40,80
+total runs: seeds(5) x num body numbers(4) x num types(4) x num methods(8) = 640
+e.g. seed=0, body number=16, type=hopper, method=aligned.
+
+For oracle:
+average over: 2 seeds x 16 bodies = 32
+total runs: seeds(2) x num possible bodies(20) x num types(4) = 160
+e.g. seed=0, body=19, type=hopper
+
+If there is misalignment, in general, performance hurts.
+
+This is getting more obvious when number of bodies gets large. This is more obvious in 16 bodies than in 2 bodies.
+
+Misaligning some dimensions hurts more than others in general, but differs with morphologies.
 
 # Other Thoughts?
 
