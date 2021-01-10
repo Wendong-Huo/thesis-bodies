@@ -25,7 +25,8 @@ if __name__ == "__main__":
 
     # Make every env has the same obs space and action space
     default_wrapper = []
-    default_wrapper.append(wrapper.WalkerWrapper)
+    # if padding zero:
+    #   default_wrapper.append(wrapper.WalkerWrapper)
     
     if args.realign_method!="":
         default_wrapper.append(wrapper.ReAlignedWrapper)

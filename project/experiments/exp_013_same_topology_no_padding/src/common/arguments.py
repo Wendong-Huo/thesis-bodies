@@ -1,4 +1,4 @@
-import argparse
+import sys, argparse
 
 
 def get_args():
@@ -32,8 +32,13 @@ def get_args():
     # parser.add_argument("--preserve_header", action="store_true", help="preserve_header when misalign others")
     parser.add_argument("--random_even_same_body", action="store_true", help="all training bodies have different orders in observation.")
     # parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
-    args = parser.parse_args()
-
+    if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone
+        args = parser.parse_args(sys.argv[1:])
+        sys.argv = [sys.argv[0]]
+    if sys.argv[0]=="python -m unittest": # hack: unittest from command line
+        args = parser.parse_args([])
+    else:
+        args = parser.parse_args()
     args.train_steps = int(args.train_steps)
     args.train_bodies_str = args.train_bodies
     args.train_bodies = str2array(args.train_bodies_str)

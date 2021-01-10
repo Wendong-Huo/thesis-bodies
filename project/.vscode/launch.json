@@ -10,14 +10,11 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                // "--train_bodies=400,500",
-                // "--test_bodies=400,500",
-                // "--random_align_obs",
-                // "--preserve_header",
-                // "--random_even_same_body",
-                // "--model_filename=output_data/models/model-300-sd0.zip",
+                "--train_bodies=500,501",
+                // // "--test_bodies=400,500",
+                "--realign_method=joints_feetcontact",
             ],
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/experiments/exp_013_same_topology_no_padding/src/",
             "console": "integratedTerminal",
             "justMyCode": false,
         }

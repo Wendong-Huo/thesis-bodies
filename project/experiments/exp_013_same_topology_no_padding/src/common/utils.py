@@ -9,7 +9,7 @@ def get_exp_name():
     """Return current experiment folder, such as exp0."""
     _full_path = str(pathlib.Path().absolute())
     _paths = _full_path.split('/')
-    assert _paths[-1] == "src", "Project structure has been changed. utils.get_exp_folder() should be changed accordingly."
+    assert _paths[-1] == "src", f"Project structure has been changed. utils.get_exp_folder() should be changed accordingly.\n{_paths}"
     assert len(_paths) > 2, "Why path is so short?"
     _folder_name = _paths[-2]
     return _folder_name
