@@ -10,30 +10,16 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--train_bodies=500,501",
-                // // "--test_bodies=400,500",
-                "--realign_method=joints_feetcontact",
+                "--train_bodies=300,600",
+                "--test_bodies=300,600",
+                "--topologies=diff",
+                "--wrapper_type=Walker2DHopperGoodWrapper",
+                // "--realign_method=joints_feetcontact",
             ],
-            "cwd": "${workspaceFolder}/experiments/exp_013_same_topology_no_padding/src/",
+            "cwd": "${fileDirname}",
+            // "cwd": "${workspaceFolder}/experiments/exp_014_same_topology_no_padding/src/",
             "console": "integratedTerminal",
             "justMyCode": false,
         }
-        // ,
-        // {
-        //     "name": "1.train.py",
-        //     "type": "python",
-        //     "request": "launch",
-        //     "program": "${file}",
-        //     "args": [
-        //         "--train_bodies=300",
-        //         "--num_venv=1",
-        //         // "--skip_frames=3",
-        //         // "--test_bodies=400",
-        //         "--render",
-        //     ],
-        //     "cwd": "${fileDirname}",
-        //     "console": "integratedTerminal",
-        //     "justMyCode": false,
-        // }
     ]
 }

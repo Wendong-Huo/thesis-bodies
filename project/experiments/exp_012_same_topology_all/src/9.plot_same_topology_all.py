@@ -131,10 +131,10 @@ df_all = pd.concat(df_all)
 df_all.to_pickle("output_data/tmp/same_topology_all.pickle")
 
 for plot_num_bodies in [2,4,8,16]:
-    df_all = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
-    print(df_all)
+    df_part = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
+    print(df_part)
     print("Plotting...")
-    g = sns.FacetGrid(df_all, col="body", hue="method", legend_out=True)
+    g = sns.FacetGrid(df_part, col="body", hue="method", legend_out=True)
     g.map(sns.lineplot, "step", "value")
     g.add_legend()
     plt.savefig(f"output_data/plots/plot_same_topology_all_{plot_num_bodies}.png")
