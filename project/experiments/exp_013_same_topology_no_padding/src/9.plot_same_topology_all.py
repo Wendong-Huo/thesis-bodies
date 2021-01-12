@@ -51,7 +51,7 @@ def same_topology_get_results(tensorboard_path, body_arr, seed, method, read_cac
                 df = tflog2pandas(path)
                 for body in bodies:
                     df_body = df[df["metric"]==f"eval/{body}_mean_reward"].copy()
-                    if df_body.shape[0]<62:
+                    if df_body.shape[0]<31:
                         print(df_body.shape)
                         need_retrain.append({
                             "bodies": bodies,
@@ -130,11 +130,19 @@ for job in all_jobs.values():
 df_all = pd.concat(df_all)
 df_all.to_pickle("output_data/tmp/same_topology_all.pickle")
 
+# smooth oracles by choosing less steps
+valid_steps = list(df_all[df_all["method"]=="aligned"]["step"].unique())
+df_all = df_all[df_all["step"].isin(valid_steps)]
+# remove hopper's feetcontact_only, because hopper only has one feet, randomize that will be exactly the same with aligned.
+df_all = df_all[(df_all["body"]!="hopper")|(df_all["method"]!="feetcontact_only")]
+df_all["Randomization"] = df_all["method"]
+
+
 for plot_num_bodies in [2,4,8,16]:
-    df_all = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
-    print(df_all)
+    df_part = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
+    print(df_part)
     print("Plotting...")
-    g = sns.FacetGrid(df_all, col="body", hue="method", legend_out=True)
+    g = sns.FacetGrid(df_part, col="body", hue="Randomization", legend_out=True)
     g.map(sns.lineplot, "step", "value")
     g.add_legend()
     plt.savefig(f"output_data/plots/plot_same_topology_all_{plot_num_bodies}.png")

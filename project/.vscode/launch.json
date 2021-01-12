@@ -10,11 +10,9 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--train_bodies=300,600",
-                "--test_bodies=300,600",
-                "--topologies=diff",
-                "--wrapper_type=Walker2DHopperGoodWrapper",
-                // "--realign_method=joints_feetcontact",
+                "--train_bodies=849",
+                "--test_bodies=849",
+                "--seed=2"
             ],
             "cwd": "${fileDirname}",
             // "cwd": "${workspaceFolder}/experiments/exp_014_same_topology_no_padding/src/",

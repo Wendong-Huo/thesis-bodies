@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_014_diff_top_walker_hopper/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_015_diff_walker/src"]
 }
 
