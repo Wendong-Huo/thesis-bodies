@@ -1,7 +1,8 @@
 # What is tested?
 
-Now we have different topologies. 
-If we have a policy that can control both WalkerArms and Walker2D, how should we align the observation.
+Randomly generate 16 bodies. Each body has 16 joints. Train on one and test on one to prove it is a valid body.
+Start with 100.
+
 
 # What are Treatment and Control groups?
 
