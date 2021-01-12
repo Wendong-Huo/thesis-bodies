@@ -136,7 +136,7 @@ df_all = df_all[df_all["step"].isin(valid_steps)]
 # remove hopper's feetcontact_only, because hopper only has one feet, randomize that will be exactly the same with aligned.
 df_all = df_all[(df_all["body"]!="hopper")|(df_all["method"]!="feetcontact_only")]
 df_all["Randomization"] = df_all["method"]
-
+df_all = df_all[df_all["method"].isin(["oracle", "aligned", "general_joints_feetcontact"])]
 
 for plot_num_bodies in [2,4,8,16]:
     df_part = df_all[(df_all["num_bodies"]==1)|(df_all["num_bodies"]==plot_num_bodies)]
@@ -145,5 +145,5 @@ for plot_num_bodies in [2,4,8,16]:
     g = sns.FacetGrid(df_part, col="body", hue="Randomization", legend_out=True)
     g.map(sns.lineplot, "step", "value")
     g.add_legend()
-    plt.savefig(f"output_data/plots/plot_same_topology_all_{plot_num_bodies}.png")
+    plt.savefig(f"output_data/plots/plot_aligned_vs_random_{plot_num_bodies}.png")
     plt.close()

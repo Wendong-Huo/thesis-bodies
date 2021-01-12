@@ -8,14 +8,16 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/experiments/exp_016_diff_walker_2/src/1.train.py",
             "args": [
-                "--train_bodies=849",
-                "--test_bodies=849",
-                "--seed=2"
+                "--train_bodies=907,900",
+                // "--test_bodies=849",
+                "--topology_wrapper=MutantWrapper",
+                "--seed=2",
+                "--num_venvs=2",
             ],
-            "cwd": "${fileDirname}",
-            // "cwd": "${workspaceFolder}/experiments/exp_014_same_topology_no_padding/src/",
+            // "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/experiments/exp_016_diff_walker_2/src/",
             "console": "integratedTerminal",
             "justMyCode": false,
         }
