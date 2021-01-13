@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_017_generate_random_bodies/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_018_main_exp/src"]
 }
 

@@ -67,8 +67,8 @@ if __name__ == "__main__":
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = eval_venv.step(action)
             if args.render:
-                eval_venv.envs[0].camera_adjust()
-                time.sleep(0.01)
+                # eval_venv.envs[0].camera_adjust()
+                time.sleep(0.02)
             if done:
                 # it should not matter if the env reset. I guess...
                 break

@@ -26,6 +26,7 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         self._history_dx = []
         obs = super().reset()
         self.pybullet = self._p
+        self.camera_angle = 0
         return obs
 
     def show_body_id(self):
@@ -35,14 +36,20 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def camera_adjust(self):
         self.camera_simpy_follow_robot()
 
-    def camera_simpy_follow_robot(self):
+    def camera_simpy_follow_robot(self, rotate=True):
         if self._p:
-            distance = 5
-            pitch = -50
-            yaw = 0
-            _current_x = self.robot.body_xyz[0]
+            self.camera_angle += 1
+            distance = 4
+            pitch = -10
+            if rotate:
+                yaw = self.camera_angle
+            else:
+                yaw = 0
 
-            lookat = [_current_x, 0, 0.7]
+            _current_x = self.robot.body_xyz[0]
+            _current_y = self.robot.body_xyz[1]
+
+            lookat = [_current_x, _current_y, 0.7]
             self._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)
 
     def camera_follow_robot(self):

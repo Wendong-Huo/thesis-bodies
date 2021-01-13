@@ -1,7 +1,13 @@
 # What is tested?
 
-Randomly generate 16 bodies. Each body has 16 joints. Train on one and test on one to prove it is a valid body.
-ID starts from 100.
+Select 16 2xx bodies.
+Try different alignment combinations.
+
+Generate 500 different ways to align observation space.
+
+Train, and get results.
+
+Plot them and show the difference.
 
 
 # What are Treatment and Control groups?
