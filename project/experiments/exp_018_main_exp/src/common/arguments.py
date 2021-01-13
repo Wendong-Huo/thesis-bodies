@@ -29,6 +29,7 @@ def get_args():
     parser.add_argument("--topology_wrapper", type=str, default="", help="Switch for different experiments. Could be: same|diff")
     parser.add_argument("--wrapper_case", type=str, default="Walker2DHopperWrapper", help="special wrapper for different experiments.")
     parser.add_argument("--realign_method", type=str, default="", help="Only works when --topologies=same. See exp_012's hypothesis. Could be: general_only|joints_only|feetcontact_only|...")
+    parser.add_argument("--custom_alignment", type=str, default="", help="For CustomAlignWrapper. e.g. '0,1,2;0,1,2;2,0,1;1,0,2' for 4 observations with size of 3. ")
     # parser.add_argument("--misalign_obs", action="store_true", help="first misalignment test.")
     # parser.add_argument("--random_align_obs", action="store_true", help="second misalignment test.")
     # parser.add_argument("--preserve_header", action="store_true", help="preserve_header when misalign others")

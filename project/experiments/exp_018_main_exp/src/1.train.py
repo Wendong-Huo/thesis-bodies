@@ -3,7 +3,7 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
 from stable_baselines3.common.callbacks import CheckpointCallback
-from common import wrapper_diff, wrapper_mut
+from common import wrapper_custom_align, wrapper_diff, wrapper_mut
 
 import common.common as common
 import common.wrapper as wrapper
@@ -42,6 +42,8 @@ if __name__ == "__main__":
         default_wrapper.append(wrapper_diff.get_wrapper_class())
     elif args.topology_wrapper == "MutantWrapper":
         default_wrapper.append(wrapper_mut.MutantWrapper)
+    elif args.topology_wrapper == "CustomAlignWrapper":
+        default_wrapper.append(wrapper_custom_align.CustomAlignWrapper)
     else:
         pass # no need for wrapper
 
@@ -52,7 +54,7 @@ if __name__ == "__main__":
     print("Making train environments...")
     venv = DummyVecEnv([gym_interface.make_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                robot_body=args.train_bodies[i % len(args.train_bodies)],
-                                               dataset_folder="output_data/bodies") for i in range(args.num_venvs)])
+                                               dataset_folder="../input_data/bodies") for i in range(args.num_venvs)])
 
     normalize_kwargs = {}
     if args.vec_normalize:
@@ -73,7 +75,7 @@ if __name__ == "__main__":
         body_info = 0
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed+1, wrappers=default_wrapper, render=False,
                                                         robot_body=test_body, body_info=body_info,
-                                                        dataset_folder="output_data/bodies")])
+                                                        dataset_folder="../input_data/bodies")])
         if args.vec_normalize:
             eval_venv = VecNormalize(eval_venv, norm_reward=False, **normalize_kwargs)
         if args.stack_frames > 1:
@@ -98,7 +100,7 @@ if __name__ == "__main__":
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 
-    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/f"tensorboard"/saved_model_filename), seed=common.seed, **hyperparams)
+    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/f"tensorboard_10x10"/saved_model_filename), seed=common.seed, **hyperparams)
 
     if len(args.initialize_weights_from) > 0:
         try:

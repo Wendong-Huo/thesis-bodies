@@ -10,7 +10,10 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--train_bodies=101",
+                "--train_bodies=200,201",
+                "--topology_wrapper=CustomAlignWrapper",
+                "--custom_alignment=0,1,2,3,4,5,6,7,8,9::1,0,2,3,4,5,6,7,8,9",
+                "--num_venvs=2",
                 "--render",
             ],
             "cwd": "${fileDirname}",

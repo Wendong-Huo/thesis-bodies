@@ -1,4 +1,5 @@
 import os
+import hashlib
 import pathlib
 import yaml
 import torch.nn as nn
@@ -82,6 +83,10 @@ def build_model_filename(args):
             filename += f"-case{args.wrapper_case}"
     elif args.topology_wrapper=="MutantWrapper":
         filename += "-MutantWrapper"
+    elif args.topology_wrapper=="CustomAlignWrapper":
+        str2hash = args.custom_alignment
+        md5_string = hashlib.md5(str2hash.encode()).hexdigest()
+        filename += f"-CustomAlignWrapper-md{md5_string}"
     else:
         pass
     

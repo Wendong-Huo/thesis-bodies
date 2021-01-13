@@ -5,7 +5,7 @@
 # ...
 # a15[0,1,2,3,4,5,6,7,8,9]
 
-# Total possible combinations = (Pr10)^16 = (10!)^16 = 9e104 (A huge number.)
+# Total possible combinations = (Pr10)^(16-1) = (10!)^15 (A huge number.)
 
 # So we randomly shuffle them, and if repeats, re-shuffle to get a new one.
 

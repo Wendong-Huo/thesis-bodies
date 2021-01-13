@@ -3,4 +3,4 @@ set -x
 
 hostname -I
 
-tensorboard --logdir output_data/tensorboard --host 0.0.0.0
+tensorboard --logdir output_data/${1:-tensorboard} --host 0.0.0.0

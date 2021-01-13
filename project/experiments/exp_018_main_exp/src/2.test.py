@@ -5,7 +5,7 @@ from tqdm import tqdm
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from common import wrapper_diff, wrapper_mut
+from common import wrapper_custom_align, wrapper_diff, wrapper_mut
 import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
@@ -34,13 +34,15 @@ if __name__ == "__main__":
         default_wrapper.append(wrapper_diff.get_wrapper_class())
     elif args.topology_wrapper == "MutantWrapper":
         default_wrapper.append(wrapper_mut.MutantWrapper)
+    elif args.topology_wrapper == "CustomAlignWrapper":
+        default_wrapper.append(wrapper_custom_align.CustomAlignWrapper)
     else:
         pass # no need for wrapper
 
     for test_body in args.test_bodies:
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                         robot_body=test_body,
-                                                        dataset_folder="output_data/bodies")])
+                                                        dataset_folder="../input_data/bodies")])
         if args.vec_normalize:
             raise NotImplementedError
             # normalize_kwargs["gamma"] = hyperparams["gamma"]

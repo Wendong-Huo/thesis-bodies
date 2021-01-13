@@ -36,7 +36,7 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def camera_adjust(self):
         self.camera_simpy_follow_robot()
 
-    def camera_simpy_follow_robot(self, rotate=True):
+    def camera_simpy_follow_robot(self, rotate=False):
         if self._p:
             self.camera_angle += 1
             distance = 4
