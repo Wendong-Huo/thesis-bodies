@@ -8,6 +8,19 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
+            "program": "${file}",
+            "args": [
+                "--train_bodies=101",
+                "--render",
+            ],
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "exp_016",
+            "type": "python",
+            "request": "launch",
             "program": "${workspaceFolder}/experiments/exp_016_diff_walker_2/src/1.train.py",
             "args": [
                 "--train_bodies=907,900",
@@ -20,6 +33,6 @@
             "cwd": "${workspaceFolder}/experiments/exp_016_diff_walker_2/src/",
             "console": "integratedTerminal",
             "justMyCode": false,
-        }
+        },
     ]
 }

@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_016_diff_walker_2/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_017_generate_random_bodies/src"]
 }
 
