@@ -31,3 +31,6 @@ Alignment seems doesn't matter in this experiment.
 # Other Thoughts?
 
 Add arms to walker2d?
+
+results in tensorboard_9xx
+videos in exp_018 data folder
