@@ -1,3 +1,4 @@
+import os, pathlib
 import time
 import numpy as np
 from tqdm import tqdm
@@ -13,6 +14,7 @@ from common import wrapper_custom_align, wrapper_diff, wrapper_mut
 import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
+from common import linux
 
 if __name__ == "__main__":
     args = common.args
@@ -22,6 +24,8 @@ if __name__ == "__main__":
     # args.test_steps = 10
     # args.render = True
     print(args)
+    model_name = pathlib.Path(args.model_filename).stem
+    os.makedirs(f"output_data/saved_images/{model_name}", exist_ok=False)
 
     assert len(args.train_bodies) == 0, "No need for body to train."
 
@@ -48,6 +52,7 @@ if __name__ == "__main__":
     else:
         pass # no need for wrapper
 
+
     for test_body in args.test_bodies:
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                         robot_body=test_body,
@@ -66,11 +71,7 @@ if __name__ == "__main__":
         obs = eval_venv.reset()
         g_obs_data = np.zeros(shape=[args.test_steps, obs.shape[1]], dtype=np.float32)
 
-        if True:
-            from common import linux
-            linux.fullscreen()
-            print("\n\nWait for a while, so I have the time to press Ctrl+F11 to enter FullScreen Mode.\n\n")
-            time.sleep(2) # Wait for a while, so I have the time to press Ctrl+F11 to enter FullScreen Mode.
+        linux.fullscreen()
 
         distance_x = 0
         total_reward = 0
@@ -85,7 +86,7 @@ if __name__ == "__main__":
                 (width, height, rgbPixels, _, _) = eval_venv.envs[0].pybullet.getCameraImage(1920,1080, renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
                 image = rgbPixels[:,:,:3]
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                cv2.imwrite(f"output_data/saved_images/test_{test_body}_{step:05}.png", image)
+                cv2.imwrite(f"output_data/saved_images/{model_name}/test_{test_body}_{step:05}.png", image)
 
             if done:
                 # it should not matter if the env reset. I guess...

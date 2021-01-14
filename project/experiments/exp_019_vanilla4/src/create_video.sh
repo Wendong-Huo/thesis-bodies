@@ -3,11 +3,33 @@
 set -x
 
 #generate videos
-cat output_data/saved_images/test_*.png | ffmpeg -framerate 100 -f image2pipe -i - -y output_data/videos/9xx-no-align.mp4
-# for body in $(seq 900 907)
-# do
-#     ffmpeg -framerate 100 -i output_data/saved_images/test_$(echo $body)_00%3d.png -y output_data/videos/test_$body.mp4
-# done
+for body in $(seq 900 907)
+do
+    ffmpeg -framerate 100 -i output_data/saved_images/9xx/test_$(echo $body)_00%3d.png -y output_data/videos/9xx_$body.mp4
+    ffmpeg -framerate 100 -i output_data/saved_images/9xx-not-aligned/test_$(echo $body)_00%3d.png -y output_data/videos/9nn_$body.mp4
+
+    ffmpeg -i output_data/videos/9xx_$body.mp4 -filter:v "crop=in_w/2:in_h:in_w/4:0" -c:a -y output_data/videos/9xx_half_$body.mp4
+    ffmpeg -i output_data/videos/9nn_$body.mp4 -filter:v "crop=in_w/2:in_h:in_w/4:0" -c:a -y output_data/videos/9nn_half_$body.mp4
+
+    ffmpeg -i output_data/videos/9xx_half_$body.mp4 -i output_data/videos/9nn_half_$body.mp4 -filter_complex \
+    "[0:v][1:v]hstack=shortest=1[step1]; \
+    [step1]drawtext=text='$body Meaningfully Aligned':fontfile=FreeSerif.ttf:fontcolor=black:fontsize=50:x=10:y=10[step2]; \
+    [step2]drawtext=text='$body Arbitrarily Aligned':fontfile=FreeSerif.ttf:fontcolor=black:fontsize=50:x=1920/2+10:y=10 \
+    " -y output_data/videos/compare_$body.mp4
+
+done
+
+ffmpeg \
+-i output_data/videos/compare_900.mp4 \
+-i output_data/videos/compare_901.mp4 \
+-i output_data/videos/compare_902.mp4 \
+-i output_data/videos/compare_903.mp4 \
+-i output_data/videos/compare_904.mp4 \
+-i output_data/videos/compare_905.mp4 \
+-i output_data/videos/compare_906.mp4 \
+-i output_data/videos/compare_907.mp4 \
+ -filter_complex "[0:v][1:v][2:v][3:v][4:v][5:v][6:v][7:v] concat=n=8" -y output_data/videos/final.mp4
+
 
 # ffmpeg -framerate 100 -i output_data/saved_images/barchart_00%3d.png -y output_data/videos/barchart_$body.mp4
 # ffmpeg -i output_data/videos/getCameraImage_$body.mp4 -vf "movie=output_data/videos/barchart_$body.mp4, scale=500: -1 [inner];[in][inner]overlay=10:10 [out]" -y output_data/videos/$body.mp4

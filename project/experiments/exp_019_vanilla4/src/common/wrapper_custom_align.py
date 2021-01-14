@@ -6,7 +6,7 @@ import numpy as np
 
 from common import common
 from common import gym_interface
-
+from common import colors
 class CustomAlignWrapper(gym.ObservationWrapper):
     max_num_joints = 8
 
@@ -15,6 +15,7 @@ class CustomAlignWrapper(gym.ObservationWrapper):
         env.foot_list = []
         super().__init__(env)
         self.debug = 1
+        self.colored = False
         # assert gym_interface.template(env.robot.robot_id)=="randomrobot", "CustomAlignWrapper only support randomrobot for now."
         # obs ------------ F() ------> abs_obs
         # abs_action --- F^{-1}() ---> action
@@ -33,6 +34,28 @@ class CustomAlignWrapper(gym.ObservationWrapper):
         assert self.original_num_joints <= self.max_num_joints, f"CustomAlignWrapper only support at most {self.max_num_joints}-joint body."
         # always reset the space size, because it removes the foot_contact part
         self.reset_space_size()
+    
+    def reset(self):
+        obs = super().reset()
+        self.reset_link_color()
+        return obs
+
+
+    def reset_link_color(self):
+        if self.isRender and not self.colored and hasattr(self, "pybullet"):
+            self.pybullet.configureDebugVisualizer(flag=self.pybullet.COV_ENABLE_MOUSE_PICKING, enable=0,lightPosition=[10,-10,10])
+
+            color_idx = 0
+            for part_name, part in self.robot.parts.items():
+                if part_name.startswith("link0_") or part_name.startswith("floor") or part_name.startswith("aux_"):
+                    continue
+                if part_name.startswith("torso"):
+                    self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
+                else:
+                    print(part_name, part.bodyPartIndex, color_idx)
+                    self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=colors.get_link_color(self.realign_idx[color_idx])) # change color
+                    color_idx += 1
+            self.colored = True
 
     def reset_space_size(self):
         # re-calculate observation space size

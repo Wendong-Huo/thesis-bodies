@@ -35,6 +35,7 @@ def get_args():
     # parser.add_argument("--preserve_header", action="store_true", help="preserve_header when misalign others")
     parser.add_argument("--random_even_same_body", action="store_true", help="all training bodies have different orders in observation.")
     # parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
+    parser.add_argument("--disable_reordering", action="store_true", help="For MutantWrapper, add this to disable reordering even when use MutantWrapper. So at test time, when rendering, we can see the coloring.")
 
     parser.add_argument("-tb", "--tensorboard", type=str, default="tensorboard", help="Folder name for tensorboard data.")
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone
