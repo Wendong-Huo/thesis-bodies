@@ -2,7 +2,7 @@ import os
 from typing import Optional
 
 import numpy as np
-from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
+from stable_baselines3.common.callbacks import BaseCallback, EventCallback, EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 from stable_baselines3.common.evaluation import evaluate_policy
 
@@ -77,12 +77,28 @@ class EvalCallback_with_prefix(EvalCallback):
                 if self.best_model_save_path is not None:
                     self.model.save(os.path.join(self.best_model_save_path, "best_model"))
                 self.best_mean_reward = mean_reward
+                self.update_best_reward(self.eval_env.envs[0].robot.robot_id, self.best_mean_reward)
                 # Trigger callback if needed
                 if self.callback is not None:
                     return self._on_event()
 
         return True
 
+    # This sets the score for SkipSolvedCallback
+    def update_best_reward(self, robot_id, best_mean_reward):
+        print(f"UpdateBestReward {best_mean_reward}")
+        if not hasattr(self.model, "best_rewards"):
+            self.model.best_rewards = {}
+        self.model.best_rewards[robot_id] = best_mean_reward
+        self.model.robot_id_by_score = [idx for idx,v in sorted(self.model.best_rewards.items(), key=lambda item: item[1])][::-1]
+        self.model.skip_robot_ids = []
+        if hasattr(self.model, "skip_solved_threshold"):
+            if best_mean_reward > self.model.skip_solved_threshold:
+                if robot_id not in self.model.skip_robot_ids:
+                    self.model.skip_robot_ids.append(robot_id)
+            if len(self.model.skip_robot_ids)==len(self.model.best_rewards): # if all bodies pass threshold,
+                self.model.skip_robot_ids = []                               # then no body need to be skipped.
+        self.model.worst_robot_id = self.model.robot_id_by_score[-1]
 
 class SaveVecNormalizeCallback(BaseCallback):
     """From zoo"""
@@ -116,3 +132,42 @@ class SaveVecNormalizeCallback(BaseCallback):
                 if self.verbose > 1:
                     print(f"Saving VecNormalize to {path}")
         return True
+
+
+# update_best_reward() set the scores, SkipSolvedCallback determine the behavior
+class SkipSolvedCallback(BaseCallback):
+    def __init__(self, skip_threshold: float=1e3, verbose: int=0):
+        self.skip_threshold = skip_threshold
+        self.robot_2_env_id = None
+        self.next_env_idx = 0
+        super().__init__(verbose=verbose)
+
+    def _on_step(self) -> bool:
+        if not hasattr(self.model, "skip_solved_threshold"):
+            self.model.skip_solved_threshold = self.skip_threshold
+        if hasattr(self.model, "robot_id_by_score"):
+            if self.robot_2_env_id is None:
+                self.robot_2_env_id = {}
+                for env_idx, env in enumerate(self.model.env.envs):
+                    if env.robot.robot_id in self.robot_2_env_id:
+                        self.robot_2_env_id[env.robot.robot_id].append(env_idx)
+                    else:
+                        self.robot_2_env_id[env.robot.robot_id] = [env_idx]
+
+            if len(self.model.skip_robot_ids)>0:
+                worst_ids = self.robot_2_env_id[self.model.worst_robot_id]
+                for skip_robot_id in self.model.skip_robot_ids:
+                    skip_ids = self.robot_2_env_id[skip_robot_id]
+                    for idx in skip_ids:
+                        worst_idx = worst_ids[self.next_env_idx%len(worst_ids)]
+                        self.next_env_idx += 1
+                        # Copy data
+                        self.model._last_obs[idx] = self.model._last_obs[worst_idx]
+                        self.locals["actions"][idx] = self.locals["actions"][worst_idx]
+                        self.locals["rewards"][idx] = self.locals["rewards"][worst_idx]
+                        self.model._last_dones[idx] = self.model._last_dones[worst_idx]
+                        self.locals["values"][idx] = self.locals["values"][worst_idx]
+                        self.locals["log_probs"][idx] = self.locals["log_probs"][worst_idx]
+            print(self.robot_2_env_id[self.model.worst_robot_id])
+        return True
+

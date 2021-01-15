@@ -86,7 +86,7 @@ if __name__ == "__main__":
             best_model_save_path=str(common.output_data_folder/"models"/saved_model_filename),
             prefix=f"{test_body}",
             n_eval_episodes=3,
-            eval_freq=1e4,  # will implicitly multiplied by (train_num_envs)
+            eval_freq=int(args.eval_steps/args.num_venvs),  # will implicitly multiplied by (train_num_envs)
             deterministic=True,
         )
         all_callbacks.append(eval_callback)
@@ -98,6 +98,10 @@ if __name__ == "__main__":
             save_vec_callback = callbacks.SaveVecNormalizeCallback(save_freq=1000, save_path=str(
                 common.output_data_folder/'checkpoints'), name_prefix=args.train_bodies)
             all_callbacks.append(save_vec_callback)
+
+    if args.skip_solved_threshold>0:
+        skip_solved_callback = callbacks.SkipSolvedCallback(args.skip_solved_threshold)
+        all_callbacks.append(skip_solved_callback)
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 

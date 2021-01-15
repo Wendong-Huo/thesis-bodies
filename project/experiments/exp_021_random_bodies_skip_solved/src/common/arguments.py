@@ -11,6 +11,7 @@ def get_args():
 
     parser.add_argument("--test_steps", type=int, default=1000, help="total time steps for testing.")
     parser.add_argument("--train_steps", type=float, default=2e6, help="total time steps for training.")
+    parser.add_argument("--eval_steps", type=float, default=1e5, help="eval policy every # steps during training.")
 
     parser.add_argument("--num_venvs", type=int, default=16, help="How many envs you want to vectorize (train together).")
 
@@ -38,7 +39,7 @@ def get_args():
     # parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
     parser.add_argument("--disable_reordering", action="store_true", help="For MutantWrapper, add this to disable reordering even when use MutantWrapper. So at test time, when rendering, we can see the coloring.")
 
-
+    parser.add_argument("--skip_solved_threshold", type=float, default=-1, help="Define a value for solved, skip training on that body until everyone pass that threshold. -1 for disabling this function.")
     parser.add_argument("-tb", "--tensorboard", type=str, default="tensorboard", help="Folder name for tensorboard data.")
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone
         args = parser.parse_args(sys.argv[1:])
