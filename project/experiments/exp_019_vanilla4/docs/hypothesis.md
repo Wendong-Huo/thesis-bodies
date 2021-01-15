@@ -24,7 +24,11 @@ The 500 random alignments follow some distribution. (plots: Walker2D like a bi-m
 
 Results for 20 runs of the good and bad alignment:
 
-significantly different?
+significantly different? Nope
+
+Might because the initialization of the policy network is too important, so only use 1 run to search for good alignment is not a good way, because when 
+seed changes, the result might changes.
+Solution: In random search, we need to use multiple runs with different seeds for 1 alignment.
 
 # Other Thoughts?
 

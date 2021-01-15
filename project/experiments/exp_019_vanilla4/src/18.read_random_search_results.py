@@ -9,8 +9,7 @@ from common.gym_interface import template
 with open("output_data/jobs_vanilla4.pickle", "rb") as f:
     jobs = pickle.load(f)
 
-read_cache = False
-
+read_cache = True
 try:
     if not read_cache:
         raise Exception("read raw data")
