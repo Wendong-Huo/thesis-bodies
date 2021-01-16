@@ -66,12 +66,12 @@ def one_exp():
     assert check_not_in_body_history(str_body_selected), "Not lucky! Not a new set of bodies!"
     print("\n# train on bodies: ", bodies)
 
-    for i in range(10):
+    for i in range(100):
         custom_alignment = construct_custom_alignment()
         assert check_not_in_alignment_history(custom_alignment), "Not lucky! Not a new alignment!"
         print(f"# ==> Alignment {i} : ", custom_alignment)
         # 1 runs for each alignment, search for a good alignment
-        for j in range(1):
+        for j in range(2):
             seed = g_current_exp_id
             print(f"sbatch -J random_1xx submit.sh python 1.train.py --train_steps=1e7 --custom_align_max_joints --seed={seed} --train_bodies={str_body_selected} --test_bodies={str_body_selected} --topology_wrapper=CustomAlignWrapper --custom_alignment={custom_alignment} --tensorboard=tensorboard_random_1xx")
 

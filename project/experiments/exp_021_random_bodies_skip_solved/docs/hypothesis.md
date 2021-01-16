@@ -8,6 +8,7 @@ Name them 100s.
 
 Train on the best 8 bodies simultaneously, with different alignments (100 alignments) (each with 3 runs). 300 jobs.
 
+1xx first 10 evaluations submitted.
 # What are Treatment and Control groups?
 
 
