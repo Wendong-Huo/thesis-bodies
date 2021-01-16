@@ -14,6 +14,7 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         self._last_x = 0
         self._history_x = []
         self._history_dx = []
+        self.colored = False
         super().__init__(robot, render=render)
     
     def step(self, a):
@@ -27,7 +28,15 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         obs = super().reset()
         self.pybullet = self._p
         self.camera_angle = 0
+        if self.isRender and not self.colored and hasattr(self, "pybullet"):
+            # only reset color once after the scene is set.
+            self._reset_color()
+            self.colored = True
         return obs
+
+    def _reset_color(self):
+        # to change lighting condition, need an arbitrary flag.
+        self.pybullet.configureDebugVisualizer(flag=self.pybullet.COV_ENABLE_MOUSE_PICKING, enable=1,lightPosition=[10,-10,10])
 
     def show_body_id(self):
         if self._p:
@@ -38,16 +47,17 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
 
     def camera_simpy_follow_robot(self, rotate=True):
         if self._p:
-            self.camera_angle += 1
+            self.camera_angle += 0.3
             distance = 4
             pitch = -10
             if rotate:
-                yaw = self.camera_angle
+                yaw = (self.camera_angle//60)*60
             else:
                 yaw = 0
 
-            _current_x = self.robot.body_xyz[0]
-            _current_y = self.robot.body_xyz[1]
+            # Why I need to '*1.1' here?
+            _current_x = self.robot.body_xyz[0] * 1.1
+            _current_y = self.robot.body_xyz[1] * 1.1
 
             lookat = [_current_x, _current_y, 0.7]
             self._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)

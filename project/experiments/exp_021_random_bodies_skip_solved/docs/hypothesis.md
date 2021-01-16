@@ -1,20 +1,23 @@
 # What is tested?
 
-Based on Vanilla4's success, select 4 2xx bodies.
-Try different alignment combinations.
+Enable self collision for random bodies. (More realistic.)
+Need to re-search for workable bodies.
 
-Generate 500 different ways to align observation space.
+Generate 100 bodies, train them with 2 runs and pick the best 8 bodies.
+Name them 100s.
 
-Train, and get results.
-
-Plot them and show the difference.
-
+Train on the best 8 bodies simultaneously, with different alignments (100 alignments) (each with 3 runs). 300 jobs.
 
 # What are Treatment and Control groups?
 
-Not clear
 
 # What are the results? (in short)
 
 
 # Other Thoughts?
+
+I really should employ GA, otherwise I can't find the good alignment for these bodies!
+
+
+20 workable bodies are in `input_data/bodies`.
+The trained models for them are in `output_data/models`.

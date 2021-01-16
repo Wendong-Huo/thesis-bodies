@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print("Making train environments...")
     venv = DummyVecEnv([gym_interface.make_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                robot_body=args.train_bodies[i % len(args.train_bodies)],
-                                               dataset_folder="../input_data/bodies") for i in range(args.num_venvs)])
+                                               dataset_folder=args.body_folder) for i in range(args.num_venvs)])
 
     normalize_kwargs = {}
     if args.vec_normalize:
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         body_info = 0
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed+1, wrappers=default_wrapper, render=False,
                                                         robot_body=test_body, body_info=body_info,
-                                                        dataset_folder="../input_data/bodies")])
+                                                        dataset_folder=args.body_folder)])
         if args.vec_normalize:
             eval_venv = VecNormalize(eval_venv, norm_reward=False, **normalize_kwargs)
         if args.stack_frames > 1:

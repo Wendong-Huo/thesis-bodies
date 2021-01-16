@@ -2,6 +2,7 @@ import numpy as np
 import pybullet
 from gym_envs.my_envs import MyWalkerBase, MyWalkerBaseBulletEnv
 
+from common import colors
 class MyRandomRobot(MyWalkerBase):
     foot_list = []
 
@@ -17,6 +18,7 @@ class MyRandomRobot(MyWalkerBase):
         super().__init__(xml, "torso", action_dim=joint_number, obs_dim=8+joint_number*2, power=0.10)
         self.self_collision = self_collision
         self.self_collision_enabled = False
+        self.colored = False
 
     def alive_bonus(self, z, pitch):
         if z>self.initial_z*3: # avoid fly-away bug
@@ -29,7 +31,6 @@ class MyRandomRobot(MyWalkerBase):
     def robot_specific_reset(self, bullet_client):
         super().robot_specific_reset(bullet_client)
         # bullet_client.setGravity(0,0,-1) # experiment in low gravity because of the pybullet "fly-away" bug
-        bullet_client.changeVisualShape(1,-1,rgbaColor=[0.7,0.7,0.2,1.0]) # change torso color
         bullet_client.changeDynamics(0,-1,lateralFriction=0.999) # increase floor friction
         if self.self_collision and not self.self_collision_enabled:
             self.set_self_collision(bullet_client)
@@ -66,3 +67,6 @@ class MyRandomRobotEnv(MyWalkerBaseBulletEnv):
         self.xml = xml
         super().__init__(self.robot, render)
 
+    def _reset_color(self):
+        self.pybullet.changeVisualShape(1, -1, rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change torso color
+        super()._reset_color()

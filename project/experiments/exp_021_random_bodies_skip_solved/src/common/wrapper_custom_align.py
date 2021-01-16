@@ -15,7 +15,7 @@ class CustomAlignWrapper(gym.ObservationWrapper):
         env.foot_list = []
         super().__init__(env)
         self.debug = 1
-        self.colored = False
+        self._link_colored = False
         # assert gym_interface.template(env.robot.robot_id)=="randomrobot", "CustomAlignWrapper only support randomrobot for now."
         # obs ------------ F() ------> abs_obs
         # abs_action --- F^{-1}() ---> action
@@ -37,25 +37,22 @@ class CustomAlignWrapper(gym.ObservationWrapper):
     
     def reset(self):
         obs = super().reset()
-        self.reset_link_color()
+        if self.isRender and not self._link_colored and hasattr(self, "pybullet"):
+            self._reset_link_color()
+            self._link_colored = True
         return obs
 
-
-    def reset_link_color(self):
-        if self.isRender and not self.colored and hasattr(self, "pybullet"):
-            self.pybullet.configureDebugVisualizer(flag=self.pybullet.COV_ENABLE_MOUSE_PICKING, enable=0,lightPosition=[10,-10,10])
-
-            color_idx = 0
-            for part_name, part in self.robot.parts.items():
-                if part_name.startswith("link0_") or part_name.startswith("floor") or part_name.startswith("aux_"):
-                    continue
-                if part_name.startswith("torso"):
-                    self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
-                else:
-                    print(part_name, part.bodyPartIndex, color_idx)
-                    self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=colors.get_link_color(self.realign_idx[color_idx])) # change color
-                    color_idx += 1
-            self.colored = True
+    def _reset_link_color(self):
+        color_idx = 0
+        for part_name, part in self.robot.parts.items():
+            if part_name.startswith("link0_") or part_name.startswith("floor") or part_name.startswith("aux_"):
+                continue
+            if part_name.startswith("torso"):
+                self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
+            else:
+                print(part_name, part.bodyPartIndex, color_idx)
+                self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=colors.get_link_color(self.realign_idx[color_idx])) # change color
+                color_idx += 1
 
     def reset_space_size(self):
         # re-calculate observation space size
@@ -98,6 +95,8 @@ class CustomAlignWrapper(gym.ObservationWrapper):
     def parse_alignment(self, custom_alignment_string):
         alignment = None
         alignments = custom_alignment_string.split("::")
+        if len(custom_alignment_string)==0: # use default order
+            alignments = [ ",".join([str(x) for x in range(self.max_num_joints)]) ] * common.args.num_venvs
         assert len(alignments)==common.args.num_venvs, f"Not enough alignment for {common.args.num_venvs} envs."
         for i,a in enumerate(alignments):
             if self.env.rank == i:

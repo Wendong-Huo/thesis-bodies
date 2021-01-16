@@ -26,6 +26,7 @@ def get_args():
     parser.add_argument("--initialize_weights_from", type=str, default="", help="better initialization from model file.")
 
     parser.add_argument("--model_filename", type=str, default="", help="model to test.")
+    parser.add_argument("--body_folder", type=str, default="../input_data/bodies", help="folders that contains body xml files")
     
     parser.add_argument("--topology_wrapper", type=str, default="", help="Switch for different experiments. Could be: same|diff")
     parser.add_argument("--wrapper_case", type=str, default="Walker2DHopperWrapper", help="special wrapper for different experiments.")

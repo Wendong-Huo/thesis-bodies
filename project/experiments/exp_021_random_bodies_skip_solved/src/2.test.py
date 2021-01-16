@@ -42,7 +42,7 @@ if __name__ == "__main__":
     for rank_idx, test_body in enumerate(args.test_bodies):
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, force_render=args.render,
                                                         robot_body=test_body,
-                                                        dataset_folder="../input_data/bodies")])
+                                                        dataset_folder=args.body_folder)])
         if args.vec_normalize:
             raise NotImplementedError
             # normalize_kwargs["gamma"] = hyperparams["gamma"]
@@ -70,7 +70,7 @@ if __name__ == "__main__":
             obs, reward, done, info = eval_venv.step(action)
             if args.render:
                 # eval_venv.envs[0].camera_adjust()
-                time.sleep(0.01)
+                time.sleep(0.015)
             if done:
                 # it should not matter if the env reset. I guess...
                 break

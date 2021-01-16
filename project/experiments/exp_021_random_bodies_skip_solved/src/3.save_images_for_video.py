@@ -56,7 +56,7 @@ if __name__ == "__main__":
     for test_body in args.test_bodies:
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed, wrappers=default_wrapper, render=args.render,
                                                         robot_body=test_body,
-                                                        dataset_folder="../input_data/bodies")])
+                                                        dataset_folder=args.body_folder)])
         if args.vec_normalize:
             raise NotImplementedError
             # normalize_kwargs["gamma"] = hyperparams["gamma"]

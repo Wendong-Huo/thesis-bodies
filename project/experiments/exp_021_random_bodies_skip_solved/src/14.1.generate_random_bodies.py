@@ -66,7 +66,7 @@ def reset_global_variables():
     global max_depth, joint_number, max_limb, lowest_point
     joint_number = 0
     max_depth = 3
-    max_limb = 10
+    max_limb = 6
     lowest_point = 0
 
 for i in range(100):
@@ -98,5 +98,5 @@ for i in range(100):
                         </worldbody>
                     </mujoco>
                     """
-    with open(f"output_data/bodies/{200+i}.xml", "w") as f:
+    with open(f"output_data/bodies/{100+i}.xml", "w") as f:
         print(xml_template, file=f)

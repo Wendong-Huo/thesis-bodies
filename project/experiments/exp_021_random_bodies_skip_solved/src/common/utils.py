@@ -2,9 +2,6 @@ import os
 import hashlib
 import pathlib
 import yaml
-import torch.nn as nn
-import numpy as np
-
 
 def get_exp_name():
     """Return current experiment folder, such as exp0."""
@@ -106,6 +103,7 @@ def build_model_filename(args):
 
 def mean_and_error(_data):
     """A helper for creating error bar"""
+    import numpy as np
     _data = np.array(_data)
     _two_sigma = 2*np.std(_data)
     _mean = np.mean(_data)
@@ -128,6 +126,7 @@ def linux_fullscreen():
     k.release_key(k.control_key)
 
 def load_hyperparameters(conf_name="MyWalkerEnv"):
+    import torch.nn as nn
     with (get_input_data_folder() / "hyperparameters.yml").open() as f:
         hp = yaml.load(f, Loader=yaml.SafeLoader)
     hyperparams = hp[conf_name]
