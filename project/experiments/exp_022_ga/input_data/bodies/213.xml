@@ -1,0 +1,16 @@
+
+                    <!--
+                    joint_number: 10
+                    -->
+                    <mujoco model="randomrobot">
+                        <compiler angle="degree" coordinate="global" inertiafromgeom="true"/>
+                        <default>
+                        <joint armature="0.01" damping=".1" limited="true"/>
+                        <geom conaffinity="0" condim="3" contype="1" density="1000" friction="0.8 .1 .1" rgba="0.8 0.6 .4 1"/>
+                        </default>
+                        <option integrator="RK4" timestep="0.002"/>
+                        <worldbody>
+                    <body name='torso' pos='0.00 0.00 1.18'><geom fromto='0 0 0 0.00 0.00 1.00' name='torso_geom' size='0.06' type='capsule'/><inertial mass='0.3'/><body name='L0_D1' pos='0.00 0.00 0.15'><joint axis='0 1 0' name='L0_D1_joint' pos='0 0 0' range='6.02 172.25' type='hinge'/><geom fromto='0 0 0 -0.12 0.48 -0.23' name='L0_D1_geom' size='0.05' type='capsule'/><inertial mass='0.3'/><body name='L1_D0' pos='-0.05 0.18 -0.09'><joint axis='0 0 1' name='L1_D0_joint' pos='0 0 0' range='82.09 172.39' type='hinge'/><geom fromto='0 0 0 0.47 0.29 -0.22' name='L1_D0_geom' size='0.05' type='capsule'/><inertial mass='0.3'/></body><body name='L2_D0' pos='-0.06 0.22 -0.11'><joint axis='0 0 1' name='L2_D0_joint' pos='0 0 0' range='9.90 39.75' type='hinge'/><geom fromto='0 0 0 -0.18 -0.15 0.46' name='L2_D0_geom' size='0.06' type='capsule'/><inertial mass='0.3'/></body></body><body name='L3_D1' pos='0.00 0.00 0.32'><joint axis='0 0 1' name='L3_D1_joint' pos='0 0 0' range='8.56 57.35' type='hinge'/><geom fromto='0 0 0 0.42 -0.28 -0.39' name='L3_D1_geom' size='0.06' type='capsule'/><inertial mass='0.3'/><body name='L4_D0' pos='0.16 -0.11 -0.15'><joint axis='0 0 1' name='L4_D0_joint' pos='0 0 0' range='35.04 164.06' type='hinge'/><geom fromto='0 0 0 -0.64 0.59 -0.03' name='L4_D0_geom' size='0.06' type='capsule'/><inertial mass='0.3'/></body><body name='L5_D0' pos='0.27 -0.18 -0.25'><joint axis='1 0 0' name='L5_D0_joint' pos='0 0 0' range='0.08 90.87' type='hinge'/><geom fromto='0 0 0 0.34 -0.46 -0.65' name='L5_D0_geom' size='0.06' type='capsule'/><inertial mass='0.3'/></body></body><body name='L6_D1' pos='0.00 0.00 0.52'><joint axis='0 0 1' name='L6_D1_joint' pos='0 0 0' range='115.00 148.82' type='hinge'/><geom fromto='0 0 0 -0.34 0.31 -0.69' name='L6_D1_geom' size='0.04' type='capsule'/><inertial mass='0.3'/></body><body name='L7_D1' pos='0.00 0.00 0.37'><joint axis='0 1 0' name='L7_D1_joint' pos='0 0 0' range='76.33 82.51' type='hinge'/><geom fromto='0 0 0 0.25 -0.41 0.52' name='L7_D1_geom' size='0.03' type='capsule'/><inertial mass='0.3'/><body name='L8_D0' pos='0.18 -0.30 0.39'><joint axis='1 0 0' name='L8_D0_joint' pos='0 0 0' range='32.46 105.09' type='hinge'/><geom fromto='0 0 0 -0.14 -0.35 0.53' name='L8_D0_geom' size='0.08' type='capsule'/><inertial mass='0.3'/></body><body name='L9_D0' pos='0.04 -0.07 0.09'><joint axis='0 0 1' name='L9_D0_joint' pos='0 0 0' range='36.68 151.60' type='hinge'/><geom fromto='0 0 0 0.66 0.38 -0.36' name='L9_D0_geom' size='0.07' type='capsule'/><inertial mass='0.3'/></body></body></body>
+                        </worldbody>
+                    </mujoco>
+                    
