@@ -17,7 +17,15 @@ from stable_baselines3.common import logger
 from stable_baselines3.common.preprocessing import preprocess_obs
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.common import base_class
-
+from stable_baselines3.common.distributions import (
+    BernoulliDistribution,
+    CategoricalDistribution,
+    DiagGaussianDistribution,
+    Distribution,
+    MultiCategoricalDistribution,
+    StateDependentNoiseDistribution,
+    make_proba_distribution,
+)
 class PNSFeaturesExtractor(BaseFeaturesExtractor):
 
     def __init__(self, observation_space: gym.Space):
@@ -28,7 +36,7 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
             self.pns.append(nn.Linear(26,26))
         self.robot_id_2_idx = {}
         
-    def forward(self, observations: th.Tensor, robot_id=None) -> th.Tensor:
+    def forward(self, observations: th.Tensor, robot_id) -> th.Tensor:
         if isinstance(robot_id, list):
             assert observations.shape[0] == len(robot_id), "Need robot_id for each piece of obs"
             for i in robot_id:
@@ -50,6 +58,38 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
         else:
             observations = self.pns[self.robot_id_2_idx[robot_id]](observations)
         return observations
+
+class PNSMotorNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.pns = []
+        self.total_available_modules = 8
+        for i in range(self.total_available_modules):
+            self.pns.append(nn.Linear(8,8))
+        self.robot_id_2_idx = {}
+
+    def forward(self, action, robot_id):
+        if isinstance(robot_id, list):
+            assert action.shape[0] == len(robot_id), "Need robot_id for each piece of obs"
+            for i in robot_id:
+                if i not in self.robot_id_2_idx:
+                    if len(self.robot_id_2_idx)==0:
+                        next_idx = 0
+                    else:
+                        next_idx = max(self.robot_id_2_idx.values())+1
+                    assert next_idx < self.total_available_modules, "Too many bodies, not enough PNS modules."
+                    self.robot_id_2_idx[i] = next_idx
+
+            assert(action.shape[0]==8)
+            transformed = []
+            for i, single in enumerate(action):
+                single = self.pns[self.robot_id_2_idx[robot_id[i]]](single)
+                transformed.append(single)
+            action = th.stack(transformed, dim=0)
+            assert action.shape[0] == 8 and action.shape[-1] == 8, "Only support 9xx for now."
+        else:
+            action = self.pns[self.robot_id_2_idx[robot_id]](action)
+        return action
 
 class PNSRolloutBuffer(RolloutBuffer):
     @staticmethod
@@ -116,7 +156,7 @@ class PNSMlpPolicy(ActorCriticPolicy):
         sde_net_arch: Optional[List[int]] = None,
         use_expln: bool = False,
         squash_output: bool = False,
-        features_extractor_class: Type[BaseFeaturesExtractor] = PNSFeaturesExtractor, # !! replace the FeatureExtractor
+        features_extractor_class: Type[BaseFeaturesExtractor] = PNSFeaturesExtractor, # !! replace the FeatureExtractor, this is the sensor PNS
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
@@ -143,6 +183,7 @@ class PNSMlpPolicy(ActorCriticPolicy):
         )
         self.all_robot_ids = []
         self.current_robot_id = self.all_robot_ids
+        self.pns_motor_net = PNSMotorNet()
 
     def extract_features(self, obs: th.Tensor) -> th.Tensor:
         """
@@ -156,6 +197,34 @@ class PNSMlpPolicy(ActorCriticPolicy):
         obs = self.features_extractor(preprocessed_obs, self.current_robot_id)
         # self.set_robot_id(self.all_robot_ids) # reset current robot_id after process
         return obs
+
+    def _get_action_dist_from_latent(self, latent_pi: th.Tensor, latent_sde: Optional[th.Tensor] = None) -> Distribution:
+        """
+        Retrieve action distribution given the latent codes.
+
+        :param latent_pi: Latent code for the actor
+        :param latent_sde: Latent code for the gSDE exploration function
+        :return: Action distribution
+        """
+        mean_actions = self.action_net(latent_pi)
+        # add motor PNS
+        mean_actions = self.pns_motor_net(mean_actions, self.current_robot_id)
+
+        if isinstance(self.action_dist, DiagGaussianDistribution):
+            return self.action_dist.proba_distribution(mean_actions, self.log_std)
+        elif isinstance(self.action_dist, CategoricalDistribution):
+            # Here mean_actions are the logits before the softmax
+            return self.action_dist.proba_distribution(action_logits=mean_actions)
+        elif isinstance(self.action_dist, MultiCategoricalDistribution):
+            # Here mean_actions are the flattened logits
+            return self.action_dist.proba_distribution(action_logits=mean_actions)
+        elif isinstance(self.action_dist, BernoulliDistribution):
+            # Here mean_actions are the logits (before rounding to get the binary actions)
+            return self.action_dist.proba_distribution(action_logits=mean_actions)
+        elif isinstance(self.action_dist, StateDependentNoiseDistribution):
+            return self.action_dist.proba_distribution(mean_actions, self.log_std, latent_sde)
+        else:
+            raise ValueError("Invalid action distribution")
 
     def set_robot_id(self, robot_id):
         self.current_robot_id = robot_id
