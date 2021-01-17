@@ -21,21 +21,32 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
     def __init__(self, observation_space: gym.Space):
         super().__init__(observation_space, get_flattened_obs_dim(observation_space))
         self.pns = []
-        for i in range(8):
+        self.total_available_modules = 8
+        for i in range(self.total_available_modules):
             self.pns.append(nn.Linear(26,26))
+        self.robot_id_2_idx = {}
         
-    def forward(self, observations: th.Tensor, env=None) -> th.Tensor:
-        if env is None:
+    def forward(self, observations: th.Tensor, robot_id=None) -> th.Tensor:
+        if isinstance(robot_id, list):
+            assert observations.shape[0] == len(robot_id), "Need robot_id for each piece of obs"
+            for i in robot_id:
+                if i not in self.robot_id_2_idx:
+                    if len(self.robot_id_2_idx)==0:
+                        next_idx = 0
+                    else:
+                        next_idx = max(self.robot_id_2_idx.values())+1
+                    assert next_idx < self.total_available_modules, "Too many bodies, not enough PNS modules."
+                    self.robot_id_2_idx[i] = next_idx
+
             assert(observations.shape[0]==8)
             transformed = []
-            for i in range(8):
-                single = observations[i]
-                single = self.pns[i](single)
+            for i, single in enumerate(observations):
+                single = self.pns[self.robot_id_2_idx[robot_id[i]]](single)
                 transformed.append(single)
             observations = th.stack(transformed, dim=0)
             assert observations.shape[0] == 8 and observations.shape[-1] == 26, "Only support 9xx for now."
         else:
-            observations = self.pns[env](observations)
+            observations = self.pns[self.robot_id_2_idx[robot_id]](observations)
         return observations
 
 class PNSRolloutBuffer(RolloutBuffer):
@@ -128,7 +139,10 @@ class PNSMlpPolicy(ActorCriticPolicy):
             optimizer_class=optimizer_class,
             optimizer_kwargs=optimizer_kwargs,
         )
-    def extract_features(self, obs: th.Tensor, env=None) -> th.Tensor:
+        self.all_robot_ids = []
+        self.current_robot_id = self.all_robot_ids
+
+    def extract_features(self, obs: th.Tensor) -> th.Tensor:
         """
         Preprocess the observation if needed and extract features.
 
@@ -137,41 +151,12 @@ class PNSMlpPolicy(ActorCriticPolicy):
         """
         assert self.features_extractor is not None, "No features extractor was set"
         preprocessed_obs = preprocess_obs(obs, self.observation_space, normalize_images=self.normalize_images)
-        return self.features_extractor(preprocessed_obs, env)
-    def _get_latent(self, obs: th.Tensor, env=None) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
-        """
-        Get the latent code (i.e., activations of the last layer of each network)
-        for the different networks.
+        obs = self.features_extractor(preprocessed_obs, self.current_robot_id)
+        # self.set_robot_id(self.all_robot_ids) # reset current robot_id after process
+        return obs
 
-        :param obs: Observation
-        :return: Latent codes
-            for the actor, the value function and for gSDE function
-        """
-        # Preprocess the observation if needed
-        features = self.extract_features(obs,env)
-        latent_pi, latent_vf = self.mlp_extractor(features)
-
-        # Features for sde
-        latent_sde = latent_pi
-        if self.sde_features_extractor is not None:
-            latent_sde = self.sde_features_extractor(features)
-        return latent_pi, latent_vf, latent_sde
-
-    def evaluate_actions(self, obs: th.Tensor, actions: th.Tensor, env=None) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
-        """
-        Evaluate actions according to the current policy,
-        given the observations.
-
-        :param obs:
-        :param actions:
-        :return: estimated value, log likelihood of taking those actions
-            and entropy of the action distribution.
-        """
-        latent_pi, latent_vf, latent_sde = self._get_latent(obs,env)
-        distribution = self._get_action_dist_from_latent(latent_pi, latent_sde)
-        log_prob = distribution.log_prob(actions)
-        values = self.value_net(latent_vf)
-        return values, log_prob, distribution.entropy()
+    def set_robot_id(self, robot_id):
+        self.current_robot_id = robot_id
 
 class PNSPPO(PPO):
     def _setup_model(self) -> None:
@@ -206,6 +191,10 @@ class PNSPPO(PPO):
 
             self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
 
+        # PNSPPO part
+        for i in range(8):
+            self.policy.all_robot_ids.append(self.env.envs[i].robot.robot_id)
+
     def train(self) -> None:
         """
         Update policy using the currently gathered
@@ -227,6 +216,7 @@ class PNSPPO(PPO):
         for epoch in range(self.n_epochs):
             approx_kl_divs = []
             for env_id in range(8):
+                self.policy.set_robot_id(self.env.envs[env_id].robot.robot_id)
                 # Do a complete pass on the rollout buffer
                 for rollout_data in self.rollout_buffer.get(env_id=env_id, batch_size=self.batch_size):
                     
@@ -241,7 +231,7 @@ class PNSPPO(PPO):
                     if self.use_sde:
                         self.policy.reset_noise(self.batch_size)
 
-                    values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions, env_id)
+                    values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)
                     values = values.flatten()
                     # Normalize advantage
                     advantages = rollout_data.advantages
