@@ -1,14 +1,9 @@
 # What is tested?
 
-Enable self collision for random bodies. (More realistic.)
-Need to re-search for workable bodies.
+No hypo here. Try out Asyc Steady State GA that supports Slurm.
 
-Generate 100 bodies, train them with 2 runs and pick the best 8 bodies.
-Name them 100s.
+Not ready, try exp_023_pns first, more promising.
 
-Train on the best 8 bodies simultaneously, with different alignments (100 alignments) (each with 3 runs). 300 jobs.
-
-1xx first 10 evaluations submitted.
 # What are Treatment and Control groups?
 
 
@@ -17,8 +12,8 @@ Train on the best 8 bodies simultaneously, with different alignments (100 alignm
 
 # Other Thoughts?
 
-I really should employ GA, otherwise I can't find the good alignment for these bodies!
-
-
-20 workable bodies are in `input_data/bodies`.
-The trained models for them are in `output_data/models`.
+TODO for tomorrow:
+1. env number from 8 to 16, cut the geno when needed
+2. keep a running average for each geno [mean, count]. `new mean = (mean * count + new value) / (count + 1)`
+3. stop condition
+4. test on VACC

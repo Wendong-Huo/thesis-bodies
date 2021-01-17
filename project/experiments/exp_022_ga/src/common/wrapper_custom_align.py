@@ -101,7 +101,7 @@ class CustomAlignWrapper(gym.ObservationWrapper):
         for i,a in enumerate(alignments):
             if self.env.rank == i:
                 b = a.split(",")
-                assert len(b)==self.max_num_joints, f"CustomAlignWrapper only support an observation space size of {self.max_num_joints}"
+                assert len(b)==self.max_num_joints, f"CustomAlignWrapper only support an observation space size of {self.max_num_joints}, but there are {len(b)}"
                 alignment = [int(x.strip()) for x in b]
         assert alignment is not None, f"Alignment for rank {self.rank} is not found."
         self.realign_idx = alignment

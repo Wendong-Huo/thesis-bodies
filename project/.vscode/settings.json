@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_021_random_bodies_skip_solved/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_022_ga/src"]
 }
 

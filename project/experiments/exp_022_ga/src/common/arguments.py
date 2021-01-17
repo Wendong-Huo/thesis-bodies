@@ -40,6 +40,9 @@ def get_args():
     # parser.add_argument("--preserve_feet_contact", action="store_true", help="preserve_feet_contact when misalign the rest (only obs of joints)")
     parser.add_argument("--disable_reordering", action="store_true", help="For MutantWrapper, add this to disable reordering even when use MutantWrapper. So at test time, when rendering, we can see the coloring.")
 
+    parser.add_argument("--ga_job_id", type=int, default=-1, help="For GA, the individual id.")
+    parser.add_argument("--ga_parent_id", type=int, default=-1, help="For GA, the individual id.")
+
     parser.add_argument("--skip_solved_threshold", type=float, default=-1, help="Define a value for solved, skip training on that body until everyone pass that threshold. -1 for disabling this function.")
     parser.add_argument("-tb", "--tensorboard", type=str, default="tensorboard", help="Folder name for tensorboard data.")
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone

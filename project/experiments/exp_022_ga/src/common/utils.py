@@ -22,7 +22,7 @@ def get_output_data_folder(init=False):
         _path.mkdir()
     output_data_folder = _path / get_exp_name()
     output_data_folder.mkdir(exist_ok=True)
-    _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "checkpoints", "tmp", "bodies"]
+    _subs = ["tensorboard", "plots", "models", "saved_images", "videos", "checkpoints", "tmp", "bodies", "database"]
     for _sub in _subs:
         (output_data_folder / _sub).mkdir(exist_ok=True)
 
@@ -132,3 +132,18 @@ def load_hyperparameters(conf_name="MyWalkerEnv"):
     hyperparams = hp[conf_name]
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
     return hyperparams
+
+
+class Log:
+    def __init__(self, path="") -> None:
+        self.msgs = []
+        self.log_path = path
+    def record(self, msg):
+        self.msgs.append(msg)
+    def dump(self):
+        if self.log_path=="":
+            print("\n".join(self.msgs))
+        else:
+            with open(self.log_path, "a") as file:
+                file.writelines(self.msgs)
+        self.msgs = []
