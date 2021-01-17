@@ -26,14 +26,26 @@ from stable_baselines3.common.distributions import (
     StateDependentNoiseDistribution,
     make_proba_distribution,
 )
+def debug(grad):
+    # print(grad.shape)
+    # print(grad[:3,:3])
+    return grad * 1000
 class PNSFeaturesExtractor(BaseFeaturesExtractor):
 
     def __init__(self, observation_space: gym.Space):
         super().__init__(observation_space, get_flattened_obs_dim(observation_space))
-        self.pns = []
         self.total_available_modules = 8
+        _pns = []
         for i in range(self.total_available_modules):
-            self.pns.append(nn.Linear(26,26))
+            alignment_matrix = nn.Linear(26,26)
+            # first 8 numbers should be global observation (a reasonable prior), so initialize this, might make learning faster.
+            with th.no_grad():
+                alignment_matrix.weight[:, :8] = 0.
+                alignment_matrix.weight[:8, :] = 0.
+                for i in range(8):
+                    alignment_matrix.weight[i,i] = 1.
+            _pns.append(alignment_matrix)
+        self.pns = nn.ModuleList(_pns)
         self.robot_id_2_idx = {}
         
     def forward(self, observations: th.Tensor, robot_id) -> th.Tensor:
@@ -56,16 +68,22 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
             observations = th.stack(transformed, dim=0)
             assert observations.shape[0] == 8 and observations.shape[-1] == 26, "Only support 9xx for now."
         else:
+            # debug: why gradient doesn't pass to pns and pns weights don't get updated.
+            # print(self.pns[self.robot_id_2_idx[robot_id]].weight.data.numpy()[:2,:2])
             observations = self.pns[self.robot_id_2_idx[robot_id]](observations)
+            if not hasattr(self, "is_hooked"):
+                # self.pns[0].weight.register_hook(debug)
+                self.is_hooked = True
         return observations
 
 class PNSMotorNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.pns = []
         self.total_available_modules = 8
+        _pns = []
         for i in range(self.total_available_modules):
-            self.pns.append(nn.Linear(8,8))
+            _pns.append(nn.Linear(8,8))
+        self.pns = nn.ModuleList(_pns)
         self.robot_id_2_idx = {}
 
     def forward(self, action, robot_id):
@@ -89,6 +107,9 @@ class PNSMotorNet(nn.Module):
             assert action.shape[0] == 8 and action.shape[-1] == 8, "Only support 9xx for now."
         else:
             action = self.pns[self.robot_id_2_idx[robot_id]](action)
+            if not hasattr(self, "is_hooked"):
+                self.pns[0].weight.register_hook(debug)
+                self.is_hooked = True
         return action
 
 class PNSRolloutBuffer(RolloutBuffer):
@@ -184,6 +205,7 @@ class PNSMlpPolicy(ActorCriticPolicy):
         self.all_robot_ids = []
         self.current_robot_id = self.all_robot_ids
         self.pns_motor_net = PNSMotorNet()
+        self._build(lr_schedule) # build again, otherwise the new pns_motor_net can't get into the list of optimizer.
 
     def extract_features(self, obs: th.Tensor) -> th.Tensor:
         """

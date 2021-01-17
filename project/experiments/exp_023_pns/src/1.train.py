@@ -104,6 +104,8 @@ if __name__ == "__main__":
         skip_solved_callback = callbacks.SkipSolvedCallback(args.skip_solved_threshold)
         all_callbacks.append(skip_solved_callback)
 
+    all_callbacks.append(callbacks.InspectionCallback())
+
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 
     if args.pns:
