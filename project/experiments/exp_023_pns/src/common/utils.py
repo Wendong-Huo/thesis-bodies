@@ -89,6 +89,8 @@ def build_model_filename(args):
     
     if args.pns:
         filename += "-pns"
+        if args.pns_init:
+            filename += "-pns_init"
 
     # if args.misalign_obs:
     #     filename += f"-mis"

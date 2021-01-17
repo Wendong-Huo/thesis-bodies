@@ -207,15 +207,15 @@ class InspectionCallback(BaseCallback):
             for i in range(8):
                 min_value = -1.0; max_value = 1.0
                 sensor_weight = self.model.policy.features_extractor.pns[i].weight.detach().numpy()
-                if i==0:
-                    print(f"A tiny bit of sensor_weight\n{sensor_weight[:3,:3]}")
+                if i==0 or i==1:
+                    print(f"A tiny bit of sensor_weight\n{sensor_weight[7:10,7:10]}")
                 sensor_weight = (sensor_weight - min_value) / (max_value - min_value) * 255
                 sensor_weight = np.clip(sensor_weight, 0, 255)
                 sensor_weight = sensor_weight.astype(np.uint8)
                 imageio.imsave(f"{self.sub_dir}/sensor_{i}_weight/{self.model.num_timesteps}.png", sensor_weight)
 
                 motor_weight = self.model.policy.pns_motor_net.pns[i].weight.detach().numpy()
-                if i==0:
+                if i==0 or i==1:
                     print(f"A tiny bit of motor_weight\n{motor_weight[:3,:3]}")
                 motor_weight = (motor_weight - min_value) / (max_value - min_value) * 255
                 motor_weight = np.clip(motor_weight, 0, 255)

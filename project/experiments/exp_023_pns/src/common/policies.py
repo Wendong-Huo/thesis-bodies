@@ -26,10 +26,14 @@ from stable_baselines3.common.distributions import (
     StateDependentNoiseDistribution,
     make_proba_distribution,
 )
+
+from common import common
+
 def debug(grad):
     # print(grad.shape)
     # print(grad[:3,:3])
-    return grad * 1000
+    # return grad * 1000
+    pass
 class PNSFeaturesExtractor(BaseFeaturesExtractor):
 
     def __init__(self, observation_space: gym.Space):
@@ -38,12 +42,13 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
         _pns = []
         for i in range(self.total_available_modules):
             alignment_matrix = nn.Linear(26,26)
-            # first 8 numbers should be global observation (a reasonable prior), so initialize this, might make learning faster.
-            with th.no_grad():
-                alignment_matrix.weight[:, :8] = 0.
-                alignment_matrix.weight[:8, :] = 0.
-                for i in range(8):
-                    alignment_matrix.weight[i,i] = 1.
+            if common.args.pns_init:
+                # first 8 numbers should be global observation (a reasonable prior), so initialize this, might make learning faster.
+                with th.no_grad():
+                    alignment_matrix.weight[:, :8] = 0.
+                    alignment_matrix.weight[:8, :] = 0.
+                    for i in range(8):
+                        alignment_matrix.weight[i,i] = 1.
             _pns.append(alignment_matrix)
         self.pns = nn.ModuleList(_pns)
         self.robot_id_2_idx = {}
@@ -108,7 +113,7 @@ class PNSMotorNet(nn.Module):
         else:
             action = self.pns[self.robot_id_2_idx[robot_id]](action)
             if not hasattr(self, "is_hooked"):
-                self.pns[0].weight.register_hook(debug)
+                # self.pns[0].weight.register_hook(debug)
                 self.is_hooked = True
         return action
 

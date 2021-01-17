@@ -44,6 +44,7 @@ def get_args():
     parser.add_argument("--ga_parent_id", type=int, default=-1, help="For GA, the individual id.")
 
     parser.add_argument("--pns", action="store_true", help="Use Mlp with PNS instead of MlpPolicy.")
+    parser.add_argument("--pns_init", action="store_true", help="By default, first 8 numbers in observation is general information. Init with an I matrix in sensor weight.")
 
     parser.add_argument("--skip_solved_threshold", type=float, default=-1, help="Define a value for solved, skip training on that body until everyone pass that threshold. -1 for disabling this function.")
     parser.add_argument("-tb", "--tensorboard", type=str, default="tensorboard", help="Folder name for tensorboard data.")
