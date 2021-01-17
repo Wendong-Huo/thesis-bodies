@@ -189,38 +189,39 @@ class InspectionCallback(BaseCallback):
     def log_weights_to_disk(self):
         if self.model.num_timesteps%1000==0:
             if self.sub_dir == "":
-                tb_dir = self.logger.Logger.CURRENT.output_formats[1].writer.log_dir
-                sub_dir = "/".join(tb_dir.split("/")[-2:])
+                if len(self.logger.Logger.CURRENT.output_formats)==2:
+                    tb_dir = self.logger.Logger.CURRENT.output_formats[1].writer.log_dir
+                    sub_dir = "/".join(tb_dir.split("/")[-2:])
+                    for i in range(8):
+                        os.makedirs(f"output_data/saved_images/{sub_dir}/sensor_{i}_weight", exist_ok=True)
+                        os.makedirs(f"output_data/saved_images/{sub_dir}/motor_{i}_weight", exist_ok=True)
+                    self.sub_dir = f"output_data/saved_images/{sub_dir}"
+            
+            if self.sub_dir != "":
+                current_sensor_weights = self.model.policy.features_extractor.pns[0].weight.cpu().detach().numpy()
+                current_motor_weights = self.model.policy.pns_motor_net.pns[0].weight.cpu().detach().numpy()
+                if current_sensor_weights.sum() == self.saved_sensor_weights.sum() and current_motor_weights.sum() == self.saved_motor_weights.sum() : # nothing has changed
+                    return
+                self.saved_sensor_weights = current_sensor_weights.copy()
+                self.saved_motor_weights = current_motor_weights.copy()
+
                 for i in range(8):
-                    os.makedirs(f"output_data/saved_images/{sub_dir}/sensor_{i}_weight", exist_ok=True)
-                    os.makedirs(f"output_data/saved_images/{sub_dir}/motor_{i}_weight", exist_ok=True)
-                self.sub_dir = f"output_data/saved_images/{sub_dir}"
-            
-            
-            current_sensor_weights = self.model.policy.features_extractor.pns[0].weight.detach().numpy()
-            current_motor_weights = self.model.policy.pns_motor_net.pns[0].weight.detach().numpy()
-            if current_sensor_weights.sum() == self.saved_sensor_weights.sum() and current_motor_weights.sum() == self.saved_motor_weights.sum() : # nothing has changed
-                return
-            self.saved_sensor_weights = current_sensor_weights.copy()
-            self.saved_motor_weights = current_motor_weights.copy()
+                    min_value = -1.0; max_value = 1.0
+                    sensor_weight = self.model.policy.features_extractor.pns[i].weight.cpu().detach().numpy()
+                    if i==0 or i==1:
+                        print(f"A tiny bit of sensor_weight\n{sensor_weight[7:10,7:10]}")
+                    sensor_weight = (sensor_weight - min_value) / (max_value - min_value) * 255
+                    sensor_weight = np.clip(sensor_weight, 0, 255)
+                    sensor_weight = sensor_weight.astype(np.uint8)
+                    imageio.imsave(f"{self.sub_dir}/sensor_{i}_weight/{self.model.num_timesteps}.png", sensor_weight)
 
-            for i in range(8):
-                min_value = -1.0; max_value = 1.0
-                sensor_weight = self.model.policy.features_extractor.pns[i].weight.detach().numpy()
-                if i==0 or i==1:
-                    print(f"A tiny bit of sensor_weight\n{sensor_weight[7:10,7:10]}")
-                sensor_weight = (sensor_weight - min_value) / (max_value - min_value) * 255
-                sensor_weight = np.clip(sensor_weight, 0, 255)
-                sensor_weight = sensor_weight.astype(np.uint8)
-                imageio.imsave(f"{self.sub_dir}/sensor_{i}_weight/{self.model.num_timesteps}.png", sensor_weight)
-
-                motor_weight = self.model.policy.pns_motor_net.pns[i].weight.detach().numpy()
-                if i==0 or i==1:
-                    print(f"A tiny bit of motor_weight\n{motor_weight[:3,:3]}")
-                motor_weight = (motor_weight - min_value) / (max_value - min_value) * 255
-                motor_weight = np.clip(motor_weight, 0, 255)
-                motor_weight = motor_weight.astype(np.uint8)
-                imageio.imsave(f"{self.sub_dir}/motor_{i}_weight/{self.model.num_timesteps}.png", motor_weight)
+                    motor_weight = self.model.policy.pns_motor_net.pns[i].weight.cpu().detach().numpy()
+                    if i==0 or i==1:
+                        print(f"A tiny bit of motor_weight\n{motor_weight[:3,:3]}")
+                    motor_weight = (motor_weight - min_value) / (max_value - min_value) * 255
+                    motor_weight = np.clip(motor_weight, 0, 255)
+                    motor_weight = motor_weight.astype(np.uint8)
+                    imageio.imsave(f"{self.sub_dir}/motor_{i}_weight/{self.model.num_timesteps}.png", motor_weight)
 
     def _on_step(self):
         # obs = Tensor(self.locals["new_obs"])

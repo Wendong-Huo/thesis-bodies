@@ -10,6 +10,8 @@ import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 
+from common.policies import PNSPPO, PNSMlpPolicy
+
 if __name__ == "__main__":
     args = common.args
     print(args)
@@ -52,7 +54,14 @@ if __name__ == "__main__":
             eval_venv = VecFrameStack(eval_venv, args.stack_frames)
 
         eval_venv.seed(common.seed)
-        model = PPO.load(args.model_filename)
+        if args.pns:
+            model_cls = PNSPPO
+            policy_cls = PNSMlpPolicy
+        else:
+            model_cls = PPO
+            policy_cls = "MlpPolicy"
+
+        model = model_cls.load(args.model_filename, env=eval_venv)
 
         obs = eval_venv.reset()
         print(obs)

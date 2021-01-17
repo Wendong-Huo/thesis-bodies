@@ -1,5 +1,7 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, Generator
 
+import time
+
 import torch as th
 import gym
 from torch import nn
@@ -12,11 +14,12 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
 from stable_baselines3.common.preprocessing import get_flattened_obs_dim
 from stable_baselines3.common.buffers import RolloutBuffer, RolloutBufferSamples
-from stable_baselines3.common.utils import explained_variance, get_schedule_fn
+from stable_baselines3.common.utils import safe_mean, explained_variance, get_schedule_fn
 from stable_baselines3.common import logger
 from stable_baselines3.common.preprocessing import preprocess_obs
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.common import base_class
+from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback
 from stable_baselines3.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -26,6 +29,7 @@ from stable_baselines3.common.distributions import (
     StateDependentNoiseDistribution,
     make_proba_distribution,
 )
+from stable_baselines3.common.callbacks import BaseCallback
 
 from common import common
 
@@ -73,6 +77,7 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
             observations = th.stack(transformed, dim=0)
             assert observations.shape[0] == 8 and observations.shape[-1] == 26, "Only support 9xx for now."
         else:
+            assert observations.shape[0]!=8, "Not such a coincident, batch size is 8? or something is wrong?"
             # debug: why gradient doesn't pass to pns and pns weights don't get updated.
             # print(self.pns[self.robot_id_2_idx[robot_id]].weight.data.numpy()[:2,:2])
             observations = self.pns[self.robot_id_2_idx[robot_id]](observations)
@@ -257,6 +262,9 @@ class PNSMlpPolicy(ActorCriticPolicy):
         self.current_robot_id = robot_id
 
 class PNSPPO(PPO):
+    def __init__(self, *args, **argv):
+        super().__init__(*args, **argv)
+
     def _setup_model(self) -> None:
         # ActorCriticPolicy part
         self._setup_lr_schedule()
@@ -290,8 +298,15 @@ class PNSPPO(PPO):
             self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
 
         # PNSPPO part
-        for i in range(8):
+        for i in range(self.env.num_envs):
             self.policy.all_robot_ids.append(self.env.envs[i].robot.robot_id)
+
+        if hasattr(self, "pns_senser_robot_id_2_idx"):
+            for key, value in self.pns_senser_robot_id_2_idx.items():
+                self.policy.features_extractor.robot_id_2_idx[int(key)] = value
+        if hasattr(self, "pns_motor_robot_id_2_idx"):
+            for key, value in self.pns_motor_robot_id_2_idx.items():
+                self.policy.pns_motor_net.robot_id_2_idx[int(key)] = value
 
     def train(self) -> None:
         """
@@ -430,6 +445,84 @@ class PNSPPO(PPO):
         self.policy.set_robot_id(eval_env.envs[0].robot.robot_id)
         return self.policy.predict(observation, state, mask, deterministic)
 
+    def save(self, path, exclude = None, include = None):
+        self.pns_senser_robot_id_2_idx = self.policy.features_extractor.robot_id_2_idx
+        self.pns_motor_robot_id_2_idx = self.policy.pns_motor_net.robot_id_2_idx
+        return super().save(path, exclude=exclude, include=include)
+
+    def collect_rollouts(
+        self, env: VecEnv, callback: BaseCallback, rollout_buffer: RolloutBuffer, n_rollout_steps: int
+    ) -> bool:
+        """
+        Collect rollouts using the current policy and fill a `RolloutBuffer`.
+
+        :param env: The training environment
+        :param callback: Callback that will be called at each step
+            (and at the beginning and end of the rollout)
+        :param rollout_buffer: Buffer to fill with rollouts
+        :param n_steps: Number of experiences to collect per environment
+        :return: True if function returned with at least `n_rollout_steps`
+            collected, False if callback terminated rollout prematurely.
+        """
+        assert self._last_obs is not None, "No previous observation was provided"
+        n_steps = 0
+        rollout_buffer.reset()
+        # Sample new weights for the state dependent exploration
+        if self.use_sde:
+            self.policy.reset_noise(env.num_envs)
+
+        callback.on_rollout_start()
+
+        while n_steps < n_rollout_steps:
+            self.policy.set_robot_id(self.policy.all_robot_ids) # reset robot id before collecting rollouts
+            if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
+                # Sample a new noise matrix
+                self.policy.reset_noise(env.num_envs)
+
+            with th.no_grad():
+                # Convert to pytorch tensor
+                obs_tensor = th.as_tensor(self._last_obs).to(self.device)
+                actions, values, log_probs = self.policy.forward(obs_tensor)
+            actions = actions.cpu().numpy()
+
+            # Rescale and perform action
+            clipped_actions = actions
+            # Clip the actions to avoid out of bound error
+            if isinstance(self.action_space, gym.spaces.Box):
+                clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+
+            new_obs, rewards, dones, infos = env.step(clipped_actions)
+
+            self.num_timesteps += env.num_envs
+
+            # Give access to local variables
+            callback.update_locals(locals())
+            if callback.on_step() is False:
+                return False
+
+            self._update_info_buffer(infos)
+            n_steps += 1
+
+            if isinstance(self.action_space, gym.spaces.Discrete):
+                # Reshape in case of discrete action
+                actions = actions.reshape(-1, 1)
+            rollout_buffer.add(self._last_obs, actions, rewards, self._last_dones, values, log_probs)
+            self._last_obs = new_obs
+            self._last_dones = dones
+
+        with th.no_grad():
+            # Compute value for the last timestep
+            obs_tensor = th.as_tensor(new_obs).to(self.device)
+            _, values, _ = self.policy.forward(obs_tensor)
+
+        rollout_buffer.compute_returns_and_advantage(last_values=values, dones=dones)
+
+        callback.on_rollout_end()
+
+        return True
+
+
+# standalone function
 
 def evaluate_policy(
     model: "base_class.BaseAlgorithm",
