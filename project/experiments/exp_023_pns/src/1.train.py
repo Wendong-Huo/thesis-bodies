@@ -10,6 +10,7 @@ import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 import common.callbacks as callbacks
 from common.activation_fn import MyThreshold
+from common.policies import PNSPPO, PNSMlpPolicy
 
 if __name__ == "__main__":
 
@@ -105,7 +106,14 @@ if __name__ == "__main__":
 
     hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
 
-    model = PPO('MlpPolicy', venv, verbose=1, tensorboard_log=str(common.output_data_folder/args.tensorboard/saved_model_filename), seed=common.seed, **hyperparams)
+    if args.pns:
+        model_cls = PNSPPO
+        policy_cls = PNSMlpPolicy
+    else:
+        model_cls = PPO
+        policy_cls = "MlpPolicy"
+
+    model = model_cls(policy_cls, venv, verbose=1, tensorboard_log=str(common.output_data_folder/args.tensorboard/saved_model_filename), seed=common.seed, **hyperparams)
 
     if len(args.initialize_weights_from) > 0:
         try:
