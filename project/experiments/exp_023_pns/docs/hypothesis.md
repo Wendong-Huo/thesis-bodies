@@ -23,8 +23,9 @@ Misalignment. 5 runs. (same situation was tested in exp_016 arms)
 
 # What are the results? (in short)
 
-Not working in the first try.
+The control is too good. lol.
 
+cancel the job and start equal. exp_025_pns_start_identity.
 
 # Other Thoughts?
 

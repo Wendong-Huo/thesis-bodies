@@ -42,7 +42,7 @@ if __name__ == "__main__":
         pass # no need for wrapper
 
     for rank_idx, test_body in enumerate(args.test_bodies):
-        eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, force_render=args.render,
+        eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, render=args.render, force_render=args.render,
                                                         robot_body=test_body,
                                                         dataset_folder=args.body_folder)])
         if args.vec_normalize:
