@@ -38,7 +38,7 @@ PPO:
   sde_sample_freq: 4
   max_grad_norm: 0.5
   vf_coef: 0.5
-  learning_rate: !!float 3e-5
+  learning_rate: !!float 3e-4
   use_sde: True
   clip_range: 0.4
   policy_kwargs: "dict(log_std_init=-2,

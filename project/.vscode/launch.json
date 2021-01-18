@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--model_filename=output_data/models/model-900-901-pns-pns_init-sd2.zip",
-                "--test_bodies=900,901",
+                "--model_filename=output_data/models/model-900-901-902-903-pns-pns_init-sd8/best_model.zip",
+                "--test_bodies=900,901,902,903",
                 "--pns",
                 "--pns_init",
                 "--render",
