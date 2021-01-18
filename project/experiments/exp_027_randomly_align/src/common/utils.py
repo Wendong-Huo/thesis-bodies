@@ -138,6 +138,12 @@ def load_hyperparameters(conf_name="MyWalkerEnv"):
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
     return hyperparams
 
+def shell_header():
+    return """#!/bin/sh
+set -x
+python 0.init.py
+EXP_FOLDER=$(cat .exp_folder)
+"""
 
 class Log:
     def __init__(self, path="") -> None:

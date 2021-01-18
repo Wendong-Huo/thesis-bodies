@@ -8,7 +8,7 @@ from stable_baselines3.common.callbacks import BaseCallback, EventCallback, Eval
 from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 # from stable_baselines3.common.evaluation import evaluate_policy
 from common.pns import evaluate_policy
-
+from common import common
 
 class EvalCallback_with_prefix(EvalCallback):
     """Slightly modified version"""
@@ -188,6 +188,8 @@ class InspectionCallback(BaseCallback):
         self.saved_actions = []
  
     def log_weights_to_disk(self):
+        if not common.args.pns: # only needed while pns is enabled
+            return
         if self.model.num_timesteps%1000==0:
             if self.sub_dir == "":
                 if len(self.logger.Logger.CURRENT.output_formats)==2:

@@ -97,7 +97,11 @@ class CustomAlignWrapper(gym.ObservationWrapper):
         alignments = custom_alignment_string.split("::")
         if len(custom_alignment_string)==0: # use default order
             alignments = [ ",".join([str(x) for x in range(self.max_num_joints)]) ] * common.args.num_venvs
-        assert len(alignments)==common.args.num_venvs, f"Not enough alignment for {common.args.num_venvs} envs."
+        
+        assert common.args.num_venvs%len(alignments)==0, f"Not enough alignment for {common.args.num_venvs} envs."
+        if common.args.num_venvs // len(alignments) > 1:
+            # print(f"{common.args.num_venvs} envs, {len(alignments)} items in alignment. Tiling the alignment.")
+            alignments = np.tile(alignments, common.args.num_venvs // len(alignments)).tolist()
         for i,a in enumerate(alignments):
             if self.env.rank == i:
                 b = a.split(",")
