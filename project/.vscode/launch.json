@@ -35,7 +35,7 @@
             "--pns",
             // "--pns_init",
             // "--seed=1",
-            "--eval_steps=1000",
+            // "--eval_steps=1000",
             // "--topology_wrapper=CustomAlignWrapper",
             // "--skip_solved_threshold=1",
             "--render",

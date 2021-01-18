@@ -93,7 +93,8 @@ class PNSMotorNet(nn.Module):
         self.total_available_modules = 16
         _pns = []
         for i in range(self.total_available_modules):
-            _pns.append(nn.Linear(action_space.shape[0], action_space.shape[0]))
+            _motor = nn.Linear(action_space.shape[0], action_space.shape[0])
+            _pns.append(_motor)
         self.pns = nn.ModuleList(_pns)
         self.robot_id_2_idx = {}
 

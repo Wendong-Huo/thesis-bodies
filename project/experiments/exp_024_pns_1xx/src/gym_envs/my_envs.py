@@ -18,9 +18,9 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         super().__init__(robot, render=render)
     
     def step(self, a):
-        obs = super().step(a)
+        ret = super().step(a)
         self.camera_adjust()
-        return obs
+        return ret
 
     def reset(self):
         self._history_x = []
@@ -28,6 +28,11 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         obs = super().reset()
         self.pybullet = self._p
         self.camera_angle = 0
+
+        self.electricity_cost = 2.0     # hack, encourage exploring! 
+                                        # We are wasting computation power and our lives while sitting there waiting them to simulate "saving energy".
+                                        # we could encourage energe saving AFTER we have a steady gait.
+
         if self.isRender and not self.colored and hasattr(self, "pybullet"):
             # only reset color once after the scene is set.
             self._reset_color()
@@ -87,3 +92,5 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
             yaw = 0
             lookat = [0, 0, 0]
             self._p.resetDebugVisualizerCamera(distance, yaw, pitch, lookat)
+
+

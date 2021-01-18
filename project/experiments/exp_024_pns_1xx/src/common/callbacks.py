@@ -185,6 +185,7 @@ class InspectionCallback(BaseCallback):
         self.sub_dir = ""
         self.saved_sensor_weights = np.zeros([1])
         self.saved_motor_weights = np.zeros([1])
+        self.saved_actions = []
  
     def log_weights_to_disk(self):
         if self.model.num_timesteps%1000==0:
@@ -223,6 +224,12 @@ class InspectionCallback(BaseCallback):
                     motor_weight = motor_weight.astype(np.uint8)
                     imageio.imsave(f"{self.sub_dir}/motor_{i}_weight/{self.model.num_timesteps}.png", motor_weight)
 
+    def output_action(self):
+        self.saved_actions.append(np.abs(self.locals["clipped_actions"]).mean())
+        if self.model.num_timesteps%5000==0:
+            print(f"Avg action value: {np.mean(self.saved_actions)}")
+            self.saved_actions = []
+
     def _on_step(self):
         # obs = Tensor(self.locals["new_obs"])
         # self.logger.Logger.CURRENT.output_formats[1].writer.add_graph(self.model.policy, obs, verbose=1)
@@ -230,4 +237,6 @@ class InspectionCallback(BaseCallback):
         
         # Creating too many files on the server :D, only enable this when needed.
         # self.log_weights_to_disk()
+
+        self.output_action()
         pass
