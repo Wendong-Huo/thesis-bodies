@@ -227,5 +227,7 @@ class InspectionCallback(BaseCallback):
         # obs = Tensor(self.locals["new_obs"])
         # self.logger.Logger.CURRENT.output_formats[1].writer.add_graph(self.model.policy, obs, verbose=1)
         # print("Write Torch Graph")
-        self.log_weights_to_disk()
+        
+        # Creating too many files on the server :D, only enable this when needed.
+        # self.log_weights_to_disk()
         pass
