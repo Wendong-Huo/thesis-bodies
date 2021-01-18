@@ -1,20 +1,16 @@
 # What is tested?
 
-add sensor and motor modules (PNS) to the policy.
+Add support to 1xx.
 
-associate body with different modules.
+Test 1xx with PNS.
 
-train together.
-
-it's a soft alignment.
-
+Test learning_rate as well
 
 # What are Treatment and Control groups?
 
+Treatment: 100-107, lr=3e-5
 
 # What are the results? (in short)
-
-Not working in the first try.
 
 
 # Other Thoughts?

@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_023_pns/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_024_pns_1xx/src"]
 }
 

@@ -42,11 +42,12 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
 
     def __init__(self, observation_space: gym.Space):
         super().__init__(observation_space, get_flattened_obs_dim(observation_space))
-        self.total_available_modules = 8
+        self.total_available_modules = 16
         _pns = []
         for i in range(self.total_available_modules):
-            alignment_matrix = nn.Linear(26,26)
+            alignment_matrix = nn.Linear(observation_space.shape[0], observation_space.shape[0])
             if common.args.pns_init:
+                # For pybullet envs,
                 # first 8 numbers should be global observation (a reasonable prior), so initialize this, might make learning faster.
                 with th.no_grad():
                     alignment_matrix.weight[:, :8] = 0.
@@ -69,15 +70,15 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
                     assert next_idx < self.total_available_modules, "Too many bodies, not enough PNS modules."
                     self.robot_id_2_idx[i] = next_idx
 
-            assert(observations.shape[0]==8)
+            assert(observations.shape[0]<=16)
             transformed = []
             for i, single in enumerate(observations):
                 single = self.pns[self.robot_id_2_idx[robot_id[i]]](single)
                 transformed.append(single)
             observations = th.stack(transformed, dim=0)
-            assert observations.shape[0] == 8 and observations.shape[-1] == 26, "Only support 9xx for now."
+            # assert observations.shape[0] == 8 and observations.shape[-1] == 26, "Only support 9xx for now."
         else:
-            assert observations.shape[0]!=8, "Not such a coincident, batch size is 8? or something is wrong?"
+            # assert observations.shape[0]!=8, "Not such a coincident, batch size is 8? or something is wrong?"
             # debug: why gradient doesn't pass to pns and pns weights don't get updated.
             # print(self.pns[self.robot_id_2_idx[robot_id]].weight.data.numpy()[:2,:2])
             observations = self.pns[self.robot_id_2_idx[robot_id]](observations)
@@ -87,12 +88,12 @@ class PNSFeaturesExtractor(BaseFeaturesExtractor):
         return observations
 
 class PNSMotorNet(nn.Module):
-    def __init__(self):
+    def __init__(self, action_space: gym.Space):
         super().__init__()
-        self.total_available_modules = 8
+        self.total_available_modules = 16
         _pns = []
         for i in range(self.total_available_modules):
-            _pns.append(nn.Linear(8,8))
+            _pns.append(nn.Linear(action_space.shape[0], action_space.shape[0]))
         self.pns = nn.ModuleList(_pns)
         self.robot_id_2_idx = {}
 
@@ -108,13 +109,13 @@ class PNSMotorNet(nn.Module):
                     assert next_idx < self.total_available_modules, "Too many bodies, not enough PNS modules."
                     self.robot_id_2_idx[i] = next_idx
 
-            assert(action.shape[0]==8)
+            assert(action.shape[0]<=16)
             transformed = []
             for i, single in enumerate(action):
                 single = self.pns[self.robot_id_2_idx[robot_id[i]]](single)
                 transformed.append(single)
             action = th.stack(transformed, dim=0)
-            assert action.shape[0] == 8 and action.shape[-1] == 8, "Only support 9xx for now."
+            # assert action.shape[0] == 8 and action.shape[-1] == 8, "Only support 9xx for now."
         else:
             action = self.pns[self.robot_id_2_idx[robot_id]](action)
             if not hasattr(self, "is_hooked"):
@@ -147,7 +148,7 @@ class PNSRolloutBuffer(RolloutBuffer):
         if not self.generator_ready:
             for tensor in ["observations", "actions", "values", "log_probs", "advantages", "returns"]:
                 self.__dict__[tensor] = self.swap(self.__dict__[tensor]) # no flatten
-                assert self.__dict__[tensor].shape[0] == 8, "Only support 8 bodies for now"
+                # assert self.__dict__[tensor].shape[0] == 8, "Only support 8 bodies for now"
             self.generator_ready = True
 
         # Return everything, don't create minibatches
@@ -214,7 +215,7 @@ class PNSMlpPolicy(ActorCriticPolicy):
         )
         self.all_robot_ids = []
         self.current_robot_id = self.all_robot_ids
-        self.pns_motor_net = PNSMotorNet()
+        self.pns_motor_net = PNSMotorNet(action_space = self.action_space)
         self._build(lr_schedule) # build again, otherwise the new pns_motor_net can't get into the list of optimizer.
 
     def extract_features(self, obs: th.Tensor) -> th.Tensor:
@@ -328,7 +329,7 @@ class PNSPPO(PPO):
         # train for gradient_steps epochs
         for epoch in range(self.n_epochs):
             approx_kl_divs = []
-            for env_id in range(8):
+            for env_id in range(self.n_envs):
                 self.policy.set_robot_id(self.env.envs[env_id].robot.robot_id)
                 # Do a complete pass on the rollout buffer
                 for rollout_data in self.rollout_buffer.get(env_id=env_id, batch_size=self.batch_size):

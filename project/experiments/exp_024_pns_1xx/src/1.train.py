@@ -10,7 +10,7 @@ import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 import common.callbacks as callbacks
 from common.activation_fn import MyThreshold
-from common.policies import PNSPPO, PNSMlpPolicy
+from common.pns import PNSPPO, PNSMlpPolicy
 
 if __name__ == "__main__":
 
@@ -23,6 +23,9 @@ if __name__ == "__main__":
     saved_model_filename = common.build_model_filename(args)
 
     hyperparams = common.load_hyperparameters(conf_name="PPO")
+    # Overwrite learning_rate using args:
+    hyperparams["learning_rate"] = common.args.learning_rate
+
     print(hyperparams)
 
     # Make every env has the same obs space and action space

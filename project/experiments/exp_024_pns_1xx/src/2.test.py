@@ -10,7 +10,7 @@ import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 
-from common.policies import PNSPPO, PNSMlpPolicy
+from common.pns import PNSPPO, PNSMlpPolicy
 
 if __name__ == "__main__":
     args = common.args

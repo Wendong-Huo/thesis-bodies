@@ -13,6 +13,7 @@ def get_args():
     parser.add_argument("--train_steps", type=float, default=2e6, help="total time steps for training.")
     parser.add_argument("--eval_steps", type=float, default=1e5, help="eval policy every # steps during training.")
 
+    parser.add_argument("--learning_rate", type=float, default=3e-5, help="Setting learning rate.")
     parser.add_argument("--num_venvs", type=int, default=16, help="How many envs you want to vectorize (train together).")
 
     parser.add_argument("--with_bodyinfo", action="store_true")

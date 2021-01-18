@@ -26,11 +26,9 @@ Case3(Walker2D) = [0,1,2,3,4,5,6,7|--,--,--,--,08,09,10,11,12,13,14,15,16,17,18,
 
 # What are the results? (in short)
 
-Alignment seems doesn't matter in this experiment.
+Misalign mutants is worse than meaningful aligned mutants. (Should be the main preliminary experiment.)
 
 # Other Thoughts?
-
-Add arms to walker2d?
 
 results in tensorboard_9xx
 videos in exp_018 data folder
