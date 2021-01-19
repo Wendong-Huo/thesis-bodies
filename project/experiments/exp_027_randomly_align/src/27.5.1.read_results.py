@@ -48,36 +48,42 @@ def check_finished():
     sns.countplot(data=df, x="body_seed", hue="num_mutate") # check every run is here
     plt.show()
     plt.close()
+# check_finished()
 
-# g = sns.FacetGrid(data=df, row="num_mutate", col="metric", hue="body_seed")
-# g.map(sns.lineplot, "step", "value")
-# plt.savefig("output_data/tmp/all.png")
-# plt.close()
+def plot_all():
+    g = sns.FacetGrid(data=df, row="num_mutate", col="metric", hue="body_seed")
+    g.map(sns.lineplot, "step", "value")
+    plt.savefig("output_data/tmp/all.png")
+    plt.close()
+# plot_all()
 
-num_mutate = 4
-_df = df[(df["step"]==1007616)&(df["num_mutate"]==num_mutate)]
-print(_df)
-mean_final_values = _df.groupby(['body_seed'], sort=False)['value'].mean().sort_values()
-print(mean_final_values)
-print(mean_final_values.index[0], mean_final_values.index[-1])
-worst_body_seed = mean_final_values.index[0]
-best_body_seed = mean_final_values.index[-1]
+def plot_best_vs_worst(num_mutate = 4, evaluate_at_step = 1007616, dry_run=True):
+    _df = df[(df["step"]==evaluate_at_step)&(df["num_mutate"]==num_mutate)]
+    # print(_df)
+    mean_final_values = _df.groupby(['body_seed'], sort=False)['value'].mean().sort_values()
+    # print(mean_final_values)
+    # print(mean_final_values.index[0], mean_final_values.index[-1])
+    worst_body_seed = mean_final_values.index[0]
+    best_body_seed = mean_final_values.index[-1]
 
-_df = df[(df["num_mutate"]==num_mutate) & ((df["body_seed"]==worst_body_seed)|(df["body_seed"]==best_body_seed))]
-g = sns.FacetGrid(data=_df, col="metric", hue="body_seed")
-g.map(sns.lineplot, "step", "value")
-plt.savefig("output_data/tmp/best_vs_worst_4.png")
-plt.close()
+    if not dry_run:
+        _df = df[(df["num_mutate"]==num_mutate) & ((df["body_seed"]==worst_body_seed)|(df["body_seed"]==best_body_seed))]
+        g = sns.FacetGrid(data=_df, col="metric", hue="body_seed")
+        g.map(sns.lineplot, "step", "value")
+        plt.savefig(f"output_data/tmp/best_vs_worst_{num_mutate}.png")
+        plt.close()
 
-print(f"best_alignment in mutate {num_mutate}:")
-_df = df[(df["body_seed"]==best_body_seed) & (df["num_mutate"]==num_mutate)]
-print(_df.iloc[0]["custom_alignment"])
-print(_df.iloc[0]["str_md5"])
-print(f"worst_alignment in mutate {num_mutate}:")
-_df = df[(df["body_seed"]==worst_body_seed) & (df["num_mutate"]==num_mutate)]
-print(_df.iloc[0]["custom_alignment"])
-print(_df.iloc[0]["str_md5"])
-
+    print("")
+    print(f"best_alignment in mutate {num_mutate}:")
+    _df = df[(df["body_seed"]==best_body_seed) & (df["num_mutate"]==num_mutate)]
+    print(_df.iloc[0]["custom_alignment"])
+    print(_df.iloc[0]["str_md5"])
+    print(f"worst_alignment in mutate {num_mutate}:")
+    _df = df[(df["body_seed"]==worst_body_seed) & (df["num_mutate"]==num_mutate)]
+    print(_df.iloc[0]["custom_alignment"])
+    print(_df.iloc[0]["str_md5"])
+for i in [2,4,8,16,32]:
+    plot_best_vs_worst(i)
 
 # df_one_body = df[df["metric"]=="eval/904_mean_reward"]
 # # sns.lineplot(data=df_one_body, x="step", y="value", hue="body_seed")
