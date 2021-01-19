@@ -82,6 +82,29 @@ for num_mutate in [2,4,8,16,32]:
             all_jobs.append(job)
             num_jobs += 1
 
+# add m0 in
+num_mutate = 0
+seed = 0
+with seeds.temp_seed(seed):
+    run_seeds = np.random.randint(low=0, high=10000, size=[5])
+custom_alignment = get_str_alignments(alignments)
+print(f"\n# mutate {num_mutate} alignment for 9xx: {get_str_alignments(alignments)}")
+str_md5 = hashlib.md5(custom_alignment.encode()).hexdigest()
+print(f"# {str_md5}")
+for run_seed in run_seeds:
+    cmd = f"sbatch -J search_9xx_mutate_{num_mutate} submit-short.sh python 1.train.py --seed={run_seed} --custom_alignment={custom_alignment} --tensorboard=tensorboard/9xx_mutate_{num_mutate} --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --train_bodies=900,901,902,903,904,905,906,907 --test_bodies=900,901,902,903,904,905,906,907"
+    print(cmd)
+    job = {
+        "id": num_jobs,
+        "num_mutate": num_mutate,
+        "body_seed": seed,
+        "str_md5": str_md5,
+        "custom_alignment": custom_alignment,
+        "run_seed": run_seed,
+    }
+    all_jobs.append(job)
+    num_jobs += 1
+
 print(f"# Total jobs: {num_jobs}.")
 with open("output_data/tmp/all_jobs.pickle", "wb") as f:
     pickle.dump(all_jobs, f)
