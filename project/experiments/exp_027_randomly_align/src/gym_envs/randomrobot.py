@@ -3,6 +3,7 @@ import pybullet
 from gym_envs.my_envs import MyWalkerBase, MyWalkerBaseBulletEnv
 
 from common import colors
+from common import common
 class MyRandomRobot(MyWalkerBase):
     foot_list = []
 
@@ -23,6 +24,11 @@ class MyRandomRobot(MyWalkerBase):
     def alive_bonus(self, z, pitch):
         if z>self.initial_z*3: # avoid fly-away bug
             print("Fly-away Bug!")
+            from datetime import datetime
+            _dump = f"{datetime.now().ctime()} Related robot_id {self.robot_id}\n{common.args}\nDumps {locals()}\n"
+            print(_dump)
+            with open("output_data/tmp/FlyawayBug.txt", "a") as f:
+                print(_dump, file=f)
             exit(1)
         # straight = z > 0.2 # torso length is 1.0
         # return +1 if straight else -1

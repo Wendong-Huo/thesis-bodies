@@ -24,6 +24,8 @@ def load_tb(force=0):
             tb_path = f"output_data/tensorboard_1xx/1xx_mutate_{job['num_mutate']}/model-100-101-102-103-104-105-106-107-CustomAlignWrapper-md{job['str_md5']}-sd*/PPO_1"
             paths = glob.glob(tb_path)
             for tb_path in paths:
+                _tmp = tb_path.split("sd")[-1]
+                vacc_run_seed = _tmp.split("/")[0] # need to read the run seed from vacc..
                 print(f"Loading {tb_path}")
                 if not os.path.exists(tb_path):
                     continue
@@ -33,13 +35,14 @@ def load_tb(force=0):
                 df["body_seed"] = job["body_seed"]
                 df["custom_alignment"] = job["custom_alignment"]
                 df["str_md5"] = job["str_md5"]
+                df["vacc_run_seed"] = vacc_run_seed
                 dfs.append(df)
         df = pd.concat(dfs)
         print(df)
         df.to_pickle(cache_path)
     return df
 
-df = load_tb()
+df = load_tb(0)
 print(df)
 
 import seaborn as sns
@@ -50,13 +53,37 @@ def check_finished():
     plt.show()
     plt.close()
 # check_finished() # There are some Fly-away bug! exclude these bodies.
+def get_unfinished():
+    _count = df.groupby("metric").count()
+    # _count = _count[(_count["value"]!=160)&(_count["value"]!=160)]
+    print(_count)
+
+    return
+    row = 0
+    n = 0
+    for i in range(40):
+        for j in range(5):
+            for k in range(8):
+                _row = _df.iloc[row]
+                assert _row["body_seed"]==i
+                _tmp = str(_row["metric"])
+                if _tmp == f"eval/10{k}_mean_reward":
+                    row+=1
+                    print(f"{_row} ..ok")
+                else:
+                    print(f"{_tmp} ..bad")
+                    return
+                n+=1
+    print(_df)
+get_unfinished()
+exit(0)
 def exclude_bodies_with_fly_away_bug(df):
     _df = df.groupby("body_seed").count()
     _df = _df[_df["value"]==800] # only consider bodies that have 800 records. (Fly-away bug will abort the training early)
-    valid_body_seed = _df.index
+    valid_body_seed = _df.index.values
     df = df[df["body_seed"].isin(valid_body_seed)]
     # print(df.head())
-    print(f"valid alignment {valid_body_seed}")
+    print(f"valid alignment {valid_body_seed} ({len(valid_body_seed)} in total)")
     return df
 df = exclude_bodies_with_fly_away_bug(df)
 

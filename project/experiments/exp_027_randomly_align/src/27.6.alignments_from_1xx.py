@@ -48,7 +48,7 @@ for num_mutate in [64]:
         with seeds.temp_seed(seed):
             run_seeds = np.random.randint(low=0, high=10000, size=[5])
         for run_seed in run_seeds:
-            cmd = f"sbatch -J search_1xx_mutate_{num_mutate} submit.sh python 1.train.py --seed={run_seed} --custom_alignment={custom_alignment} --tensorboard=tensorboard/1xx_mutate_{num_mutate} --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --train_bodies=100,101,102,103,104,105,106,107 --test_bodies=100,101,102,103,104,105,106,107"
+            cmd = f"sbatch -J search_1xx_mutate_{num_mutate} submit.sh python 1.train.py --seed={run_seed} --custom_alignment={custom_alignment} --tensorboard=tensorboard/1xx_mutate_{num_mutate}_rerun --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --train_bodies=100,101,102,103,104,105,106,107 --test_bodies=100,101,102,103,104,105,106,107 --test_steps=1e7"
             print(cmd)
             job = {
                 "id": num_jobs,
