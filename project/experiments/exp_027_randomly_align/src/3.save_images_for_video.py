@@ -53,8 +53,8 @@ if __name__ == "__main__":
         pass # no need for wrapper
 
 
-    for test_body in args.test_bodies:
-        eval_venv = DummyVecEnv([gym_interface.make_env(rank=0, seed=common.seed, wrappers=default_wrapper, render=args.render,
+    for rank_idx, test_body in enumerate(args.test_bodies):
+        eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, render=args.render, force_render=args.render,
                                                         robot_body=test_body,
                                                         dataset_folder=args.body_folder)])
         if args.vec_normalize:
@@ -71,7 +71,9 @@ if __name__ == "__main__":
         obs = eval_venv.reset()
         g_obs_data = np.zeros(shape=[args.test_steps, obs.shape[1]], dtype=np.float32)
 
+        time.sleep(1)
         linux.fullscreen()
+        time.sleep(1)
 
         distance_x = 0
         total_reward = 0
@@ -82,11 +84,11 @@ if __name__ == "__main__":
             obs, reward, done, info = eval_venv.step(action)
             if args.render:
                 eval_venv.envs[0].camera_adjust()
-
-                (width, height, rgbPixels, _, _) = eval_venv.envs[0].pybullet.getCameraImage(1920,1080, renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
-                image = rgbPixels[:,:,:3]
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                cv2.imwrite(f"output_data/saved_images/{model_name}/test_{test_body}_{step:05}.png", image)
+                if common.args.one_snapshot_at==-1 or common.args.one_snapshot_at==step:
+                    (width, height, rgbPixels, _, _) = eval_venv.envs[0].pybullet.getCameraImage(1920,1080, renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
+                    image = rgbPixels[:,:,:3]
+                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                    cv2.imwrite(f"output_data/saved_images/{model_name}/test_{test_body}_{step:05}.png", image)
 
             if done:
                 # it should not matter if the env reset. I guess...

@@ -1,4 +1,4 @@
-import time,copy,hashlib
+import time,copy,hashlib,pickle
 import numpy as np
 from common import gym_interface,seeds,utils
 
@@ -58,17 +58,30 @@ str_md5 = hashlib.md5("::".join([str_meaninful_alignment]*2).encode()).hexdigest
 print(f"# {str_md5}")
 print(f"# most meaningful alignment for 9xx: {str_meaninful_alignment}")
 num_jobs = 0
+all_jobs = []
 for num_mutate in [2,4,8,16,32]:
     for seed in range(20):
         new_alignments = ga_mutate(alignments, n=num_mutate, seed=seed)
-        print(f"# mutate {num_mutate} alignment for 9xx: {get_str_alignments(new_alignments)}")
-        
-        run_seeds = np.random.randint(low=0, high=10000, size=[5])
+        print(f"\n# mutate {num_mutate} alignment for 9xx: {get_str_alignments(new_alignments)}")
+        with seeds.temp_seed(seed):
+            run_seeds = np.random.randint(low=0, high=10000, size=[5])
         custom_alignment = get_str_alignments(new_alignments)
         str_md5 = hashlib.md5(custom_alignment.encode()).hexdigest()
+        print(f"# {str_md5}")
         for run_seed in run_seeds:
-            print(f"\n# {str_md5}")
             cmd = f"sbatch -J search_9xx_mutate_{num_mutate} submit.sh python 1.train.py --seed={run_seed} --custom_alignment={custom_alignment} --tensorboard=tensorboard/9xx_mutate_{num_mutate} --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --train_bodies=900,901,902,903,904,905,906,907 --test_bodies=900,901,902,903,904,905,906,907"
             print(cmd)
+            job = {
+                "id": num_jobs,
+                "num_mutate": num_mutate,
+                "body_seed": seed,
+                "str_md5": str_md5,
+                "custom_alignment": custom_alignment,
+                "run_seed": run_seed,
+            }
+            all_jobs.append(job)
             num_jobs += 1
+
 print(f"# Total jobs: {num_jobs}.")
+with open("output_data/tmp/all_jobs.pickle", "wb") as f:
+    pickle.dump(all_jobs, f)

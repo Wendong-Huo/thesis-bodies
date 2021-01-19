@@ -1,5 +1,5 @@
 
 {
-    "python.analysis.extraPaths": ["./experiments/exp_028_arms_help/src"]
+    "python.analysis.extraPaths": ["./experiments/exp_027_randomly_align/src"]
 }
 

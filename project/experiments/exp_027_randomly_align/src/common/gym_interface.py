@@ -57,6 +57,7 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
             if render:
                 _render = rank in [0]
         env = gym.make(env_id, render=_render)
+        # rank related to which order is used for each body, so rank and the test_bodies need to be in the same order.
         env.rank = rank
         if len(wrappers)>0:
             for _wrapper in wrappers:
