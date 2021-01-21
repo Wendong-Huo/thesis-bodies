@@ -72,7 +72,7 @@
                 "--eval_steps=1000",
                 // "--topology_wrapper=CustomAlignWrapper",
                 // "--skip_solved_threshold=1",
-                "--render",
+                // "--render",
             ],
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",

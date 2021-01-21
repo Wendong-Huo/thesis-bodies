@@ -71,8 +71,16 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
 
 
 
-def make_pyrobotdesign_env(rank=0, seed=0, render=True, wrappers=[], robo_body="1000",  grammar_file = "grammar_apr30.dot", force_render=False):
+def make_pyrobotdesign_env(rank=0, seed=0, render=True, wrappers=[], robo_body="1000",  grammar_file = "grammar_apr30.dot", force_render=False, dataset_folder="../input_data/robo"):
     def _init():
+        try:
+            gym.spec("RoboEnv-v0")
+        except:
+            gym.envs.registration.register(id="RoboEnv-v0",
+                entry_point="gym_envs.robo:RoboEnv",
+                max_episode_steps=1000,
+                reward_threshold=2500.0,
+            )
 
         if force_render:
             _render = True
@@ -80,9 +88,9 @@ def make_pyrobotdesign_env(rank=0, seed=0, render=True, wrappers=[], robo_body="
             _render = False
             if render:
                 _render = rank in [0]
-        with open(f"../input_data/robo/{robo_body}.txt", "r") as f:
+        with open(f"{dataset_folder}/{robo_body}.txt", "r") as f:
             rule_sequence = f.readline().strip()
-        env = gym.make("RobotLocomotion-v0", grammar_file=grammar_file, rule_sequence=rule_sequence)
+        env = gym.make("RoboEnv-v0", grammar_file=grammar_file, rule_sequence=rule_sequence)
         env.robo_body = robo_body
         if _render:
             env.render()

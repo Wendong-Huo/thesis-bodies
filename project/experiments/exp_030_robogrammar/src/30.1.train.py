@@ -23,14 +23,14 @@ if __name__ == "__main__":
     args = common.args
     print(args)
 
-    # SAC.learn need this. If use SubprocVecEnv instead of DummyVecEnv, you need to seed in each subprocess.
-    set_random_seed(common.seed)
+    # args.vec_normalize = True # Robo need normalization.
+    
 
     saved_model_filename = common.build_model_filename(args)
 
-    hyperparams = common.load_hyperparameters(conf_name="PPO")
+    hyperparams = common.load_hyperparameters(conf_name="Robo")
     # Overwrite learning_rate using args:
-    hyperparams["learning_rate"] = common.args.learning_rate
+    # hyperparams["learning_rate"] = common.args.learning_rate
 
     print(hyperparams)
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         default_wrapper.append(wrapper.BodyinfoWrapper)
 
     print("Making train environments...")
-    venv = DummyVecEnv([gym_interface.make_pyrobotdesign_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render,
+    venv = DummyVecEnv([gym_interface.make_pyrobotdesign_env(rank=i, seed=common.seed, wrappers=default_wrapper, render=args.render, dataset_folder=args.dataset_folder,
                                                robo_body=args.robo_bodies[i%len(args.robo_bodies)]) for i in range(args.num_venvs)])
 
     normalize_kwargs = {}
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     for rank_idx, test_body in enumerate(args.robo_bodies):
         body_info = 0
         eval_venv = DummyVecEnv([gym_interface.make_pyrobotdesign_env(rank=rank_idx, seed=common.seed+1, wrappers=default_wrapper, render=False,
-                                                        robo_body=test_body)])
+                                                        robo_body=test_body, dataset_folder=args.dataset_folder)])
         if args.vec_normalize:
             eval_venv = VecNormalize(eval_venv, norm_reward=False, **normalize_kwargs)
         if args.stack_frames > 1:

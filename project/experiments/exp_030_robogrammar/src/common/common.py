@@ -1,5 +1,6 @@
 import common.arguments as arguments
 from common.utils import *
+from common.robo_common import *
 
 check_exp_folder()
 

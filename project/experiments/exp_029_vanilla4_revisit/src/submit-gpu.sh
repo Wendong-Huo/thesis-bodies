@@ -8,7 +8,7 @@
 # same as:
 #SBATCH --cores-per-socket 7
 
-#SBATCH --output /users/s/l/sliu1/slurm.out/%j-%x-gpu
+#SBATCH --output /users/s/l/sliu1/gpfs2/slurm.out/%j-%x-gpu
 
 cd ${SLURM_SUBMIT_DIR}
 source activate thesis-bodies-gpu

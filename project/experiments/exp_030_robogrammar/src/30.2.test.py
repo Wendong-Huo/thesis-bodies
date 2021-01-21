@@ -1,22 +1,32 @@
-import time
+
+
+import pyrobotdesign as rd
+import pyrobotdesign_env
+import time,os
 import numpy as np
 from tqdm import tqdm
 
-from stable_baselines3 import PPO
+
+from stable_baselines3 import PPO, SAC
+from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
+from stable_baselines3.common.callbacks import CheckpointCallback
 from common import wrapper_custom_align, wrapper_diff, wrapper_mut
+
 import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
-
+import common.callbacks as callbacks
+from common.activation_fn import MyThreshold
 from common.pns import PNSPPO, PNSMlpPolicy
 
 if __name__ == "__main__":
+
     args = common.args
     print(args)
 
-    assert len(args.train_bodies) == 0, "No need for body to train."
+    # args.vec_normalize = True # Robo need normalization.
 
     # Make every env has the same obs space and action space
     default_wrapper = []
@@ -41,11 +51,15 @@ if __name__ == "__main__":
     else:
         pass # no need for wrapper
 
-    for rank_idx, test_body in enumerate(args.test_bodies):
-        eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, force_render=args.render,
-                                                        robot_body=test_body,
-                                                        dataset_folder=args.body_folder)])
-        normalize_kwargs = {}
+    if args.with_bodyinfo:
+        default_wrapper.append(wrapper.BodyinfoWrapper)
+    assert len(args.robo_bodies) > 0, "No body to test."
+
+    print("Making eval environments...")
+    for rank_idx, test_body in enumerate(args.robo_bodies):
+        body_info = 0
+        eval_venv = DummyVecEnv([gym_interface.make_pyrobotdesign_env(rank=rank_idx, seed=common.seed+1, wrappers=default_wrapper, render=args.render,
+                                                        robo_body=test_body, dataset_folder=args.dataset_folder)])
         if args.vec_normalize:
             vorm_filename = f"{args.model_filename[:-4]}.vnorm.pkl"
             eval_venv = VecNormalize.load(vorm_filename, eval_venv)
@@ -63,7 +77,7 @@ if __name__ == "__main__":
         model = model_cls.load(args.model_filename, env=eval_venv)
 
         obs = eval_venv.reset()
-        print(obs)
+        print(obs.shape)
         g_obs_data = np.zeros(shape=[args.test_steps, obs.shape[1]], dtype=np.float32)
 
         distance_x = 0
@@ -76,15 +90,16 @@ if __name__ == "__main__":
             # print("")
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = eval_venv.step(action)
+            print(action.mean())
             if args.render:
                 # eval_venv.envs[0].camera_adjust()
                 time.sleep(0.01)
             if done:
                 # it should not matter if the env reset. I guess...
-                break
-                # pass
+                # break
+                pass
             else:  # the last observation will be after reset, so skip the last
-                distance_x = eval_venv.envs[0].robot.body_xyz[0]
+                distance_x = -1
             total_reward += reward[0]
 
         eval_venv.close()
@@ -92,4 +107,3 @@ if __name__ == "__main__":
         print(f"test on {test_body}")
         print(f"Results: last step {step}, total_reward {total_reward}, distance_x {distance_x}")
         print("\n"*4)
-

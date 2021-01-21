@@ -6,6 +6,7 @@ def get_args():
     parser.add_argument("--seed", type=int, default=0, help="seed")
     parser.add_argument("--render", action="store_true")
 
+    parser.add_argument("--dataset_folder", type=str, default="../input_data/robo", help="folder for bodies")
     parser.add_argument("--train_bodies", type=str, default="", help="Format: --train_bodies=0,100,300")
     parser.add_argument("--test_bodies", type=str, default="", help="Format: --test_bodies=0,100,300")
     parser.add_argument("--robo_bodies", type=str, default="", help="RoboGrammar rules.")
