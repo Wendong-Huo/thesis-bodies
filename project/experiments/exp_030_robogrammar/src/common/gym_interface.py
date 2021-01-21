@@ -68,3 +68,29 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
         return env
 
     return _init
+
+
+
+def make_pyrobotdesign_env(rank=0, seed=0, render=True, wrappers=[], robo_body="1000",  grammar_file = "grammar_apr30.dot", force_render=False):
+    def _init():
+
+        if force_render:
+            _render = True
+        else:
+            _render = False
+            if render:
+                _render = rank in [0]
+        with open(f"../input_data/robo/{robo_body}.txt", "r") as f:
+            rule_sequence = f.readline().strip()
+        env = gym.make("RobotLocomotion-v0", grammar_file=grammar_file, rule_sequence=rule_sequence)
+        env.robo_body = robo_body
+        if _render:
+            env.render()
+        if len(wrappers)>0:
+            for _wrapper in wrappers:
+                env = _wrapper(env)
+        if seed is not None:
+            env.seed(seed*100 + rank)
+            env.action_space.seed(seed*100 + rank)
+        return env
+    return _init

@@ -8,6 +8,7 @@ def get_args():
 
     parser.add_argument("--train_bodies", type=str, default="", help="Format: --train_bodies=0,100,300")
     parser.add_argument("--test_bodies", type=str, default="", help="Format: --test_bodies=0,100,300")
+    parser.add_argument("--robo_bodies", type=str, default="", help="RoboGrammar rules.")
 
     parser.add_argument("--test_steps", type=int, default=1000, help="total time steps for testing.")
     parser.add_argument("--train_steps", type=float, default=2e6, help="total time steps for training.")
@@ -63,6 +64,8 @@ def get_args():
     args.test_bodies_str = args.test_bodies
     args.test_bodies = str2array(args.test_bodies_str)
 
+    args.robo_bodies_str = args.robo_bodies
+    args.robo_bodies = str2array(args.robo_bodies_str)
     return args
 
 

@@ -80,7 +80,12 @@ class EvalCallback_with_prefix(EvalCallback):
                 if self.best_model_save_path is not None:
                     self.model.save(os.path.join(self.best_model_save_path, "best_model"))
                 self.best_mean_reward = mean_reward
-                self.update_best_reward(self.eval_env.envs[0].robot.robot_id, self.best_mean_reward)
+                if hasattr(self.eval_env.envs[0].robot, "robot_id"):
+                    self.update_best_reward(self.eval_env.envs[0].robot.robot_id, self.best_mean_reward)
+                elif hasattr(self.eval_env.envs[0], "robo_body"):
+                    self.update_best_reward(self.eval_env.envs[0].robo_body, self.best_mean_reward)
+                else:
+                    raise NotImplemented
                 # Trigger callback if needed
                 if self.callback is not None:
                     return self._on_event()

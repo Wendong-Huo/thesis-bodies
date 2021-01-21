@@ -61,6 +61,9 @@ def check_exp_folder():
 def build_model_filename(args):
     filename = "model-"
     filename += args.train_bodies_str.replace(",", "-")
+    if len(args.robo_bodies)>0:
+        filename += args.robo_bodies_str.replace(",","-")
+        
     if args.with_bodyinfo:
         filename += "-body"
     if args.vec_normalize:
