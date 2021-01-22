@@ -18,9 +18,10 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         super().__init__(robot, render=render)
     
     def step(self, a):
-        ret = super().step(a)
+        obs, reward, done, info = super().step(a)
+        info["distance_x"] = self.robot.body_xyz[0]
         self.camera_adjust()
-        return ret
+        return obs, reward, done, info
 
     def reset(self):
         self._history_x = []

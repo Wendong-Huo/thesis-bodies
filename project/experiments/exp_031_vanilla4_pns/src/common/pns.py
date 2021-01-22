@@ -298,18 +298,9 @@ class PNSMlpPolicy(ActorCriticPolicy):
 
 class PNSPPO(PPO):
     def __init__(self, *args, **argv):
-        super().__init__(*args, **argv)
         self.last_sensor_permutation_weights = []
         self.last_motor_permutation_weights = []
-        for i in range(self.n_envs):
-            model = self.policy.features_extractor.pns[i]
-            weight = model.weight.detach().cpu().numpy()
-            permutation_weight = permutation_matrix(weight)
-            self.last_sensor_permutation_weights.append(permutation_weight)
-            model = self.policy.pns_motor_net.pns[i]
-            weight = model.weight.detach().cpu().numpy()
-            permutation_weight = permutation_matrix(weight)
-            self.last_motor_permutation_weights.append(permutation_weight)
+        super().__init__(*args, **argv)
 
     def _setup_model(self) -> None:
         # ActorCriticPolicy part
@@ -344,6 +335,16 @@ class PNSPPO(PPO):
             self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
 
         # PNSPPO part
+        for i in range(self.n_envs):
+            model = self.policy.features_extractor.pns[i]
+            weight = model.weight.detach().cpu().numpy()
+            permutation_weight = permutation_matrix(weight)
+            self.last_sensor_permutation_weights.append(permutation_weight)
+            model = self.policy.pns_motor_net.pns[i]
+            weight = model.weight.detach().cpu().numpy()
+            permutation_weight = permutation_matrix(weight)
+            self.last_motor_permutation_weights.append(permutation_weight)
+
         for i in range(self.env.num_envs):
             self.policy.all_robot_ids.append(self.env.envs[i].robot.robot_id)
 

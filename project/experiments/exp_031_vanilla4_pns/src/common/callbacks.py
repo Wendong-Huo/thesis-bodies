@@ -2,6 +2,7 @@ import os
 from typing import Optional
 from torch import Tensor
 import imageio
+from collections import deque
 
 import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback, EventCallback, EvalCallback
@@ -186,6 +187,7 @@ class InspectionCallback(BaseCallback):
         self.saved_sensor_weights = np.zeros([1])
         self.saved_motor_weights = np.zeros([1])
         self.saved_actions = []
+        self.distance_x = None
  
     def log_weights_to_disk(self):
         if not common.args.pns: # only needed while pns is enabled
@@ -234,6 +236,20 @@ class InspectionCallback(BaseCallback):
             print(f"Avg action value: {np.mean(self.saved_actions)}")
             self.saved_actions = []
 
+    def log_record_rollout_reward(self):
+        for i in range(self.model.n_envs):
+            if self.locals['dones'][i]:
+                if self.distance_x is None: # lazy init
+                    self.distance_x = {}
+                    for j in range(self.model.n_envs):
+                        self.distance_x[j] = deque()
+
+                self.distance_x[i].append(self.locals['infos'][i]['distance_x'])
+                if len(self.distance_x[i])>10:
+                    self.distance_x[i].popleft()
+                self.logger.record(f'rollout_episodic_distance_x/robot_{self.model.env.envs[i].robot.robot_id}', np.mean(self.distance_x[i]))
+                # print(self.distance_x[i])
+
     def _on_step(self):
         # obs = Tensor(self.locals["new_obs"])
         # self.logger.Logger.CURRENT.output_formats[1].writer.add_graph(self.model.policy, obs, verbose=1)
@@ -241,6 +257,7 @@ class InspectionCallback(BaseCallback):
         
         # Creating too many files on the server :D, only enable this when needed.
         self.log_weights_to_disk()
+        self.log_record_rollout_reward()
 
         self.output_action()
         pass
