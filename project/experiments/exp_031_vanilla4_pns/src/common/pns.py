@@ -335,6 +335,16 @@ class PNSPPO(PPO):
             self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
 
         # PNSPPO part
+        if common.args.pns_fix_cns:
+            print("Fix all parameters in CNS.")
+            for parameter in self.policy.parameters():
+                parameter.requires_grad = False
+            for i in range(self.n_envs):
+                model = self.policy.features_extractor.pns[i]
+                model.weight.requires_grad = True
+            # for parameter in self.policy.parameters():
+            #     print(parameter)
+
         for i in range(self.n_envs):
             model = self.policy.features_extractor.pns[i]
             weight = model.weight.detach().cpu().numpy()

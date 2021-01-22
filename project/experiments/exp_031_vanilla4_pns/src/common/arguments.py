@@ -46,6 +46,7 @@ def get_args():
 
     parser.add_argument("--pns", action="store_true", help="Use Mlp with PNS instead of MlpPolicy.")
     parser.add_argument("--pns_init", action="store_true", help="By default, first 8 numbers in observation is general information. Init with an I matrix in sensor weight.")
+    parser.add_argument("--pns_fix_cns", action="store_true", help="By default, every parameter in policy (both cns and pns) is trainable. If we can assume the cns is good enough, we can use this flag to fix the parameter in cns and only train pns.")
 
 
 
