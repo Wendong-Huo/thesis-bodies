@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition dg-jup
+#SBATCH --partition dggpu
 #SBATCH --mem 8G
 #SBATCH --gres=gpu:1
 #SBATCH -c 1

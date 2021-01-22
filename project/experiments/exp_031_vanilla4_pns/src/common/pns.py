@@ -299,6 +299,17 @@ class PNSMlpPolicy(ActorCriticPolicy):
 class PNSPPO(PPO):
     def __init__(self, *args, **argv):
         super().__init__(*args, **argv)
+        self.last_sensor_permutation_weights = []
+        self.last_motor_permutation_weights = []
+        for i in range(self.n_envs):
+            model = self.policy.features_extractor.pns[i]
+            weight = model.weight.detach().cpu().numpy()
+            permutation_weight = permutation_matrix(weight)
+            self.last_sensor_permutation_weights.append(permutation_weight)
+            model = self.policy.pns_motor_net.pns[i]
+            weight = model.weight.detach().cpu().numpy()
+            permutation_weight = permutation_matrix(weight)
+            self.last_motor_permutation_weights.append(permutation_weight)
 
     def _setup_model(self) -> None:
         # ActorCriticPolicy part
@@ -459,6 +470,8 @@ class PNSPPO(PPO):
         if self.clip_range_vf is not None:
             logger.record("train/clip_range_vf", clip_range_vf)
 
+        self.reset_weights_to_permutation_matrix()
+
     def predict(
         self,
         observation: np.ndarray,
@@ -560,6 +573,35 @@ class PNSPPO(PPO):
 
         return True
 
+    def reset_weights_to_permutation_matrix(self):
+        with th.no_grad():
+            # First reset all bias of pns net.
+            for i in range(self.n_envs):
+                model = self.policy.features_extractor.pns[i]
+                model.bias = nn.Parameter(th.zeros_like(model.bias))
+                model = self.policy.pns_motor_net.pns[i]
+                model.bias = nn.Parameter(th.zeros_like(model.bias))
+            # Second if there is possibly a new permutation, align to that
+            for i in range(self.n_envs):
+                model = self.policy.features_extractor.pns[i]
+                weight = model.weight.detach().cpu().numpy()
+                permutation_weight = permutation_matrix(weight)
+                if np.array_equal(permutation_weight, self.last_sensor_permutation_weights[i]):
+                    model.weight.data.copy_(th.clamp(model.weight, min=-0.1, max=1.0))
+                else:
+                    self.last_sensor_permutation_weights[i] = permutation_weight
+                    model.weight.data.copy_(th.Tensor(permutation_weight))
+                    print("\n\nReset Permutation for sensor pns!\n\n")
+
+                model = self.policy.pns_motor_net.pns[i]
+                weight = model.weight.detach().cpu().numpy()
+                permutation_weight = permutation_matrix(weight)
+                if np.array_equal(permutation_weight, self.last_motor_permutation_weights[i]):
+                    model.weight.data.copy_(th.clamp(model.weight, min=-0.1, max=1.0))
+                else:
+                    self.last_motor_permutation_weights[i] = permutation_weight
+                    model.weight.data.copy_(th.Tensor(permutation_weight))
+                    print("\n\nReset Permutation for motor pns!\n\n")
 
 # standalone function
 
@@ -624,3 +666,23 @@ def evaluate_policy(
     if return_episode_rewards:
         return episode_rewards, episode_lengths
     return mean_reward, std_reward
+
+
+def permutation_matrix(A):
+    """input a square matrix A, to get a close permutation matrix B."""
+    assert A.shape[0]==A.shape[1], "matrix A is not square"
+    B = np.zeros_like(A)
+    A_length = A.shape[0]
+    A_flatten = A.flatten()
+    A_argsort = np.argsort(A_flatten)[::-1]
+    visited_x = {}
+    visited_y = {}
+    for i in A_argsort:
+        x =  i//A_length
+        y = i%A_length
+        if x in visited_x or y in visited_y:
+            continue
+        visited_x[x] = True
+        visited_y[y] = True
+        B[x,y]=1
+    return B

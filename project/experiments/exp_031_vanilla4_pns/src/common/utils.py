@@ -138,21 +138,24 @@ def load_hyperparameters(conf_name="MyWalkerEnv"):
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
     return hyperparams
 
+def md5(str2hash):
+    return hashlib.md5(str2hash.encode()).hexdigest()
+
 def shell_header(exp_name="Unknown", description="Unknown"):
-    return f"""#!/bin/sh
+    print(f"""#!/bin/sh
 set -x
 python 0.init.py
 EXP_FOLDER=$(cat .exp_folder)
 # ========================================
 
-exp_name={exp_name}
+exp_name="{exp_name}"
 
-description={description}
+description="{description}"
 
-"""
+""")
 
 def shell_tail():
-    return """
+    print("""
 # ========================================
 # log
 echo "================" >> ~/gpfs2/experiments.log
@@ -164,7 +167,7 @@ echo $description >> ~/gpfs2/experiments.log
 squeue -O "JobID,Partition,Name,Nodelist,TimeUsed,UserName,StartTime,Schednodes,Command" --user=sliu1 -n $exp_name | head -n 10 >> ~/gpfs2/experiments.log
 echo "================" >> ~/gpfs2/experiments.log
 
-"""
+""")
 
 class Log:
     def __init__(self, path="") -> None:

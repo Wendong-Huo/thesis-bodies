@@ -202,6 +202,7 @@ class InspectionCallback(BaseCallback):
             
             if self.sub_dir != "":
                 if hasattr(self.model.policy.features_extractor, "pns"):
+                    np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
                     current_sensor_weights = self.model.policy.features_extractor.pns[0].weight.cpu().detach().numpy()
                     current_motor_weights = self.model.policy.pns_motor_net.pns[0].weight.cpu().detach().numpy()
                     if current_sensor_weights.sum() == self.saved_sensor_weights.sum() and current_motor_weights.sum() == self.saved_motor_weights.sum() : # nothing has changed
