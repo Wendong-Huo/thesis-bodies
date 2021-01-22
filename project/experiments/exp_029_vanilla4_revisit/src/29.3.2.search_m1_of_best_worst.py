@@ -1,8 +1,11 @@
-import copy, hashlib
+import copy, hashlib, pickle
 import numpy as np
 
 from common import seeds,utils
-print(utils.shell_header())
+
+exp_name = "vanilla4_mga"
+
+print(utils.shell_header(exp_name, "Search M1 of the best and worst found in 29.1"))
 
 def ga_mutate(alignments, n=1, seed=0):
     # Mutate individual
@@ -47,7 +50,7 @@ bad_mutants = get_offspring_alignments(bad_alignment, 20)
 
 g_current_exp_id = 0
 g_all_jobs = {}
-def generate_jobs(mutants):
+def generate_jobs(mutants, label=""):
     global g_current_exp_id, g_all_jobs
     for offspring_alignment in mutants:
         # print(offspring_alignment,run_seed)
@@ -57,7 +60,7 @@ def generate_jobs(mutants):
         with seeds.temp_seed(g_current_exp_id):
             run_seeds = np.random.randint(low=0, high=1000000, size=[5])
         for run_seed in run_seeds:
-            cmd = f"sbatch -J vanilla4_manual_ga submit.sh python 1.train.py  --custom_alignment={offspring_alignment} --train_steps=5e6 --seed={run_seed} --train_bodies=399,499,599,699 --test_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper --tensorboard=tensorboard_vanilla4_mga --custom_align_max_joints=8"
+            cmd = f"sbatch -J vanilla4_manual_ga submit.sh python 1.train.py  --custom_alignment={offspring_alignment} --train_steps=5e6 --seed={run_seed} --train_bodies=399,499,599,699 --test_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper --tensorboard=tensorboard_{exp_name} --custom_align_max_joints=8"
             print(cmd)
             g_all_jobs[g_current_exp_id] = {
                 # "vanilla_bodies": vanilla_bodies,
@@ -65,8 +68,14 @@ def generate_jobs(mutants):
                 "seed": g_current_exp_id,
                 "str_md5": str_md5,
                 "run_seed": run_seed,
+                "label": label,
             }
             g_current_exp_id+=1
-generate_jobs(good_mutants)
-generate_jobs(bad_mutants)
+generate_jobs(good_mutants, label="good")
+generate_jobs(bad_mutants, label="bad")
 print(f"# In Total {g_current_exp_id} jobs.")
+
+print(utils.shell_tail())
+
+with open(f"output_data/jobs_{exp_name}.pickle", "wb") as f:
+    pickle.dump(g_all_jobs, f)

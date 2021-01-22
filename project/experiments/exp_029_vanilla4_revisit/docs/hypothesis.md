@@ -12,6 +12,7 @@ refer to `28.0.1.start_exp.sh`
 
 # What are the results? (in short)
 
+The best and the worst has no difference. The variance of each run is too large, and it takes too long to do one run, so it is very unlikely to find a solution that is not on the plateau!
 
 
 # Other Thoughts?
