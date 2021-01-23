@@ -48,8 +48,8 @@ def get_args():
     parser.add_argument("--pns_init", action="store_true", help="By default, first 8 numbers in observation is general information. Init with an I matrix in sensor weight.")
     parser.add_argument("--pns_fix_cns", action="store_true", help="By default, every parameter in policy (both cns and pns) is trainable. If we can assume the cns is good enough, we can use this flag to fix the parameter in cns and only train pns.")
     parser.add_argument("--cnspns", action="store_true", help="Use Official Version of CNSPNSPPO")
-    parser.add_argument("--cnspns_sensor_channel", type=int, default=16, help="Number of channels.")
-    parser.add_argument("--cnspns_motor_channel", type=int, default=16, help="Number of channels.")
+    parser.add_argument("--cnspns_sensor_channel", type=int, default=32, help="Number of sensor channels. (Ants has 28 input, so 32 might be a reasonable choice)")
+    parser.add_argument("--cnspns_motor_channel", type=int, default=8, help="Number of channels. (Ants has 8 joints, so 8 might be a reasonable choice)")
     parser.add_argument("--cnspns_fix_cns", action="store_true", help="Fix the parameters in CNS, only train PNS.")
 
 
