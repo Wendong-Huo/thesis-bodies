@@ -5,16 +5,30 @@ from tqdm import tqdm
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from common import wrapper_custom_align, wrapper_diff, wrapper_mut
+from stable_baselines3.common.save_util import load_from_zip_file
+
+from common import wrapper_custom_align, wrapper_diff, wrapper_mut, wrapper_pns
 import common.common as common
 import common.wrapper as wrapper
 import common.gym_interface as gym_interface
 
 from common.pns import PNSPPO, PNSMlpPolicy
+from common.cnspns import CNSPNSPPO, CNSPNSPolicy
 
 if __name__ == "__main__":
     args = common.args
     print(args)
+
+    data, params, pytorch_variables = load_from_zip_file(args.model_filename, device="cpu")
+
+    if args.cnspns:
+        for parameter_name, module in params['policy'].items():
+            if parameter_name.startswith("pns_sensor_adaptor.nets.") and parameter_name.endswith(".weight"):
+                print(f"Sensor channel for the policy: {module.shape[0]}")
+                args.cnspns_sensor_channel = module.shape[0]
+            if parameter_name.startswith("pns_motor_adaptor.nets.") and parameter_name.endswith(".weight"):
+                print(f"Motor channel for the policy: {module.shape[1]}")
+                args.cnspns_motor_channel = module.shape[1]
 
     assert len(args.train_bodies) == 0, "No need for body to train."
 
@@ -41,6 +55,11 @@ if __name__ == "__main__":
     else:
         pass # no need for wrapper
 
+    if args.cnspns:
+        # hard code for now. could be automatically determined.
+        _w = wrapper_pns.make_same_dim_wrapper(obs_dim=28, action_dim=8)
+        default_wrapper.append(_w)
+
     for rank_idx, test_body in enumerate(args.test_bodies):
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, force_render=args.render,
                                                         robot_body=test_body,
@@ -57,6 +76,9 @@ if __name__ == "__main__":
         if args.pns:
             model_cls = PNSPPO
             policy_cls = PNSMlpPolicy
+        elif args.cnspns:
+            model_cls = CNSPNSPPO
+            policy_cls = CNSPNSPolicy
         else:
             model_cls = PPO
             policy_cls = "MlpPolicy"

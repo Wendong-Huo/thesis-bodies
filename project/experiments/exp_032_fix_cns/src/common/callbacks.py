@@ -8,7 +8,7 @@ import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback, EventCallback, EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 # from stable_baselines3.common.evaluation import evaluate_policy
-from common.pns import evaluate_policy
+from common.cnspns import evaluate_policy
 from common import common
 
 class EvalCallback_with_prefix(EvalCallback):
@@ -239,16 +239,20 @@ class InspectionCallback(BaseCallback):
     def log_record_rollout_reward(self):
         for i in range(self.model.n_envs):
             if self.locals['dones'][i]:
+                robot_id = self.model.env.envs[i].robot.robot_id
                 if self.distance_x is None: # lazy init
                     self.distance_x = {}
                     for j in range(self.model.n_envs):
-                        self.distance_x[j] = deque()
+                        self.distance_x[self.model.env.envs[j].robot.robot_id] = deque()
 
-                self.distance_x[i].append(self.locals['infos'][i]['distance_x'])
-                if len(self.distance_x[i])>10:
-                    self.distance_x[i].popleft()
-                self.logger.record(f'rollout_episodic_distance_x/robot_{self.model.env.envs[i].robot.robot_id}', np.mean(self.distance_x[i]))
-                # print(self.distance_x[i])
+                self.distance_x[robot_id].append(self.locals['infos'][i]['distance_x'])
+                if len(self.distance_x[robot_id])>10:
+                    self.distance_x[robot_id].popleft()
+                self.logger.record(f'rollout_episodic_distance_x/robot_{robot_id}', np.mean(self.distance_x[robot_id]))
+                np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
+                # debug:
+                # print(f"most recent distance_x: {self.locals['infos'][i]['distance_x']}")
+                # print(f"Queue: {self.distance_x[robot_id]}")
 
     def _on_step(self):
         # obs = Tensor(self.locals["new_obs"])

@@ -3,7 +3,7 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
 from stable_baselines3.common.callbacks import CheckpointCallback
-from common import wrapper_custom_align, wrapper_diff, wrapper_mut
+from common import wrapper_custom_align, wrapper_diff, wrapper_mut, wrapper_pns
 
 import common.common as common
 import common.wrapper as wrapper
@@ -11,6 +11,7 @@ import common.gym_interface as gym_interface
 import common.callbacks as callbacks
 from common.activation_fn import MyThreshold
 from common.pns import PNSPPO, PNSMlpPolicy
+from common.cnspns import CNSPNSPPO, CNSPNSPolicy
 
 if __name__ == "__main__":
 
@@ -50,6 +51,12 @@ if __name__ == "__main__":
         default_wrapper.append(wrapper_custom_align.CustomAlignWrapper)
     else:
         pass # no need for wrapper
+
+    if args.cnspns:
+        # hard code for now. could be automatically determined.
+        _w = wrapper_pns.make_same_dim_wrapper(obs_dim=28, action_dim=8)
+        default_wrapper.append(_w)
+
 
     assert len(args.train_bodies) > 0, "No body to train."
     if args.with_bodyinfo:
@@ -114,6 +121,9 @@ if __name__ == "__main__":
     if args.pns:
         model_cls = PNSPPO
         policy_cls = PNSMlpPolicy
+    elif args.cnspns:
+        model_cls = CNSPNSPPO
+        policy_cls = CNSPNSPolicy
     else:
         model_cls = PPO
         policy_cls = "MlpPolicy"
@@ -134,10 +144,10 @@ if __name__ == "__main__":
         model.learn(total_timesteps=args.train_steps, callback=all_callbacks)
     except KeyboardInterrupt:
         pass
-    model.save(str(common.output_data_folder/"models"/saved_model_filename))
+    model.save(str(common.output_data_folder/args.tensorboard/saved_model_filename))
 
     if args.vec_normalize:
         # Important: save the running average, for testing the agent we need that normalization
-        model.get_vec_normalize_env().save(str(common.output_data_folder/"models"/f"{saved_model_filename}.vnorm.pkl"))
+        model.get_vec_normalize_env().save(str(common.output_data_folder/args.tensorboard/f"{saved_model_filename}.vnorm.pkl"))
 
     venv.close()
