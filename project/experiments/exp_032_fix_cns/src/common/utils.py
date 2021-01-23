@@ -1,7 +1,13 @@
-import os
+import os, re
 import hashlib
 import pathlib
 import yaml
+
+from stable_baselines3.common.save_util import load_from_zip_file
+from stable_baselines3.common.vec_env import DummyVecEnv
+import common.gym_interface as gym_interface
+
+from common import common
 
 def get_exp_name():
     """Return current experiment folder, such as exp0."""
@@ -136,6 +142,17 @@ def load_hyperparameters(conf_name="MyWalkerEnv"):
         hp = yaml.load(f, Loader=yaml.SafeLoader)
     hyperparams = hp[conf_name]
     hyperparams["policy_kwargs"] = eval(hyperparams["policy_kwargs"])
+    # Overwrite learning_rate using args:
+    hyperparams["learning_rate"] = common.args.learning_rate
+    # Use MyThreshold instead of ReLU
+    # hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
+
+    # ignore these keys
+    keys_remove = ["normalize", "n_envs", "n_timesteps", "policy"]
+    for key in keys_remove:
+        if key in hyperparams:
+            del hyperparams[key]
+    
     return hyperparams
 
 def md5(str2hash):
@@ -168,6 +185,42 @@ squeue -O "JobID,Partition,Name,Nodelist,TimeUsed,UserName,StartTime,Schednodes,
 echo "================" >> ~/gpfs2/experiments.log
 
 """)
+
+
+def load_parameters_from_path(model, model_filename, model_cls, bodies, default_wrapper):
+
+    args = common.args
+    data, params, pytorch_variables = load_from_zip_file(model_filename, device="cpu")
+    robot_ids_in_file = []
+    if args.cnspns:
+        for parameter_name, module in params['policy'].items():
+            _match = re.findall(r'pns_sensor_adaptor\.nets\.([0-9]+)\.weight', parameter_name)
+            if _match:
+                _robot_id = _match[0]
+                print(f"Sensor channel for the policy: {module.shape[0]}")
+                robot_ids_in_file.append(int(_robot_id))
+                assert args.cnspns_sensor_channel == module.shape[0], f"Loading from a model with a different number of sensor channels. Want {args.cnspns_sensor_channel}, the model has {module.shape[0]}."
+            _match = re.findall(r'pns_motor_adaptor\.nets\.([0-9])+\.weight', parameter_name)
+            if _match:
+                print(f"Motor channel for the policy: {module.shape[1]}")
+                assert args.cnspns_motor_channel == module.shape[1], f"Loading from a model with a different number of motor channels. Want {args.cnspns_motor_channel}, the model has {module.shape[1]}."
+        fake_env = DummyVecEnv([gym_interface.make_env(robot_body=_robot_id, wrappers=default_wrapper,
+                                            render=False, dataset_folder=args.body_folder) for _robot_id in robot_ids_in_file])
+    else:
+        fake_env = None
+    load_model = model_cls.load(model_filename, fake_env)
+    if args.cnspns:
+        for robot_id in robot_ids_in_file:
+            if robot_id not in bodies:
+                model.policy.add_net_to_adaptors(robot_id)
+        for robot_id in bodies:
+            if robot_id not in robot_ids_in_file:
+                load_model.policy.add_net_to_adaptors(robot_id)
+    load_weights = load_model.policy.state_dict()
+    model.policy.load_state_dict(load_weights)
+    # model.policy.build()
+    print(f"Weights loaded from {model_filename}")
+    return model
 
 class Log:
     def __init__(self, path="") -> None:

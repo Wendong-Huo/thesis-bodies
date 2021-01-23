@@ -25,7 +25,7 @@
                 "--test_bodies=599",
                 "--cnspns",
                 "--render",
-                "--model_filename=output_data/models/model-599-sd99818/best_model.zip",
+                "--model_filename=output_data/models/v/model-699-initw-sd0/best_model.zip",
                 // "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=16"
 
@@ -40,16 +40,16 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--train_bodies=599",
-                "--test_bodies=599",
+                "--train_bodies=699",
                 // "--pns",
+                "-f=v",
                 "--cnspns",
-                "--eval_steps=1000",
+                "--eval_steps=1005",
                 "--num_venvs=2",
-                // "--cnspns_sensor_channel=4",
+                "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=4",
                 // "--pns_fix_cns",
-                // "--initialize_weights_from=output_data/tmp/model-399-499-599-699-CustomAlignWrapper-mdd41d8cd98f00b204e9800998ecf8427e-pns-pns_init-sd80966/best_model.zip",
+                "--model_filename=output_data/models/launch/model-399-initw-sd0/best_model.zip",
                 // "--topology_wrapper=CustomAlignWrapper",
                 // "--custom_align_max_joints=8",
                 "--render"

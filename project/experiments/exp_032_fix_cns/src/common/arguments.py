@@ -24,9 +24,9 @@ def get_args():
     parser.add_argument("--threshold_threshold", type=float, default=0.0, help="activation function used in training. 0.0 is equivalent to ReLU")
     parser.add_argument("--threshold_value", type=float, default=0.0, help="activation function used in training. 0.0 is equivalent to ReLU")
 
-    parser.add_argument("--initialize_weights_from", type=str, default="", help="better initialization from model file.")
-
     parser.add_argument("--model_filename", type=str, default="", help="model to test.")
+    # parser.add_argument("--initialize_weights_from", type=str, default="", help="better initialization from model file.")
+
     parser.add_argument("--body_folder", type=str, default="../input_data/bodies", help="folders that contains body xml files")
     
     parser.add_argument("--topology_wrapper", type=str, default="", help="Switch for different experiments. Could be: same|diff")
@@ -50,12 +50,13 @@ def get_args():
     parser.add_argument("--cnspns", action="store_true", help="Use Official Version of CNSPNSPPO")
     parser.add_argument("--cnspns_sensor_channel", type=int, default=16, help="Number of channels.")
     parser.add_argument("--cnspns_motor_channel", type=int, default=16, help="Number of channels.")
+    parser.add_argument("--cnspns_fix_cns", action="store_true", help="Fix the parameters in CNS, only train PNS.")
 
 
 
     parser.add_argument("--one_snapshot_at", type=int, default=-1, help="For save images, only save one picture at certain step.")
     parser.add_argument("--skip_solved_threshold", type=float, default=-1, help="Define a value for solved, skip training on that body until everyone pass that threshold. -1 for disabling this function.")
-    parser.add_argument("-tb", "--tensorboard", type=str, default="tensorboard", help="Folder name for tensorboard data.")
+    parser.add_argument("-f", "--subfolder", type=str, default="default", help="Subfolder for this run.")
     parser.add_argument("--force_read", action="store_true")
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone
         args = parser.parse_args(sys.argv[1:])

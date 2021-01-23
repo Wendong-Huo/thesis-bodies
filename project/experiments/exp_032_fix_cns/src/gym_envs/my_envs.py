@@ -20,7 +20,8 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def step(self, a):
         obs, reward, done, info = super().step(a)
         info["distance_x"] = self.robot.body_xyz[0]
-        self.camera_adjust()
+        if self.isRender:
+            self.camera_adjust()
         return obs, reward, done, info
 
     def reset(self):

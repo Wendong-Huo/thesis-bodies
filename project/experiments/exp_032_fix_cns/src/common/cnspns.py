@@ -38,15 +38,25 @@ class PNSSensorAdaptor(nn.Module):
         super().__init__()
         self._nets = {}
         self.sensor_channel = sensor_channel
+
     def build_module_dict(self, robot_ids, obs_dim):
         self.obs_dim = obs_dim
         for robot_id in robot_ids:
-            robot_id = str(robot_id)
+            self._add_one_net(robot_id)
+        self._rebuild_module_dict()
+    def add_one_net(self, robot_id):
+        self._add_one_net(robot_id)
+        self._rebuild_module_dict()
+    def _add_one_net(self, robot_id):
+        robot_id = str(robot_id)
+        if robot_id not in self._nets:
             net = nn.Linear(self.obs_dim, self.sensor_channel)
             net.weight.pns_type = "sensor"
             net.bias.pns_type = "sensor"
             self._nets[robot_id] = net
+    def _rebuild_module_dict(self):
         self.nets = nn.ModuleDict(self._nets)
+
     def forward(self, obs, robot_id):
         assert self.obs_dim == obs.shape[1], f"Max input dimension is {self.obs_dim}"
         if isinstance(robot_id, list):
@@ -70,11 +80,19 @@ class PNSMotorAdaptor(nn.Module):
     def build_module_dict(self, robot_ids, action_dim):
         self.action_dim = action_dim
         for robot_id in robot_ids:
-            robot_id = str(robot_id)
+            self._add_one_net(robot_id)
+        self._rebuild_module_dict()
+    def add_one_net(self, robot_id):
+        self._add_one_net(robot_id)
+        self._rebuild_module_dict()
+    def _add_one_net(self, robot_id):
+        robot_id = str(robot_id)
+        if robot_id not in self._nets:
             net = nn.Linear(self.motor_channel, self.action_dim)
             net.weight.pns_type = "motor"
             net.bias.pns_type = "motor"
             self._nets[robot_id] = net
+    def _rebuild_module_dict(self):
         self.nets = nn.ModuleDict(self._nets)
     def forward(self, action, robot_id):
         if isinstance(robot_id, list):
@@ -176,6 +194,10 @@ class CNSPNSPolicy(ActorCriticPolicy):
         if enable_different_learning_rates:
             assert len(self.optimizer.param_groups)==2, "Divide param_groups first, please."
             self.optimizer.param_groups[1]['lr'] = 1e-4
+
+    def add_net_to_adaptors(self, robot_id):
+        self.pns_sensor_adaptor.add_one_net(robot_id)
+        self.pns_motor_adaptor.add_one_net(robot_id)
 
     def extract_features(self, obs: th.Tensor) -> th.Tensor:
         """
@@ -467,6 +489,10 @@ class CNSPNSPPO(PPO):
         # Inject
         self.policy.set_robot_id(eval_env.envs[0].robot.robot_id)
         return self.policy.predict(observation, state, mask, deterministic)
+    
+    def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
+        state_dicts = ["policy"] # no need to save "policy.optimizer"
+        return state_dicts, []
 
 
 

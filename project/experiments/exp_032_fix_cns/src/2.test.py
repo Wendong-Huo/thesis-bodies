@@ -1,3 +1,4 @@
+import re
 import time
 import numpy as np
 from tqdm import tqdm
@@ -19,16 +20,26 @@ if __name__ == "__main__":
     args = common.args
     print(args)
 
+    hyperparams = common.load_hyperparameters(conf_name="PPO")
+
     data, params, pytorch_variables = load_from_zip_file(args.model_filename, device="cpu")
 
     if args.cnspns:
+        cns_parameter_means = []
         for parameter_name, module in params['policy'].items():
-            if parameter_name.startswith("pns_sensor_adaptor.nets.") and parameter_name.endswith(".weight"):
-                print(f"Sensor channel for the policy: {module.shape[0]}")
-                args.cnspns_sensor_channel = module.shape[0]
-            if parameter_name.startswith("pns_motor_adaptor.nets.") and parameter_name.endswith(".weight"):
-                print(f"Motor channel for the policy: {module.shape[1]}")
-                args.cnspns_motor_channel = module.shape[1]
+            _match = re.findall(r'pns_(sensor|motor)_adaptor\.nets\.([0-9]+)\.(weight|bias)', parameter_name)
+            if _match:
+                if _match[0][2]=='weight':
+                    if _match[0][0]=="sensor":
+                        print(f"Sensor channel for the policy: {module.shape[0]}")
+                        args.cnspns_sensor_channel = module.shape[0]
+                    else:
+                        print(f"Motor channel for the policy: {module.shape[1]}")
+                        args.cnspns_motor_channel = module.shape[1]
+                print(f"mean of {parameter_name} is {module.numpy().mean()}")
+            else:
+                cns_parameter_means.append(module.numpy().mean())
+        print(f"mean of all other parameters (CNS) is {np.mean(cns_parameter_means)}\n\n")
 
     assert len(args.train_bodies) == 0, "No need for body to train."
 
@@ -83,7 +94,8 @@ if __name__ == "__main__":
             model_cls = PPO
             policy_cls = "MlpPolicy"
 
-        model = model_cls.load(args.model_filename, env=eval_venv)
+        model = model_cls(policy_cls, env=eval_venv, **hyperparams)
+        common.load_parameters_from_path(model, args.model_filename, model_cls, args.test_bodies, default_wrapper)
 
         obs = eval_venv.reset()
         print(obs)
