@@ -5,20 +5,13 @@ EXP_FOLDER=$(cat .exp_folder)
 submit_to=submit-short.sh
 # ========================================
 
-exp_name="RedoV4Baseline2"
+exp_name="On399"
 
-description="I need to redo this experiment, because PPO clip range was set to 0.4 instead of 0.2, and now everything will use vec_normal."
+description="Step1. Train on 399 with no contraints on PNS"
 
-for seed in 0 1 2 3 4
-do
-    for body in 399 499 599 699
-    do
-        # Train on one, with cnspns division, see if there's any negative effect
-        sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/cnspns --cnspns --train_bodies=$body --seed=$seed
-        # Basic baseline
-        sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/control --train_bodies=$body --seed=$seed
-    done
-done
+sbatch -J $exp_name $submit_to python 1.train.py --train_bodies=399 --test_bodies=399 --pns --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --tensorboard=tensorboard/step1 --seed=0
+sbatch -J $exp_name $submit_to python 1.train.py --train_bodies=399 --test_bodies=399 --pns --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8 --tensorboard=tensorboard/step1 --seed=1
+
 
 # ========================================
 # log

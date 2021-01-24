@@ -20,6 +20,9 @@ channel size of 128, 256 is even better, but that will enlarge the PNS nets and 
 I chose sensor=32, motor=8.
 
 For small channel, s=8,m=4, 399 not working, one of 499 not working but Ants is very much fine.
+Test on small channel again with adjustment in vec_normal and ppo clip_range, we have the very similar result above. (wired)
+
+
 
 # Other Thoughts?
 

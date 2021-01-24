@@ -5,20 +5,17 @@ EXP_FOLDER=$(cat .exp_folder)
 submit_to=submit-short.sh
 # ========================================
 
-exp_name="RedoV4Baseline2"
+exp_name="TrainOnOneRe"
 
-description="I need to redo this experiment, because PPO clip range was set to 0.4 instead of 0.2, and now everything will use vec_normal."
+description="We have implemented CNSPNS function, so now we can train on one body, and later we can add other bodies in. The basic intention is to get a policy that can work well on 399 first.\
+ I need to redo this experiment with PPO clip range 0.2 and vec_normal is used."
 
-for seed in 0 1 2 3 4
+for body in 399 499 599 699
 do
-    for body in 399 499 599 699
-    do
-        # Train on one, with cnspns division, see if there's any negative effect
-        sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/cnspns --cnspns --train_bodies=$body --seed=$seed
-        # Basic baseline
-        sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/control --train_bodies=$body --seed=$seed
-    done
+    sbatch -J $exp_name $submit_to python 1.train.py --train_bodies=$body --cnspns -f=$exp_name --seed=100
+    sbatch -J $exp_name $submit_to python 1.train.py --train_bodies=$body --cnspns -f=$exp_name --seed=101
 done
+
 
 # ========================================
 # log

@@ -73,10 +73,7 @@ if __name__ == "__main__":
     normalize_kwargs = {}
     if args.vec_normalize:
         normalize_kwargs["gamma"] = hyperparams["gamma"]
-        if len(args.model_filename) > 0:
-            venv = VecNormalize.load(common.get_vec_pkl_from_model_filename(args.model_filename), venv)
-        else:
-            venv = VecNormalize(venv, **normalize_kwargs)
+        venv = VecNormalize(venv, **normalize_kwargs)
 
     if args.stack_frames > 1:
         venv = VecFrameStack(venv, args.stack_frames)
