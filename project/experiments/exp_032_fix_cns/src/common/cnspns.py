@@ -292,6 +292,8 @@ class CNSPNSPPO(PPO):
         self.policy.pns_motor_adaptor.build_module_dict(robot_ids, self.action_space.shape[0])
         self.policy.divide_and_use_different_learning_rates()
 
+        self.policy = self.policy.to(self.device)
+
     def collect_rollouts(
         self, env: VecEnv, callback: BaseCallback, rollout_buffer: RolloutBuffer, n_rollout_steps: int
     ) -> bool:

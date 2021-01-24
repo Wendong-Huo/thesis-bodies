@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     saved_model_filename = common.build_model_filename(args)
 
-    hyperparams = common.load_hyperparameters(conf_name="PPO")
+    hyperparams = common.load_hyperparameters(conf_name=args.rl_hyperparameter)
     print(hyperparams)
 
     # Make every env has the same obs space and action space
@@ -123,6 +123,7 @@ if __name__ == "__main__":
         model_cls = PPO
         policy_cls = "MlpPolicy"
 
+    hyperparams = common.clean_hyperparams_before_run(hyperparams)
     model = model_cls(policy_cls, venv, verbose=1, tensorboard_log=str(
         common.output_data_folder / "tensorboard" / common.args.subfolder / saved_model_filename),
         seed=common.seed, **hyperparams)

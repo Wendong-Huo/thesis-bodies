@@ -80,6 +80,12 @@ class EvalCallback_with_prefix(EvalCallback):
                     print("New best mean reward!")
                 if self.best_model_save_path is not None:
                     self.model.save(os.path.join(self.best_model_save_path, "best_model"))
+                    # Also save vec data
+                    path = os.path.join(self.best_model_save_path, "best_model.vecnormalize.pkl")
+                    if self.model.get_vec_normalize_env() is not None:
+                        self.model.get_vec_normalize_env().save(path)
+                        if self.verbose > 1:
+                            print(f"Saving VecNormalize to {path}")
                 self.best_mean_reward = mean_reward
                 self.update_best_reward(self.eval_env.envs[0].robot.robot_id, self.best_mean_reward)
                 # Trigger callback if needed

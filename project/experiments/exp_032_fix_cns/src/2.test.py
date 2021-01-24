@@ -75,11 +75,9 @@ if __name__ == "__main__":
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, force_render=args.render,
                                                         robot_body=test_body,
                                                         dataset_folder=args.body_folder)])
-        if args.vec_normalize:
-            raise NotImplementedError
-            # normalize_kwargs["gamma"] = hyperparams["gamma"]
-            # eval_venv = VecNormalize(eval_venv, **normalize_kwargs)
 
+        if args.vec_normalize:
+            eval_venv = VecNormalize.load(common.get_vec_pkl_from_model_filename(args.model_filename), eval_venv)
         if args.stack_frames > 1:
             eval_venv = VecFrameStack(eval_venv, args.stack_frames)
 
@@ -94,9 +92,10 @@ if __name__ == "__main__":
             model_cls = PPO
             policy_cls = "MlpPolicy"
 
+        hyperparams = common.clean_hyperparams_before_run(hyperparams)
         model = model_cls(policy_cls, env=eval_venv, **hyperparams)
         common.load_parameters_from_path(model, args.model_filename, model_cls, args.test_bodies, default_wrapper)
-
+        
         obs = eval_venv.reset()
         print(obs)
         g_obs_data = np.zeros(shape=[args.test_steps, obs.shape[1]], dtype=np.float32)

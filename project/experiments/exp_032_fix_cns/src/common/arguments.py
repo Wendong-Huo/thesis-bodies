@@ -18,7 +18,6 @@ def get_args():
 
     parser.add_argument("--with_bodyinfo", action="store_true")
     parser.add_argument("--stack_frames", type=int, default=1, help="How many frames do you want to stack for training and testing. ")
-    parser.add_argument("--vec_normalize", action="store_true", help="use VecNormalize")
     parser.add_argument("--with_checkpoint", action="store_true", help="save checkpoints along training.")
 
     parser.add_argument("--threshold_threshold", type=float, default=0.0, help="activation function used in training. 0.0 is equivalent to ReLU")
@@ -52,12 +51,16 @@ def get_args():
     parser.add_argument("--cnspns_motor_channel", type=int, default=8, help="Number of channels. (Ants has 8 joints, so 8 might be a reasonable choice)")
     parser.add_argument("--cnspns_fix_cns", action="store_true", help="Fix the parameters in CNS, only train PNS.")
 
+    parser.add_argument("--rl_hyperparameter", type=str, default="PPO", help="The name of hyperparameter set used for training.")
 
 
     parser.add_argument("--one_snapshot_at", type=int, default=-1, help="For save images, only save one picture at certain step.")
     parser.add_argument("--skip_solved_threshold", type=float, default=-1, help="Define a value for solved, skip training on that body until everyone pass that threshold. -1 for disabling this function.")
     parser.add_argument("-f", "--subfolder", type=str, default="default", help="Subfolder for this run.")
     parser.add_argument("--force_read", action="store_true")
+
+    # parser.add_argument("--vec_normalize", action="store_true", default=True, help="use VecNormalize") # let's stick to true.
+
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone
         args = parser.parse_args(sys.argv[1:])
         sys.argv = [sys.argv[0]]
@@ -70,6 +73,8 @@ def get_args():
     args.train_bodies = str2array(args.train_bodies_str)
     args.test_bodies_str = args.test_bodies
     args.test_bodies = str2array(args.test_bodies_str)
+
+    args.vec_normalize = True
 
     return args
 

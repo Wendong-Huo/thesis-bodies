@@ -69,8 +69,8 @@ def build_model_filename(args):
     filename += args.train_bodies_str.replace(",", "-")
     if args.with_bodyinfo:
         filename += "-body"
-    if args.vec_normalize:
-        filename += "-vnorm"
+    # if args.vec_normalize: # vec_normalize by default
+    #     filename += "-vnorm"
     if args.stack_frames>1:
         filename += f"-stack{args.stack_frames}"
     if args.threshold_threshold!=0:
@@ -146,14 +146,16 @@ def load_hyperparameters(conf_name="MyWalkerEnv"):
     hyperparams["learning_rate"] = common.args.learning_rate
     # Use MyThreshold instead of ReLU
     # hyperparams['policy_kwargs']['activation_fn'] = MyThreshold
+    return hyperparams
 
+def clean_hyperparams_before_run(hyperparams):
     # ignore these keys
     keys_remove = ["normalize", "n_envs", "n_timesteps", "policy"]
     for key in keys_remove:
         if key in hyperparams:
             del hyperparams[key]
-    
     return hyperparams
+        
 
 def md5(str2hash):
     return hashlib.md5(str2hash.encode()).hexdigest()
@@ -186,11 +188,14 @@ echo "================" >> ~/gpfs2/experiments.log
 
 """)
 
+def get_vec_pkl_from_model_filename(model_filename):
+    assert model_filename.endswith(".zip")
+    return f"{model_filename[:-4]}.vecnormalize.pkl"
 
 def load_parameters_from_path(model, model_filename, model_cls, bodies, default_wrapper):
 
     args = common.args
-    data, params, pytorch_variables = load_from_zip_file(model_filename, device="cpu")
+    data, params, pytorch_variables = load_from_zip_file(model_filename)
     robot_ids_in_file = []
     if args.cnspns:
         for parameter_name, module in params['policy'].items():
@@ -218,8 +223,9 @@ def load_parameters_from_path(model, model_filename, model_cls, bodies, default_
                 load_model.policy.add_net_to_adaptors(robot_id)
     load_weights = load_model.policy.state_dict()
     model.policy.load_state_dict(load_weights)
-    # model.policy.build()
+    # model.policy.rebuild()?
     print(f"Weights loaded from {model_filename}")
+
     return model
 
 class Log:

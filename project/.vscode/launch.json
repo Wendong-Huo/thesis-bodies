@@ -22,10 +22,11 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--test_bodies=599",
-                "--cnspns",
-                "--render",
-                "--model_filename=output_data/models/v/model-699-initw-sd0/best_model.zip",
+                "--test_bodies=399",
+                // "--cnspns",
+                // "--render",
+                "--vec_normalize",
+                "--model_filename=output_data/models/default/model-399-vnorm-sd0.zip",
                 // "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=16"
 
@@ -42,16 +43,18 @@
             "args": [
                 "--train_bodies=699",
                 // "--pns",
+                // "--rl_hyperparameter=TEST_PPO",
                 "-f=v",
                 "--cnspns",
                 "--eval_steps=1005",
+                "--vec_normalize",
                 "--num_venvs=2",
                 "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=4",
                 // "--pns_fix_cns",
-                "--model_filename=output_data/models/launch/model-399-initw-sd0/best_model.zip",
+                "--model_filename=output_data/models/v/model-699-vnorm-initw-sd0/best_model.zip",
                 // "--topology_wrapper=CustomAlignWrapper",
-                // "--custom_align_max_joints=8",
+                "--cnspns_motor_channel=16",
                 "--render"
             ],
             "cwd": "${fileDirname}",
