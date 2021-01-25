@@ -22,6 +22,12 @@ I chose sensor=32, motor=8.
 For small channel, s=8,m=4, 399 not working, one of 499 not working but Ants is very much fine.
 Test on small channel again with adjustment in vec_normal and ppo clip_range, we have the very similar result above. (wired)
 
+==
+If we first train a CNS using 399, and use that to train 399, 499, 599, 699 together, it doesn't work. (indicate the training for 399 made a bad initialization?)
+
+==
+cnspns architecture makes training on one body harder.
+
 
 
 # Other Thoughts?

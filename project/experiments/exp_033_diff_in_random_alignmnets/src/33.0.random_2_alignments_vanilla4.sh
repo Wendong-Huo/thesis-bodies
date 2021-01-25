@@ -2,10 +2,10 @@
 set -x
 python 0.init.py
 EXP_FOLDER=$(cat .exp_folder)
-submit_to=submit.sh
+submit_to=submit-short.sh
 # ========================================
 
-exp_name="TwoAlignments"
+exp_name="TwoAlignmentsRedo"
 
 description="With Arbitrary two alignments, do 100 runs for each and compare the log space difference."
 
@@ -20,8 +20,8 @@ do
     worst_alignment=6,2,3,0,4,5,7,1::2,1,3,5,6,7,4,0::7,4,0,3,1,2,6,5::6,4,2,5,7,3,0,1
 # 31e3558068aa1c4101069f4373b7eafd
 
-    sbatch -J $exp_name submit.sh python 1.train.py  --custom_alignment=$best_alignment --seed=$seed --train_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper -f=$exp_name --custom_align_max_joints=8
-    sbatch -J $exp_name submit.sh python 1.train.py  --custom_alignment=$best_alignment --seed=$seed --train_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper -f=$exp_name --custom_align_max_joints=8
+    sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/best  --custom_alignment=$best_alignment --seed=$seed --train_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8
+    sbatch -J $exp_name $submit_to python 1.train.py -f=$exp_name/worst --custom_alignment=$worst_alignment --seed=$seed --train_bodies=399,499,599,699 --topology_wrapper=CustomAlignWrapper --custom_align_max_joints=8
 done
 
 
