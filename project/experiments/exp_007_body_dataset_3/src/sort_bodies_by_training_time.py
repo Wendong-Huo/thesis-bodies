@@ -47,5 +47,6 @@ for body_base in args.train_bodies:
     for body in selected_bodies:
         body = int(body)
         body_type = body//100
-        shutil.copy(f"output_data/bodies/{body}.xml", f"{folder}/{body_type*100+re_index[body_type]}.xml")
+        print(f"output_data/bodies/{body}.xml")
+        # shutil.copy(f"output_data/bodies/{body}.xml", f"{folder}/{body_type*100+re_index[body_type]}.xml")
         re_index[body_type] += 1

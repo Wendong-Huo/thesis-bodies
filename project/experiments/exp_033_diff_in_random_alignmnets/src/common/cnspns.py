@@ -59,7 +59,7 @@ class PNSSensorAdaptor(nn.Module):
 
     def forward(self, obs, robot_id):
         assert self.obs_dim == obs.shape[1], f"Max input dimension is {self.obs_dim}"
-        if isinstance(robot_id, list):
+        if isinstance(robot_id, list): #stacked training phase.
             robot_ids = robot_id
             assert len(robot_ids) == obs.shape[0], "Need robot_id for each piece of obs"
             transformed = []
@@ -68,7 +68,7 @@ class PNSSensorAdaptor(nn.Module):
                 _single = self.nets[robot_id]( obs[i] )
                 transformed.append(_single)
             obs = th.stack(transformed, dim=0)
-        else:
+        else: #one line testing phase.
             robot_id = str(robot_id)
             obs = self.nets[robot_id]( obs )
         return obs

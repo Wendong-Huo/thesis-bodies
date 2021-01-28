@@ -22,11 +22,10 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "--test_bodies=399",
+                "--test_bodies=300",
                 // "--cnspns",
                 // "--render",
-                "--vec_normalize",
-                "--model_filename=output_data/models/default/model-399-vnorm-sd0.zip",
+                "--model_filename=output_data/tmp/model-399-sd0/best_model.zip",
                 // "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=16"
 
