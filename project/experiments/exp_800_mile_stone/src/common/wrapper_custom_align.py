@@ -1,4 +1,4 @@
-# Wrappers for 900 mutants, different topology, same dimension
+# Wrappers for topologically different robots, make everyone's obs and action space the same size, and specify the custom alignment
 
 import sys
 import gym

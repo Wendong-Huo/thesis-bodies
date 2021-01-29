@@ -1,0 +1,57 @@
+walker2d:
+  position:
+    0: 0
+  joints:
+    4: 0.2
+    6: -0.1
+    8: -0.2
+    10: -0.2
+    12: 0.1
+
+halfcheetah:
+  position:
+    0: 0
+    1: 0.2
+    2: 0.2
+  joints:
+    4: 0.2
+    6: -0.1
+    8: -0.2
+    10: -0.2
+    12: 0.1
+
+ant:
+  position:
+    0: 0
+    1: 0.5
+    2: 0.8
+  joints:
+    1: 0.5
+    3: 1
+    6: 0.5
+    8: -1
+    11: 0.2
+    13: -1.4
+    16: 0.2
+    18: 1.2
+
+hopper:
+  position:
+    0: 0
+  joints:
+    4: -0.2
+    6: -0.1
+    8: 0.2
+
+walkerarms:
+  position:
+    0: 0
+  joints_name:
+    arm_joint: -1.0
+    arm_left_joint: 1.0
+    thigh_joint: 0.5
+    leg_joint: -0.4
+    foot_joint: 0.1
+    thigh_left_joint: -0.2
+    leg_left_joint: -0.5
+    foot_left_joint: 0.1

@@ -17,6 +17,18 @@
             "name": "===============",
         },
         {
+            "name": "Plot",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "args": [
+                "--force_read",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "== = =  = Test.py",
             "type": "python",
             "request": "launch",
@@ -28,7 +40,6 @@
                 "--model_filename=output_data/tmp/model-399-sd0/best_model.zip",
                 // "--cnspns_sensor_channel=64",
                 // "--cnspns_motor_channel=16"
-
             ],
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",

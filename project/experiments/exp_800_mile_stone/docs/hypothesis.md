@@ -140,13 +140,13 @@ Train on 8 robots one by one for 10 times each.
 The learning curve of 8 robots. (add a baseline of Walker2D)
 
 803.3.methods
-Train a policy on these 8 robots with alignment M0, repeat with different seeds 10 times.
-Train a policy on these 8 robots with 20 random M2 alignments, repeat with different seeds 10 times.
-Pick the best in 20 and the worst in 20 to show the difference.
-Train a policy on these 8 robots with 20 random M4 alignments, repeat with different seeds 10 times.
-Train a policy on these 8 robots with 20 random M8 alignments, repeat with different seeds 10 times.
-Train a policy on these 8 robots with 20 random M16 alignments, repeat with different seeds 10 times.
-Train a policy on these 8 robots with 20 random M32 alignments, repeat with different seeds 10 times.
+Train a policy on these 8 robots with alignment M0, repeat with different seeds 5 times.
+Train a policy on these 8 robots with 21 random M2 alignments, repeat with different seeds 5 times.
+Pick the best in 21 and the worst in 21 to show the difference.
+Train a policy on these 8 robots with 21 random M4 alignments, repeat with different seeds 5 times.
+Train a policy on these 8 robots with 21 random M8 alignments, repeat with different seeds 5 times.
+Train a policy on these 8 robots with 21 random M16 alignments, repeat with different seeds 5 times.
+Train a policy on these 8 robots with 21 random M32 alignments, repeat with different seeds 5 times.
 
 
 803.3.results

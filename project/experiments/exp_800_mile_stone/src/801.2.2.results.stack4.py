@@ -91,7 +91,7 @@ def plot_learning_curve(title="Default Plot"):
     plt.savefig(f"{output_path}/{exp_name}.learning_curve.png")
 # plot_learning_curve("Train on one variant (N=1)")
 
-def density_at_final_step(step, title):
+def density_at_final_step(df, step, title, filename=""):
     import warnings
     warnings.simplefilter(action='ignore', category=FutureWarning) # Warning: sns.distplot will be removed in the future version.
     _df = df[df["step"]==step]
@@ -101,24 +101,43 @@ def density_at_final_step(step, title):
     #     plt.axhline(y=1500, color=colors.plot_color[1])
     #     plt.locator_params(nbins=3)
     # g.map(_const_line, "Learnability")
-    g.fig.suptitle(f"{title}: Density at step {step/1e6:.1f}e6")
+    g.fig.suptitle(title)
     g.set_xlabels("Density")
     g.set_ylabels("Learnability")
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}.density.png")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
 # density_at_final_step(step=df["step"].max(), title="Random variation in body parameters")
 
-threshold = 1500
-df = df[df["value"]>=threshold]
-df = df.groupby(by="robot_id").min("step")
-print("Selected")
-dfs = []
-for i in [3,4,5,6]:
-    _df = df[df.index.str.startswith(str(i))].sort_values("step", ascending=True)[:20]
-    dfs.append(_df)
-df = pd.concat(dfs)
-df = df.reset_index()
-df["robot"] = df["robot_id"].apply(lambda x: common.gym_interface.template(int(x)).capitalize())
-print(df.head(60))
+def select_by_training_time(df):
+    threshold = 1500
+    df = df[df["value"]>=threshold]
+    df = df.groupby(by="robot_id").min("step")
+    print("All selected:")
+    dfs = []
+    for i in [3,4,5,6]:
+        _df = df[df.index.str.startswith(str(i))].sort_values("step", ascending=True)[:20]
+        dfs.append(_df)
+    df = pd.concat(dfs)
+    df = df.reset_index()
+    df["robot"] = df["robot_id"].apply(lambda x: common.gym_interface.template(int(x)).capitalize())
+    print(df.head(80))
 
-# Copy them to ../input_data/bodies, and re-index them so that 300,400,500,600 is the quickest learner, and then 301,401,501,601, etc. 
+    # Copy them to ../input_data/bodies, and re-index them so that 300,400,500,600 is the quickest learner, and then 301,401,501,601, etc. 
+select_by_training_time(df)
+
+# def select_top(df,num_selected=20):
+#     _df = df[df["step"]==df["step"].max()] # select the records for at the final step
+#     _df = _df.groupby("robot_id").mean().reset_index() # take average of all 3 seeds
+#     _df["robot"] = _df["robot_id"].apply(lambda x: common.gym_interface.template(int(x)).capitalize()) # bring back "robot" column
+#     dfs = []
+#     for r in facet_grid_col_order:
+#         _df_1 = _df[_df["robot"]==r] # select one type
+#         _df_1 = _df_1.sort_values("value", ascending=False) # sort by learnability
+#         _df_1 = _df_1[:num_selected] # select top n=20
+#         selected_ids = _df_1["robot_id"]
+#         dfs.append(df[df["robot_id"].isin(selected_ids)]) # add to outcome
+#     return pd.concat(dfs)
+# num_selected = 20 # a detail here is if we select top 20 from all 50
+# df_selected = select_top(df=df, num_selected=num_selected)
+# print(df_selected.shape) # n x 4types x 3seeds
+# density_at_final_step(df=df_selected, step=df["step"].max(), title=f"Selected {num_selected} variants: Density at step {df['step'].max()//1e5/10:.1f}e6 (N=3)", filename="_selected")

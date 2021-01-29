@@ -67,8 +67,8 @@ def check_finished():
 # check_finished()
 
 def plot_learning_curve(title="Default Plot"):
-    g = sns.FacetGrid(data=df, col="robot", col_order=facet_grid_col_order, ylim=[0,3000])
-    g.map(sns.lineplot, "step", "Learnability", color="green", linestyle='--')
+    g = sns.FacetGrid(data=df, col="robot", col_order=facet_grid_col_order, ylim=[0,3500])
+    g.map(sns.lineplot, "step", "Learnability", color="red", linestyle='--')
     g.fig.suptitle(title)
     # g.set(yscale="log")
     plt.tight_layout()
@@ -79,16 +79,16 @@ def density_at_final_step(step, title):
     import warnings
     warnings.simplefilter(action='ignore', category=FutureWarning) # Warning: sns.distplot will be removed in the future version.
     _df = df[df["step"]==step]
-    g = sns.FacetGrid(data=_df, col="robot", col_order=facet_grid_col_order, ylim=[0,3000])
-    g.map(sns.distplot, "Learnability", vertical=True, hist=False, rug=True, color="green")
+    g = sns.FacetGrid(data=_df, col="robot", col_order=facet_grid_col_order, ylim=[0,3500])
+    g.map(sns.distplot, "Learnability", vertical=True, hist=False, rug=True, color="red")
     def _const_line(data, **kwargs):
         y = data.mean()
         print(f"Baseline: {y}")
-        plt.axhline(y=y, color="green", linestyle='--')
-        plt.text(0.002, y, 'baseline', fontsize=10, va='bottom', ha='left')
+        plt.axhline(y=y, color="red", linestyle=(0, (1, 5)), linewidth=1)
+        plt.text(0.002, y, 'mean', fontsize=10, va='bottom', ha='left')
         plt.locator_params(nbins=3)
     g.map(_const_line, "Learnability")
-    g.fig.suptitle(f"{title}: Density at step {step//1e5/10:.1f}e6")
+    g.fig.suptitle(f"{title}: Density at step {step//1e5/10:.1f}e6 (N=10)")
     g.set_xlabels("Density")
     g.set_ylabels("Learnability")
     plt.tight_layout()
