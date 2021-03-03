@@ -99,7 +99,7 @@ def check_finished():
 def plot_learning_curve(df, title="", filename=""):
     g = sns.FacetGrid(data=df, col="robot", row="num_bodies", hue="label", col_order=facet_grid_col_order, ylim=[0,3500])
     g.map(sns.lineplot, "step", "Learnability")
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
 
     def _const_line(data, **kwargs):
         robot = data.iloc[0]
@@ -108,13 +108,13 @@ def plot_learning_curve(df, title="", filename=""):
     g.map(_const_line, "robot")
 
     g.set_xlabels(label="step")
-    g.set_ylabels(label="Learnability")
+    g.set_ylabels(label="Episodic Reward")
 
     plt.tight_layout()
     g.add_legend()
     # g.set(yscale="log")
-    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.png")
-plot_learning_curve(df=df, title="Train on multiple parametrically different bodies of same topology\naligned vs randomized (N=10)")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.pdf")
+# plot_learning_curve(df=df, title="Train on multiple parametrically different bodies of same topology\naligned vs randomized (N=10)")
 
 def density_at_final_step(df, step, title, filename=""):
     import warnings
@@ -130,9 +130,11 @@ def density_at_final_step(df, step, title, filename=""):
         plt.locator_params(nbins=3)
     g.map(_const_line, "robot")
 
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
     g.set_xlabels("Density")
-    g.set_ylabels("Learnability")
+    g.set_ylabels("Episodic Reward")
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
+    g.add_legend()
+
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.pdf")
 density_at_final_step(df=df, step=df["step"].max(), title=f"Train on multiple parametrically different bodies of same topology\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=10)")

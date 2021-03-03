@@ -132,7 +132,8 @@ if __name__ == "__main__":
     model = model_cls(policy_cls, venv, verbose=1, tensorboard_log=str(
         common.output_data_folder / "tensorboard" / common.args.subfolder / saved_model_filename),
         seed=common.seed, **hyperparams)
-
+    # print(model.policy)
+    # exit(0)
     if args.debug:
         if False: # write params to disk
             to_save = []

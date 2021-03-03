@@ -12,6 +12,7 @@ import yaml
 import cv2
 
 from common import gym_interface, linux
+from common.utils import linux_fullscreen
 
 def set_torque(jointIndex, torque):
     p.setJointMotorControl2(bodyIndex=robot,
@@ -25,8 +26,11 @@ p.configureDebugVisualizer(flag=p.COV_ENABLE_MOUSE_PICKING, enable=1,lightPositi
 p.resetDebugVisualizerCamera(3, 0, -20, [0,0,0.5])
 linux.fullscreen()
 
-for body in [900,901,902,903,904,905,906,907]:
+for body in range(900,916):
+    p.resetDebugVisualizerCamera(3 if gym_interface.template(body)=='ant' or gym_interface.template(body)=='walkerarms' else 2, 0, -20, [0,0,0.5])
+
     p.resetSimulation()
+    time.sleep(0.1)
     filename = os.path.join(pybullet_data.getDataPath(), "plane_stadium.sdf")
     (floor,) = p.loadSDF(filename)
     filename = f"../input_data/bodies/{body}.xml"
@@ -75,7 +79,7 @@ for body in [900,901,902,903,904,905,906,907]:
         #     set_torque(0,100)
         #     # break
         # p.stepSimulation()
-        time.sleep(0.01)
+        time.sleep(0.1)
         if True:
             (width, height, rgbPixels, _, _) = p.getCameraImage(1920,1080, renderer=p.ER_BULLET_HARDWARE_OPENGL)
             image = rgbPixels[:,:,:3]

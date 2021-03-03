@@ -17,7 +17,7 @@ def template(body):
     }
     return _template[body//100]
 
-def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=-1, dataset_folder="../input_data/bodies", force_render=False):
+def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=-1, dataset_folder="../input_data/bodies", force_render=False, render_index=0):
     # print(f"make_env( rank={rank}, seed={seed}, wrapper={'None' if wrapper is None else wrapper.__name__}, robot_body={robot_body}, body_info={body_info}")
     _template=template(robot_body)
     if dataset_folder is None:
@@ -55,7 +55,7 @@ def make_env(rank=0, seed=0, render=True, wrappers=[], robot_body=-1, body_info=
         else:
             _render = False
             if render:
-                _render = rank in [0]
+                _render = rank in [render_index]
         env = gym.make(env_id, render=_render)
         # rank related to which order is used for each body, so rank and the test_bodies need to be in the same order.
         env.rank = rank

@@ -16,12 +16,13 @@ def set_torque(jointIndex, torque):
 
 p.connect(p.GUI)
 p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-
-for body in [800]:
+floor=False
+for body in [399]:
     print(f"body {body}")
     p.resetSimulation()
-    filename = os.path.join(pybullet_data.getDataPath(), "plane_stadium.sdf")
-    _ = p.loadSDF(filename)
+    if floor:
+        filename = os.path.join(pybullet_data.getDataPath(), "plane_stadium.sdf")
+        _ = p.loadSDF(filename)
     filename = f"../input_data/bodies/{body}.xml"
     (robot,) = p.loadMJCF(filename)
     print(f"\n\nbody {body}\n\n")

@@ -64,6 +64,7 @@ def get_args():
     parser.add_argument("-f", "--subfolder", type=str, default="default", help="Subfolder for this run.")
     parser.add_argument("--force_read", action="store_true")
 
+    parser.add_argument("--smp_bodies_aligned", action="store_true", help="aligned or randomized switch. default: randomized.")
     # parser.add_argument("--vec_normalize", action="store_true", default=True, help="use VecNormalize") # let's stick to true.
 
     if "/tests/test_" in sys.argv[0]: # hack: unittest from file, standalone

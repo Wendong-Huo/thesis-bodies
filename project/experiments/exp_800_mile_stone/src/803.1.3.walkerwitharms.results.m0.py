@@ -10,6 +10,13 @@ tensorboard_path = f"output_data/tensorboard/{exp_name}"
 cache_path = f"output_data/cache/{exp_name}"
 output_path = f"output_data/plots/"
 
+g_baselines = {
+    "Walker2d": 1442.1541809082032, 
+    "Halfcheetah": 1762.0622802734374, 
+    "Ant": 1642.0044189453124, 
+    "Hopper": 2381.102606201172
+    } # from 800.1.2.results
+
 def load_tb(force=0):
     try:
         if force:
@@ -87,7 +94,11 @@ def load_tb(force=0):
     return df
 
 df = load_tb(args.force_read)
+df["label"] = "M0"
+df["Robot"] = df["robot_id"].astype(int)-899
+df["M"] = df["num_mutate"]
 print(df)
+print(df["robot_id"])
 def detail(df, column):
     print(sorted(df[column].unique()))
     for i in sorted(df[column].unique()):
@@ -110,23 +121,27 @@ def check_finished():
 # check_finished()
 
 def plot_learning_curve(df, title="", filename=""):
-    g = sns.FacetGrid(data=df, col="robot_id", row="num_mutate", hue="label", ylim=[0,3500])
+    g = sns.FacetGrid(data=df, col="Robot", hue="label", ylim=[0,3500])
     g.map(sns.lineplot, "step", "Learnability")
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
 
     # def _const_line(data, **kwargs):
     #     robot = data.iloc[0]
     #     plt.axhline(y=g_16_selected[robot], color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
     #     plt.locator_params(nbins=3)
     # g.map(_const_line, "robot")
+    def _const_line(data, **kwargs):
+        robot = data.iloc[0]
+        plt.axhline(y=g_baselines["Walker2d"], color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
+        plt.locator_params(nbins=3)
+    g.map(_const_line, "robot")
 
     g.set_xlabels(label="step")
-    g.set_ylabels(label="Learnability")
+    g.set_ylabels(label="Episodic Reward")
 
     plt.tight_layout()
-    g.add_legend()
-    # g.set(yscale="log")
-    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.png")
+    # g.add_legend()
+    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.pdf")
 plot_learning_curve(df=df, title="Train on 8 topologically different bodies with obvious correspondence (M0)\nLearning curve (N=5)")
 
 def density_at_final_step(df, step, title, filename=""):
@@ -134,26 +149,22 @@ def density_at_final_step(df, step, title, filename=""):
     warnings.simplefilter(action='ignore', category=FutureWarning) # Warning: sns.distplot will be removed in the future version.
 
     _df = df[df["step"]==step]
-    g = sns.FacetGrid(data=_df, col="robot_id", ylim=[0,3500])
+    g = sns.FacetGrid(data=_df, col="Robot", ylim=[0,3500])
     g.map(sns.distplot, "Learnability", vertical=True, hist=False, rug=True)
-    
-    # def _const_line(data, **kwargs):
-    #     robot = data.iloc[0]
-    #     plt.axhline(y=g_16_selected[robot], color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
-    #     plt.locator_params(nbins=3)
-    # g.map(_const_line, "robot")
-    
-    def _print(data, **kwargs):
-        print("Mean: ", data.mean())
-    g.map(_print, "Learnability")
 
-    g.fig.suptitle(title)
+    def _const_line(data, **kwargs):
+        robot = data.iloc[0]
+        plt.axhline(y=g_baselines["Walker2d"], color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
+        plt.locator_params(nbins=3)
+    g.map(_const_line, "robot")
+
     g.set_xlabels("Density")
-    g.set_ylabels("Learnability")
-    plt.locator_params(nbins=3)
+    g.set_ylabels("Episodic Reward")
+    plt.locator_params(nbins=3) # set x_ticks
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
-# density_at_final_step(df=df, step=df["step"].max(), title=f"Train on 8 topologically different bodies with obvious correspondence (M0)\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=5)")
+    # g.add_legend()
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.pdf")
+density_at_final_step(df=df, step=df["step"].max(), title=f"Train on 8 topologically different bodies with obvious correspondence (M0)\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=5)")
 
-print("Mean of all 8 bodies:")
-print(df[df["step"]==df["step"].max()]["Learnability"].mean())
+# print("Mean of all 8 bodies:")
+# print(df[df["step"]==df["step"].max()]["Learnability"].mean())

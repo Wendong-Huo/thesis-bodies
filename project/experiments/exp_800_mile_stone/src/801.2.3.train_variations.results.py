@@ -76,10 +76,11 @@ def check_finished():
 def plot_learning_curve(df, title="", filename=""):
     g = sns.FacetGrid(data=df, col="robot", col_order=facet_grid_col_order, ylim=[0,3500])
     g.map(sns.lineplot, "step", "Learnability", color=colors.plot_color[1], linestyle='--')
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
     # g.set(yscale="log")
+    g.set_ylabels("Episodic Reward")
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.png")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.pdf")
 plot_learning_curve(df=df, title="All parametrical variants: Train on one body (N=3)")
 
 def density_at_final_step(df, step, title, filename=""):
@@ -100,12 +101,12 @@ def density_at_final_step(df, step, title, filename=""):
         g_cursor+=1
         plt.locator_params(nbins=3)
     g.map(_const_line, "Learnability")
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
     g.set_xlabels("Density")
-    g.set_ylabels("Learnability")
+    g.set_ylabels("Episodic Reward")
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
-density_at_final_step(df=df, step=df["step"].max(), title=f"Selected 20x4 parametrical variants: Density at step {df['step'].max()//1e5/10:.1f}e6 (N=3)")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.pdf")
+density_at_final_step(df=df, step=df["step"].max(), title=f"All parametrical variants: Density at step {df['step'].max()//1e5/10:.1f}e6 (N=3)")
 
 # here the data are only 20 selected variants plus a original, so no need to select
 def select_top(df,num_selected=20):

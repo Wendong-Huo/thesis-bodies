@@ -112,6 +112,8 @@ def load_tb(force=0):
     return df
 
 df = load_tb(args.force_read)
+df["Robot"] = df["robot_id"].astype(int)-899
+df["M"] = df["num_mutate"]
 print(df)
 def detail(df, column):
     print(sorted(df[column].unique()))
@@ -135,23 +137,23 @@ def check_finished():
 # check_finished()
 
 def plot_learning_curve(df, title="", filename=""):
-    g = sns.FacetGrid(data=df, col="robot_id", row="num_mutate", hue="label", ylim=[0,3500])
+    g = sns.FacetGrid(data=df, col="Robot", row="M", hue="label", ylim=[0,3500])
     g.map(sns.lineplot, "step", "Learnability")
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
 
     def _const_line(data, **kwargs):
         robot = data.iloc[0]
-        plt.axhline(y=g_m0[robot], color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
+        plt.axhline(y=g_m0[robot], color=colors.plot_color[3], linestyle=(0, (1, 5)), linewidth=1)
         plt.locator_params(nbins=3)
     g.map(_const_line, "robot_id")
 
     g.set_xlabels(label="step")
-    g.set_ylabels(label="Learnability")
+    g.set_ylabels(label="Episodic Reward")
 
     plt.tight_layout()
     g.add_legend()
     # g.set(yscale="log")
-    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.png")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.pdf")
 def pick_best_and_worst(df):
     dfs = []
     for num_mutate in [2,4,8,16,32]:
@@ -174,7 +176,7 @@ def density_at_final_step(df, step, title, filename=""):
     warnings.simplefilter(action='ignore', category=FutureWarning) # Warning: sns.distplot will be removed in the future version.
 
     _df = df[df["step"]==step]
-    g = sns.FacetGrid(data=_df, col="num_mutate", ylim=[0,3500])
+    g = sns.FacetGrid(data=_df, col="M", ylim=[0,3500])
     g.map(sns.distplot, "Learnability", vertical=True, hist=False, rug=True)
     
     # def _const_line(data, **kwargs):
@@ -183,10 +185,11 @@ def density_at_final_step(df, step, title, filename=""):
     #     plt.locator_params(nbins=3)
     # g.map(_const_line, "robot")
     
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
     g.set_xlabels("Density")
-    g.set_ylabels("Learnability")
-    plt.locator_params(nbins=3)
+    g.set_ylabels("Episodic Reward")
+    # plt.locator_params(nbins=3)
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
-density_at_final_step(df=df, step=df["step"].max(), title=f"Train on 8 topologically different bodies with obvious correspondence\nComparison of different permutation distance\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=5)")
+    g.add_legend()
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.pdf")
+# density_at_final_step(df=df, step=df["step"].max(), title=f"Train on 8 topologically different bodies with obvious correspondence\nComparison of different permutation distance\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=5)")

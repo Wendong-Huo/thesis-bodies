@@ -7,8 +7,15 @@ class MyWalkerBase(WalkerBase):
     def __init__(self, fn, robot_name, action_dim, obs_dim, power):
         super().__init__(fn, robot_name, action_dim, obs_dim, power)
         # e.g. fn = "".../300.xml"
-        self.robot_id = int(fn.split("/")[-1].split(".")[0])
+        try:
+            self.robot_id = int(fn.split("/")[-1].split(".")[0])
+        except:
+            self.robot_id = fn.split("/")[-1].split(".")[0]
 
+    def calc_state(self):
+        if True or self.robot_body is None:
+            self.robot_body = self.parts["torso"]
+        return super().calc_state()
 class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def __init__(self, robot, render=False):
         self._last_x = 0
@@ -28,6 +35,7 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
         self._history_x = []
         self._history_dx = []
         obs = super().reset()
+
         self.pybullet = self._p
         self.camera_angle = 0
 

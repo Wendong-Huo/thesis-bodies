@@ -7,17 +7,21 @@ from common import common
 class MyRandomRobot(MyWalkerBase):
     foot_list = []
 
-    def __init__(self, xml, self_collision=False):
-        with open(xml, "r") as f:
-            lines = f.readlines()
-        joint_number = 0
-        for line in lines:
-            if line.strip().startswith("joint_number:"):
-                joint_number = int(line.split(":")[-1].strip())
-        assert joint_number!=0
-        print(f"joint_number: {joint_number}")
-        super().__init__(xml, "torso", action_dim=joint_number, obs_dim=8+joint_number*2, power=0.10)
-        self.self_collision = self_collision
+    def __init__(self, xml, num_joints=-1, self_collision=False, power=0.1):
+        if num_joints==-1: # Read number of joints from xml file
+            with open(xml, "r") as f:
+                lines = f.readlines()
+            joint_number = 0
+            for line in lines:
+                if line.strip().startswith("joint_number:"):
+                    joint_number = int(line.split(":")[-1].strip())
+            assert joint_number!=0
+            print(f"joint_number: {joint_number}")
+        else:
+            joint_number = num_joints
+
+        super().__init__(xml, "torso", action_dim=joint_number, obs_dim=8+joint_number*2, power=power)
+        self.r_self_collision = self_collision
         self.self_collision_enabled = False
         self.colored = False
 
@@ -38,7 +42,7 @@ class MyRandomRobot(MyWalkerBase):
         super().robot_specific_reset(bullet_client)
         # bullet_client.setGravity(0,0,-1) # experiment in low gravity because of the pybullet "fly-away" bug
         bullet_client.changeDynamics(0,-1,lateralFriction=0.999) # increase floor friction
-        if self.self_collision and not self.self_collision_enabled:
+        if self.r_self_collision and not self.self_collision_enabled:
             self.set_self_collision(bullet_client)
             self.self_collision_enabled = True
 
@@ -66,10 +70,10 @@ class MyRandomRobot(MyWalkerBase):
 
 class MyRandomRobotEnv(MyWalkerBaseBulletEnv):
 
-    def __init__(self, xml, render=False):
+    def __init__(self, xml, num_joints=-1, self_collision=True, power=0.1, render=False):
         # Warning: Enable self collision will increase the possibility of the "Fly-away" bug!
         #          The body plan will perform differently if this attribute is different, as if it is a completely new body plan. Need to re-search for workable bodies.
-        self.robot = MyRandomRobot(xml=xml, self_collision=True)
+        self.robot = MyRandomRobot(xml=xml, num_joints=num_joints, self_collision=self_collision, power=power)
         self.xml = xml
         super().__init__(self.robot, render)
 

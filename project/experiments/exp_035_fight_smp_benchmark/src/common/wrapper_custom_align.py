@@ -11,7 +11,9 @@ class CustomAlignWrapper(gym.ObservationWrapper):
     max_num_joints = common.args.custom_align_max_joints
 
     """For body 200s, different topology, different observation space, at most 8 joints, define alignment in arguments."""
-    def __init__(self, env):
+    def __init__(self, env, max_num_joints=-1):
+        if max_num_joints>0:
+            self.max_num_joints = max_num_joints
         env.foot_list = []
         super().__init__(env)
         self.debug = 1

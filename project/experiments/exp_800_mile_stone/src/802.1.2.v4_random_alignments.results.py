@@ -104,7 +104,7 @@ def check_finished():
 def plot_learning_curve(df, title="", filename=""):
     g = sns.FacetGrid(data=df, col="robot", hue="label", col_order=facet_grid_col_order, ylim=[0,3500])
     g.map(sns.lineplot, "step", "Learnability")
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
 
     def _const_line(data, **kwargs):
         robot = data.iloc[0]
@@ -113,12 +113,12 @@ def plot_learning_curve(df, title="", filename=""):
     g.map(_const_line, "robot")
 
     g.set_xlabels(label="step")
-    g.set_ylabels(label="Learnability")
+    g.set_ylabels(label="Episodic Reward")
 
     plt.tight_layout()
     g.add_legend()
     # g.set(yscale="log")
-    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.png")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.learning_curve.pdf")
 plot_learning_curve(df=df, title="Train on 4 topologically different bodies with two random alignments\nLearning curve (N=100)")
 
 def density_at_final_step(df, step, title, filename=""):
@@ -135,10 +135,46 @@ def density_at_final_step(df, step, title, filename=""):
         plt.locator_params(nbins=3)
     g.map(_const_line, "robot")
 
-    g.fig.suptitle(title)
+    # g.fig.suptitle(title)
     g.set_xlabels("Density")
-    g.set_ylabels("Learnability")
+    g.set_ylabels("Episodic Reward")
     plt.tight_layout()
     g.add_legend()
-    plt.savefig(f"{output_path}/{exp_name}{filename}.density.png")
+    plt.savefig(f"{output_path}/{exp_name}{filename}.density.pdf")
 density_at_final_step(df=df, step=df["step"].max(), title=f"Train on 4 topologically different bodies with two random alignment\nDensity at step {df['step'].max()//1e5/10:.1f}e6 (N=10)")
+
+# p-value
+max_step = df["step"].max()
+df_cheetah = df[(df["step"]==max_step)&(df["robot"]=="Halfcheetah")]
+df_cheetah_1 = df_cheetah[df_cheetah["label"]=="#1"]["value"].to_numpy()
+df_cheetah_2 = df_cheetah[df_cheetah["label"]=="#2"]["value"].to_numpy()
+print(df_cheetah_1.shape)
+
+def t_test(a,b):
+    """ a,b are two numpy arrays with the same shape """
+    """ one can directly use scipy, but as a reminder for myself"""
+    import numpy as np
+    from scipy import stats
+    assert a.shape[0]==b.shape[0]
+    N = a.shape[0]
+    #For unbiased max likelihood estimate we have to divide the var by N-1, and therefore the parameter ddof = 1
+    var_a = a.var(ddof=1)
+    var_b = b.var(ddof=1)
+    #std deviation
+    s = np.sqrt((var_a + var_b)/2)
+    # print(f"unbiased sample variance {s}")
+    ## Calculate the t-statistics
+    t = (a.mean() - b.mean())/(s*np.sqrt(2/N))
+    ## Compare with the critical t-value
+    #Degrees of freedom
+    df = 2*N - 2
+    #p-value after comparison with the t 
+    p = 1 - stats.t.cdf(t,df=df)
+    print("t = " + str(t))
+    print("p = " + str(2*p)) # two-sided p-value
+
+    ## Cross Checking with the internal scipy function
+    t2, p2 = stats.ttest_ind(a,b)
+    print("t = " + str(t2))
+    print("p = " + str(p2))
+t_test(df_cheetah_1, df_cheetah_2)

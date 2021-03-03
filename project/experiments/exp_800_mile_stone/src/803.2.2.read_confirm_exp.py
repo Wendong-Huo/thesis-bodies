@@ -100,6 +100,7 @@ def load_tb(force=0):
     return df
 
 df = load_tb(args.force_read)
+df["M"] = df["num_mutate"]
 print(df)
 def detail(df, column):
     print(sorted(df[column].unique()))
@@ -124,20 +125,20 @@ def check_finished():
 # check_finished()
 
 def learning_curve():
-    g = sns.FacetGrid(data=df, col="num_mutate", hue="label", legend_out=True)
+    g = sns.FacetGrid(data=df, col="M", hue="label", legend_out=True)
     g.map(sns.lineplot, "step", "value")
 
     def _const_line(data, **kwargs):
-        plt.axhline(y=g_m0, color=colors.plot_color[1], linestyle=(0, (1, 5)), linewidth=1)
+        plt.axhline(y=g_m0, color=colors.plot_color[3], linestyle=(0, (1, 5)), linewidth=1)
         plt.locator_params(nbins=3)
     g.map(_const_line, "robot_id")
     
     g.add_legend()
-    g.fig.suptitle(f"Confirm search result by independently perform 10 additional runs.")
+    # g.fig.suptitle(f"Confirm search result by independently perform 10 additional runs.")
     g.set_xlabels("step")
     g.set_ylabels("Learnability")
     plt.tight_layout()
-    plt.savefig(f"output_data/plots/{exp_name}.learning_curve.png")
+    plt.savefig(f"output_data/plots/{exp_name}.learning_curve.pdf")
     plt.close()
 learning_curve()
 

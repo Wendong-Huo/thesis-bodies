@@ -55,8 +55,8 @@ class MyWalkerBaseBulletEnv(WalkerBaseBulletEnv):
     def camera_simpy_follow_robot(self, rotate=True):
         if self._p:
             self.camera_angle += 0.3
-            distance = 4
-            pitch = -10
+            distance = 3
+            pitch = -30
             if rotate:
                 yaw = (self.camera_angle//60)*60
             else:
