@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # args.render = True
     print(args)
     model_name = pathlib.Path(args.model_filename).stem
-    os.makedirs(f"output_data/saved_images/{model_name}", exist_ok=False)
+    os.makedirs(f"output_data/saved_images/{model_name}", exist_ok=True)
 
     assert len(args.train_bodies) == 0, "No need for body to train."
 
@@ -52,13 +52,17 @@ if __name__ == "__main__":
     else:
         pass # no need for wrapper
 
+    # hmm...
+    # from common import wrapper_pns
+    # _w = wrapper_pns.make_same_dim_wrapper(obs_dim=28, action_dim=8)
+    # default_wrapper.append(_w)
 
     for rank_idx, test_body in enumerate(args.test_bodies):
         eval_venv = DummyVecEnv([gym_interface.make_env(rank=rank_idx, seed=common.seed, wrappers=default_wrapper, render=args.render, force_render=args.render,
                                                         robot_body=test_body,
                                                         dataset_folder=args.body_folder)])
         if args.vec_normalize:
-            raise NotImplementedError
+            eval_venv = VecNormalize.load(common.get_vec_pkl_from_model_filename(args.model_filename), eval_venv)
             # normalize_kwargs["gamma"] = hyperparams["gamma"]
             # eval_venv = VecNormalize(eval_venv, **normalize_kwargs)
 

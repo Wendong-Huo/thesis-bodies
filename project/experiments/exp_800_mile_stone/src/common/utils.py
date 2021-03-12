@@ -192,7 +192,7 @@ echo "================" >> ~/gpfs2/experiments.log
 
 def get_vec_pkl_from_model_filename(model_filename):
     assert model_filename.endswith(".zip")
-    return f"{model_filename[:-4]}.vecnormalize.pkl"
+    return f"{model_filename[:-4]}.vnorm.pkl"
 
 def load_parameters_from_path(model, model_filename, model_cls, bodies, default_wrapper):
 

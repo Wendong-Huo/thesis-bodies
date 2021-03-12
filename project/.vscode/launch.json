@@ -52,7 +52,7 @@
             "program": "${file}",
             "args": [
                 // "--debug",
-                "--train_bodies=399",
+                "--train_bodies=599",
                 // "--pns",
                 // "--rl_hyperparameter=TEST_PPO",
                 // "-f=default",
@@ -147,13 +147,32 @@
             "console": "integratedTerminal",
             "args": [
                 // "--custom_alignment=4,3,2,5,0,6,1,7::4,5,6,2,3,1,7,0::0,5,1,3,2,7,6,4::4,0,2,1,7,5,3,6",
-                "--custom_alignment=6,2,3,0,4,5,7,1::2,1,3,5,6,7,4,0::7,4,0,3,1,2,6,5::6,4,2,5,7,3,0,1",
-                "--train_bodies=399,499,599,699",
+                // "--custom_alignment=6,2,3,0,4,5,7,1::2,1,3,5,6,7,4,0::7,4,0,3,1,2,6,5::6,4,2,5,7,3,0,1",
+                "--train_bodies=900,901,902,903",
                 "--topology_wrapper=CustomAlignWrapper",
                 "--custom_align_max_joints=8",
                 "--render",
                 "--num_venvs=4",
             ]
+        },
+        {
+            "name": "Record Videos",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/liusida/thesis-bodies/project/experiments/exp_800_mile_stone/src/3.save_images_for_video.py",
+            // "program": "/home/liusida/thesis-bodies/project/experiments/exp_800_mile_stone/src/1.train.py",
+            "cwd": "/home/liusida/thesis-bodies/project/experiments/exp_800_mile_stone/src",
+            "args": [
+                // "--train_bodies=400",
+                "--test_bodies=400",
+                "--model_filename=output_data/models/4slides-server/4video/model-400-500-CustomAlignWrapper-mdd41d8cd98f00b204e9800998ecf8427e-sd0.zip",
+                "--topology_wrapper=CustomAlignWrapper",
+                "--custom_align_max_joints=8",
+                "--render",
+                "--one_snapshot_at=-1",
+            ],
+            "justMyCode": false,
+            "console": "integratedTerminal"
         },
     ]
 }

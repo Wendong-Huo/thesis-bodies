@@ -30,3 +30,7 @@ class MyHalfCheetahBulletEnv(MyWalkerBaseBulletEnv):
         self.robot = MyHalfCheetah(xml=xml)
         self.xml = xml
         super().__init__(self.robot, render)
+
+    def set_collision(self):
+        # enable special collision:
+        raise NotImplemented # PyBullet issue, setCollisionFilterPair doesn't work.

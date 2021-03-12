@@ -4,3 +4,5 @@ imageio
 pybullet
 tensorboard
 tqdm
+opencv-python
+PyUserInput

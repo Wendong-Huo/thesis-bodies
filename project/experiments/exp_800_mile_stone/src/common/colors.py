@@ -20,7 +20,7 @@ link_rgba = link_rgba / 255
 
 
 def get_link_color(idx):
-    return link_rgba[idx]
+    return link_rgba[int(idx)]
 
 
 

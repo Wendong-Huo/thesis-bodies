@@ -47,8 +47,8 @@ walkerarms:
   position:
     0: 0
   joints_name:
-    arm_joint: -1.0
-    arm_left_joint: 1.0
+    arm_joint: -0.5
+    arm_left_joint: 0.5
     thigh_joint: 0.5
     leg_joint: -0.4
     foot_joint: 0.1

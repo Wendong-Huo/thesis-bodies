@@ -12,8 +12,32 @@ import yaml
 import cv2
 
 from common import gym_interface, linux
-from common.utils import linux_fullscreen
+from common import colors
 
+def _reset_link_color(pybullet, robot_id, realign_idx):
+    color_idx = 0
+    joints = []
+    for joint_id in range(pybullet.getNumJoints(robot_id)):
+
+        j = pybullet.getJointInfo(robot_id, joint_id)
+        joints.append({"index": j[0], "jointName":j[1], "linkName":j[12]})
+    print(joints)
+
+    pybullet.changeVisualShape(robot_id, -1,rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change torso color
+    for joint in joints:
+        linkName = joint["linkName"].decode('utf8')
+        if linkName.startswith("link0_"):
+            continue
+        if linkName.startswith("torso") or linkName.startswith("aux_"):
+            pybullet.changeVisualShape(robot_id, joint["index"],rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
+        else:
+            print(linkName, joint["index"], color_idx)
+            pybullet.changeVisualShape(robot_id, joint["index"],rgbaColor=colors.get_link_color(realign_idx[color_idx])) # change color
+            # pybullet.changeVisualShape(robot_id, joint["index"],rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
+            color_idx += 1
+    # for joint in joints:
+    #     print(linkName, joint["index"], color_idx)
+    #     pybullet.changeVisualShape(robot_id, joint["index"], rgbaColor=colors.get_link_color(1))
 def set_torque(jointIndex, torque):
     p.setJointMotorControl2(bodyIndex=robot,
                                 jointIndex=jointIndex,
@@ -26,7 +50,16 @@ p.configureDebugVisualizer(flag=p.COV_ENABLE_MOUSE_PICKING, enable=1,lightPositi
 p.resetDebugVisualizerCamera(3, 0, -20, [0,0,0.5])
 linux.fullscreen()
 
-for body in range(900,916):
+M2 = "0,1,2,3,4,5,6,7::1,2,0,3,4,5,6,7::1,2,3,0,4,5,6,7::1,7,3,4,5,0,6,2::1,2,3,4,5,6,0,7::4,0,2,3,1,5,6,7::2,0,1,3,4,5,6,7::2,3,0,1,4,5,6,7"
+M0 = "0,1,2,3,4,5,6,7::1,2,0,3,4,5,6,7::1,2,3,0,4,5,6,7::1,2,3,4,5,0,6,7::1,2,3,4,5,6,0,7::1,0,2,3,4,5,6,7::2,0,1,3,4,5,6,7::2,3,0,1,4,5,6,7"
+M32 = "4,3,2,1,7,5,6,0::1,2,4,5,0,3,6,7::1,2,3,7,6,5,4,0::1,2,0,4,5,3,6,7::2,1,4,3,0,6,5,7::2,1,3,5,0,4,6,7::2,1,0,4,5,3,6,7::0,1,4,3,6,7,2,5"
+M4 = "5,1,2,3,4,0,6,7::1,2,0,5,4,3,6,7::1,2,3,0,4,5,6,7::1,2,4,3,5,0,6,7::1,2,3,4,5,6,0,7::1,0,2,3,4,5,6,7::2,0,1,3,4,5,6,7::2,3,0,1,4,5,6,7"
+TWO_ROBOTS_1 = "0,1,2,3,4,5,6,7::0,1,2,3,4,5,6,7"
+TWO_ROBOTS_2 = "0,1,2,3,4,5,6,7::7,6,5,4,3,2,1,0"
+NoColor = "0,0,0,0,0,0,0,0::0,0,0,0,0,0,0,0"
+arrangement = NoColor.split("::")
+arrangement = [x.split(",") for x in arrangement]
+for body in [500,900]:
     p.resetDebugVisualizerCamera(3 if gym_interface.template(body)=='ant' or gym_interface.template(body)=='walkerarms' else 2, 0, -20, [0,0,0.5])
 
     p.resetSimulation()
@@ -38,6 +71,9 @@ for body in range(900,916):
     p.removeBody(floor)
 
     print(f"\n\nbody {body}\n\n")
+    
+    _reset_link_color(p, robot, arrangement[0 if body==500 else 1])
+
     joint_names = {}
     for joint_id in range(p.getNumJoints(robot)):
         info = list(p.getJointInfo(robot, joint_id))
@@ -84,5 +120,5 @@ for body in range(900,916):
             (width, height, rgbPixels, _, _) = p.getCameraImage(1920,1080, renderer=p.ER_BULLET_HARDWARE_OPENGL)
             image = rgbPixels[:,:,:3]
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(f"output_data/saved_images/{gym_interface.template(body)}_{body}.png", image)
+            cv2.imwrite(f"output_data/saved_images/{gym_interface.template(body)}_{body}_nocolor.png", image)
             break  

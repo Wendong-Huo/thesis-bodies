@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
     # if args.cnspns:
     # hard code for now. could be automatically determined.
-    _w = wrapper_pns.make_same_dim_wrapper(obs_dim=28, action_dim=8)
-    default_wrapper.append(_w)
+    # _w = wrapper_pns.make_same_dim_wrapper(obs_dim=28, action_dim=8)
+    # default_wrapper.append(_w)
 
     assert len(args.train_bodies) > 0, "No body to train."
     if args.with_bodyinfo:

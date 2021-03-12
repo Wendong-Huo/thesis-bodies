@@ -45,9 +45,9 @@ class CustomAlignWrapper(gym.ObservationWrapper):
     def _reset_link_color(self):
         color_idx = 0
         for part_name, part in self.robot.parts.items():
-            if part_name.startswith("link0_") or part_name.startswith("floor") or part_name.startswith("aux_"):
+            if part_name.startswith("link0_") or part_name.startswith("floor"):
                 continue
-            if part_name.startswith("torso"):
+            if part_name.startswith("torso") or part_name.startswith("aux_"):
                 self.pybullet.changeVisualShape(1,part.bodyPartIndex,rgbaColor=[0.3, 0.3, 0.3, 1.0]) # change color
             else:
                 print(part_name, part.bodyPartIndex, color_idx)
